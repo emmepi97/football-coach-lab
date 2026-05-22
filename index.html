@@ -257,30 +257,20 @@ nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:
   </div>
 </nav>
 
+
 <!-- UPLOAD BAR -->
 <div class="upload-bar fade">
   <div class="upload-item">
     <label class="upload-label">
-      <span>📋</span> Foglio RISULTATI
-      <input type="file" id="fileRisultati" accept=".xlsx,.xls,.csv"/>
+      <span>📂</span> Carica file Excel completo
+      <input type="file" id="fileWorkbook" accept=".xlsx,.xls"/>
     </label>
-    <span class="upload-name" id="nameRisultati">non caricato</span>
+    <span class="upload-name" id="workbookName">nessun file</span>
   </div>
-  <div class="upload-item">
-    <label class="upload-label">
-      <span>👥</span> Foglio PRESENZE
-      <input type="file" id="filePresenze" accept=".xlsx,.xls,.csv"/>
-    </label>
-    <span class="upload-name" id="namePresenze">non caricato</span>
-  </div>
-  <div class="upload-item">
-    <label class="upload-label">
-      <span>🔬</span> Foglio ANALYTICS
-      <input type="file" id="fileAnalytics" accept=".xlsx,.xls,.csv"/>
-    </label>
-    <span class="upload-name" id="nameAnalytics">non caricato</span>
-  </div>
-  <button class="btn green" onclick="downloadAllTemplates()">⬇ Templates Excel</button>
+
+  <button class="btn green" onclick="downloadAllTemplates()">
+    ⬇ Template Excel
+  </button>
 </div>
 
 <!-- GUIDE -->
@@ -619,34 +609,78 @@ const ZONES={
 };
 
 // ─── FILE LOAD ────────────────────────────────────────────────────────────────
-function loadFile(inputId,nameId,callback){
-  const el=document.getElementById(inputId);
-  el.addEventListener('change',function(e){
-    const f=e.target.files[0]; if(!f) return;
-    document.getElementById(nameId).textContent=f.name;
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
-      const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-      callback(data);
-    };
-    reader.readAsArrayBuffer(f);
-  });
-}
 
-loadFile('fileRisultati','nameRisultati',function(data){
-  dataRisultati=data; fRisultati=data;
-  populateRisultatiFilters(); renderRisultati(data);
-});
-loadFile('filePresenze','namePresenze',function(data){
-  dataPresenze=data; fPresenze=data;
-  populatePresenzeFilters(); renderPresenze(data);
-});
-loadFile('fileAnalytics','nameAnalytics',function(data){
-  // auto-calc IPO
-  data=data.map(r=>({...r, PunteggioIPO: IPO_WEIGHTS[r.TipoEvento]||0}));
-  dataAnalytics=data; fAnalytics=data;
-  populateAnalyticsFilters(); renderAnalytics(data);
+// ─────────────────────────────────────────────────────────────
+// LOAD WORKBOOK COMPLETO (3 FOGLI AUTOMATICI)
+// ─────────────────────────────────────────────────────────────
+
+document.getElementById('fileWorkbook').addEventListener('change', function(e){
+
+  const file = e.target.files[0];
+  if(!file) return;
+
+  document.getElementById('workbookName').textContent = file.name;
+
+  const reader = new FileReader();
+
+  reader.onload = function(ev){
+
+    const wb = XLSX.read(
+      new Uint8Array(ev.target.result),
+      { type:'array' }
+    );
+
+    // ─── RISULTATI ─────────────────────
+    if(wb.Sheets['RISULTATI']){
+
+      const risultati = XLSX.utils.sheet_to_json(
+        wb.Sheets['RISULTATI']
+      );
+
+      dataRisultati = risultati;
+      fRisultati = risultati;
+
+      populateRisultatiFilters();
+      renderRisultati(risultati);
+    }
+
+    // ─── PRESENZE ─────────────────────
+    if(wb.Sheets['PRESENZE']){
+
+      const presenze = XLSX.utils.sheet_to_json(
+        wb.Sheets['PRESENZE']
+      );
+
+      dataPresenze = presenze;
+      fPresenze = presenze;
+
+      populatePresenzeFilters();
+      renderPresenze(presenze);
+    }
+
+    // ─── ANALYTICS ────────────────────
+    if(wb.Sheets['ANALYTICS']){
+
+      let analytics = XLSX.utils.sheet_to_json(
+        wb.Sheets['ANALYTICS']
+      );
+
+      analytics = analytics.map(r => ({
+        ...r,
+        PunteggioIPO: IPO_WEIGHTS[r.TipoEvento] || 0
+      }));
+
+      dataAnalytics = analytics;
+      fAnalytics = analytics;
+
+      populateAnalyticsFilters();
+      renderAnalytics(analytics);
+    }
+
+  };
+
+  reader.readAsArrayBuffer(file);
+
 });
 
 // ─── NAV ──────────────────────────────────────────────────────────────────────
