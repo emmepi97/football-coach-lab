@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CoachLab — Analisi Stagione</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<style>
+:root{
+  --bg:#06080f;
+  --bg2:#0b0f1a;
+  --surface:#0f1525;
+  --surface2:#151e30;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --green:#00e676;
+  --green2:rgba(0,230,118,0.12);
+  --red:#ff3d57;
+  --red2:rgba(255,61,87,0.12);
+  --amber:#ffb300;
+  --amber2:rgba(255,179,0,0.12);
+  --blue:#2979ff;
+  --blue2:rgba(41,121,255,0.12);
+  --cyan:#00e5ff;
+  --purple:#7c4dff;
+  --text:#e8edf5;
+  --muted:#4a5568;
+  --muted2:#6b7a8d;
+  --font-head:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:var(--font-body);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* BG TEXTURE */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 70% 50% at 10% 0%,rgba(41,121,255,0.08) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 40% at 90% 100%,rgba(0,230,118,0.06) 0%,transparent 60%);
+pointer-events:none;z-index:0}
+
+.wrap{max-width:1500px;margin:0 auto;padding:24px;position:relative;z-index:1}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.logo{font-family:var(--font-head);font-size:36px;font-weight:900;letter-spacing:0.04em;color:var(--text)}
+.logo span{color:var(--green)}
+.nav-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px}
+.nav-tab{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:0.06em;padding:10px 22px;border-radius:10px;cursor:pointer;transition:0.2s;color:var(--muted2);border:none;background:transparent}
+.nav-tab.active{background:var(--blue);color:#fff}
+.nav-tab:hover:not(.active){color:var(--text);background:var(--surface2)}
+
+/* UPLOAD ZONE */
+.upload-bar{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 28px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.upload-item{display:flex;align-items:center;gap:10px}
+.upload-label{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px dashed rgba(41,121,255,0.4);border-radius:12px;padding:10px 18px;font-size:13px;color:var(--muted2);cursor:pointer;transition:0.2s;font-family:var(--font-body)}
+.upload-label:hover{border-color:var(--blue);color:var(--text)}
+.upload-label input{display:none}
+.upload-name{font-size:12px;color:var(--green);font-weight:600}
+.btn{background:var(--blue);color:#fff;border:none;padding:11px 24px;border-radius:11px;font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:0.05em;cursor:pointer;transition:0.2s}
+.btn:hover{background:#1565c0;transform:translateY(-1px)}
+.btn.green{background:var(--green);color:#000}
+.btn.green:hover{background:#00c853}
+.btn.ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{background:var(--surface)}
+.btn.sm{padding:8px 16px;font-size:13px}
+
+/* SECTION PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* LEGENDA GUIDA */
+.guide-box{background:var(--surface);border:1px solid rgba(41,121,255,0.2);border-radius:18px;padding:20px 24px;margin-bottom:24px}
+.guide-title{font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:0.06em;color:var(--blue);margin-bottom:12px}
+.guide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.guide-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 13px}
+.guide-field{font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:0.06em;margin-bottom:3px}
+.guide-vals{font-size:11px;color:var(--muted2);line-height:1.5}
+
+/* FILTER BAR */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filter-bar select,.filter-bar input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:0.2s;min-width:140px}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--blue)}
+.filter-bar select option{background:var(--surface2)}
+.filter-label{font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--muted2);text-transform:uppercase}
+
+/* KPI GRID */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 16px;position:relative;overflow:hidden;transition:0.2s}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px)}
+.kpi::after{content:'';position:absolute;width:60px;height:60px;border-radius:50%;top:-20px;right:-15px}
+.kpi.g::after{background:rgba(0,230,118,0.1)} .kpi.b::after{background:rgba(41,121,255,0.1)} .kpi.a::after{background:rgba(255,179,0,0.1)} .kpi.r::after{background:rgba(255,61,87,0.1)} .kpi.c::after{background:rgba(0,229,255,0.1)}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);font-weight:600;margin-bottom:8px}
+.kpi-val{font-family:var(--font-head);font-size:38px;font-weight:800;letter-spacing:0.02em;line-height:1}
+.kpi.g .kpi-val{color:var(--green)} .kpi.b .kpi-val{color:var(--blue)} .kpi.a .kpi-val{color:var(--amber)} .kpi.r .kpi-val{color:var(--red)} .kpi.c .kpi-val{color:var(--cyan)}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:5px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;transition:0.2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2)}
+.card-title{font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:0.05em;margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted2);margin-bottom:18px}
+.chart-h{position:relative;height:240px}
+.chart-h-lg{position:relative;height:300px}
+.chart-h-xl{position:relative;height:360px}
+
+/* GRID LAYOUTS */
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.mb{margin-bottom:16px}
+
+/* TABLES */
+.tbl-wrap{overflow:auto;max-height:420px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--surface2);color:var(--muted2);padding:10px 13px;font-size:11px;text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;position:sticky;top:0;z-index:2}
+.tbl td{padding:10px 13px;border-top:1px solid var(--border);font-size:13px;white-space:nowrap}
+.tbl tr:hover td{background:var(--surface2)}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.badge-g{background:rgba(0,230,118,0.15);color:var(--green)}
+.badge-r{background:rgba(255,61,87,0.15);color:var(--red)}
+.badge-a{background:rgba(255,179,0,0.15);color:var(--amber)}
+.badge-b{background:rgba(41,121,255,0.15);color:var(--blue)}
+.badge-c{background:rgba(0,229,255,0.15);color:var(--cyan)}
+
+/* CAMPO DA CALCIO SVG */
+.pitch-container{position:relative;width:100%;aspect-ratio:1.5/1;background:#1a2e1a;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.08)}
+.pitch-zone{position:absolute;cursor:pointer;transition:0.2s;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:11px;font-weight:800;letter-spacing:0.05em;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.06)}
+.pitch-zone:hover{z-index:10;transform:scale(1.03)}
+.pitch-zone .zone-count{font-family:var(--font-head);font-size:22px;font-weight:900;display:block;line-height:1}
+.pitch-zone .zone-label{font-size:9px;letter-spacing:0.08em;opacity:0.7;display:block}
+
+/* HEATMAP COLORS */
+.heat-0{background:rgba(0,230,118,0.04)}
+.heat-1{background:rgba(255,179,0,0.15)}
+.heat-2{background:rgba(255,179,0,0.3)}
+.heat-3{background:rgba(255,61,87,0.3)}
+.heat-4{background:rgba(255,61,87,0.55)}
+.heat-5{background:rgba(255,61,87,0.8)}
+
+/* TIMELINE */
+.timeline-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;gap:2px;margin:10px 0}
+.t-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;transition:0.3s;position:relative;cursor:pointer;flex:1}
+.t-seg:hover{filter:brightness(1.3)}
+.t-label{font-size:10px;color:var(--muted2);display:flex;justify-content:space-between;margin-top:4px}
+
+/* IPO SCORE */
+.ipo-big{font-family:var(--font-head);font-size:72px;font-weight:900;line-height:1;letter-spacing:0.02em}
+
+/* FADE */
+.fade{animation:fadeUp 0.4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* HIDDEN */
+.hidden{display:none!important}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px;color:var(--muted2)}
+.empty .em-icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px}
+
+/* SCROLL */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:999px}
+
+/* PRESENZE */
+.presence-bar{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:4px}
+.presence-fill{height:100%;border-radius:4px;transition:width 0.6s}
+
+/* INSIGHT BOX */
+.insight{background:rgba(41,121,255,0.07);border:1px solid rgba(41,121,255,0.2);border-radius:12px;padding:12px 16px;font-size:13px;color:#90caf9;line-height:1.6;margin-top:12px}
+.insight strong{color:var(--blue)}
+
+/* PERIODO BADGE */
+.periodo{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted2)}
+
+/* TOOLTIP */
+.tooltip-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);position:absolute;z-index:100;pointer-events:none;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+
+/* CAMPO LEGENDA */
+.zone-legend{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:12px}
+.zl-item{background:var(--surface2);border-radius:8px;padding:6px 8px;text-align:center;font-size:10px;color:var(--muted2)}
+.zl-num{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .wrap{padding:16px}
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .guide-box>div{grid-template-columns:1fr!important}
+  .chart-h-xl{height:280px}
+  .chart-h-lg{height:260px}
+}
+@media(max-width:768px){
+  .ipo-heatmap-grid{grid-template-columns:1fr!important}
+  .wrap{padding:12px}
+  nav{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:20px}
+  .logo{font-size:28px}
+  .nav-tabs{width:100%;justify-content:stretch}
+  .nav-tab{flex:1;padding:10px 6px;font-size:13px;text-align:center;letter-spacing:0.02em}
+  .upload-bar{flex-direction:column;align-items:stretch;padding:14px 16px;gap:10px}
+  .upload-item{flex-direction:column;align-items:flex-start;gap:6px;width:100%}
+  .upload-label{width:100%;justify-content:center}
+  .btn.green{width:100%;text-align:center;justify-content:center}
+  .guide-box{padding:14px 16px}
+  .filter-bar{padding:12px 14px;gap:8px}
+  .filter-bar select,.filter-bar input{min-width:0;width:100%}
+  .filter-bar .btn{width:100%}
+  .filter-label{display:none}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi{padding:14px 12px;border-radius:14px}
+  .kpi-val{font-size:28px}
+  .kpi-label{font-size:9px}
+  .g2,.g3,.g4{grid-template-columns:1fr;gap:10px}
+  .card{padding:14px;border-radius:16px}
+  .card-title{font-size:18px}
+  .chart-h{height:200px}
+  .chart-h-lg{height:220px}
+  .chart-h-xl{height:240px}
+  .ipo-big{font-size:50px}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl th,.tbl td{padding:7px 9px;font-size:11px}
+  .periodo{font-size:10px;padding:3px 7px}
+  .zone-legend{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:480px){
+  .nav-tab{font-size:11px;padding:8px 3px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:24px}
+  .chart-h{height:170px}
+  .chart-h-lg{height:190px}
+  .chart-h-xl{height:200px}
+  .card{padding:11px}
+  .card-title{font-size:15px}
+  .ipo-big{font-size:40px}
+  .guide-title{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- NAV -->
+<nav class="fade">
+  <div class="logo">COACH<span>LAB</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('risultati')">⚽ RISULTATI</button>
+    <button class="nav-tab" onclick="showPage('presenze')">👤 PRESENZE</button>
+    <button class="nav-tab" onclick="showPage('analytics')">📊 ANALYTICS</button>
+  </div>
+</nav>
+
+<!-- UPLOAD BAR -->
+<div class="upload-bar fade">
+  <div class="upload-item">
+    <label class="upload-label">
+      <span>📋</span> Foglio RISULTATI
+      <input type="file" id="fileRisultati" accept=".xlsx,.xls,.csv"/>
+    </label>
+    <span class="upload-name" id="nameRisultati">non caricato</span>
+  </div>
+  <div class="upload-item">
+    <label class="upload-label">
+      <span>👥</span> Foglio PRESENZE
+      <input type="file" id="filePresenze" accept=".xlsx,.xls,.csv"/>
+    </label>
+    <span class="upload-name" id="namePresenze">non caricato</span>
+  </div>
+  <div class="upload-item">
+    <label class="upload-label">
+      <span>🔬</span> Foglio ANALYTICS
+      <input type="file" id="fileAnalytics" accept=".xlsx,.xls,.csv"/>
+    </label>
+    <span class="upload-name" id="nameAnalytics">non caricato</span>
+  </div>
+  <button class="btn green" onclick="downloadAllTemplates()">⬇ Templates Excel</button>
+</div>
+
+<!-- GUIDE -->
+<div class="guide-box fade mb">
+  <div class="guide-title">📖 Guida Compilazione Excel — 3 Fogli</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-bottom:8px">FOGLIO RISULTATI</div>
+      <div class="guide-grid" style="grid-template-columns:1fr">
+        <div class="guide-item"><div class="guide-field">Data</div><div class="guide-vals">YYYY-MM-DD (es: 2024-09-15)</div></div>
+        <div class="guide-item"><div class="guide-field">Campo</div><div class="guide-vals">Nome dello stadio/campo</div></div>
+        <div class="guide-item"><div class="guide-field">Avversario</div><div class="guide-vals">Nome squadra avversaria</div></div>
+        <div class="guide-item"><div class="guide-field">Venue</div><div class="guide-vals">Home · Away</div></div>
+        <div class="guide-item"><div class="guide-field">GolFatti</div><div class="guide-vals">Numero intero (gol tuoi)</div></div>
+        <div class="guide-item"><div class="guide-field">GolSubiti</div><div class="guide-vals">Numero intero (gol loro)</div></div>
+        <div class="guide-item"><div class="guide-field">Competizione</div><div class="guide-vals">Es: Campionato · Coppa</div></div>
+        <div class="guide-item"><div class="guide-field">Giornata</div><div class="guide-vals">Numero giornata (1, 2, 3...)</div></div>
+        <div class="guide-item"><div class="guide-field">Note</div><div class="guide-vals">Note libere sulla gara</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:0.08em;margin-bottom:8px">FOGLIO PRESENZE</div>
+      <div class="guide-grid" style="grid-template-columns:1fr">
+        <div class="guide-item"><div class="guide-field">Nome</div><div class="guide-vals">Nome giocatore</div></div>
+        <div class="guide-item"><div class="guide-field">Cognome</div><div class="guide-vals">Cognome giocatore</div></div>
+        <div class="guide-item"><div class="guide-field">Data</div><div class="guide-vals">YYYY-MM-DD</div></div>
+        <div class="guide-item"><div class="guide-field">Tipo</div><div class="guide-vals">Gara · Allenamento</div></div>
+        <div class="guide-item"><div class="guide-field">Presente</div><div class="guide-vals">Si · No</div></div>
+        <div class="guide-item"><div class="guide-field">Minuti</div><div class="guide-vals">Minuti giocati/allenati</div></div>
+        <div class="guide-item"><div class="guide-field">Ruolo</div><div class="guide-vals">Titolare · Riserva</div></div>
+        <div class="guide-item"><div class="guide-field">Nota</div><div class="guide-vals">Note (infortunio, squalifica...)</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:0.08em;margin-bottom:8px">FOGLIO ANALYTICS</div>
+      <div class="guide-grid" style="grid-template-columns:1fr">
+        <div class="guide-item"><div class="guide-field">TipoEvento</div><div class="guide-vals">Occasione da goal · Azione promettente · Tiro da fuori area · Cross senza conclusione · Tiro in area di rigore · Rigore · Punizione da zona centrale · Punizione laterale · Corner · Cartellino giallo · Cartellino rosso</div></div>
+        <div class="guide-item"><div class="guide-field">ZonaEvento</div><div class="guide-vals">1–12 (vedi mappa campo)</div></div>
+        <div class="guide-item"><div class="guide-field">MinutoEvento</div><div class="guide-vals">1–90+ (numero minuto)</div></div>
+        <div class="guide-item"><div class="guide-field">EsitoTiro</div><div class="guide-vals">In porta · Fuori · Parato · Gol · Palo</div></div>
+        <div class="guide-item"><div class="guide-field">TipologiaTiro</div><div class="guide-vals">Destro · Sinistro · Testa</div></div>
+        <div class="guide-item"><div class="guide-field">EsitoPallaInattiva</div><div class="guide-vals">Gol · Parato · Fuori · Non concluso</div></div>
+        <div class="guide-item"><div class="guide-field">PunteggioIPO</div><div class="guide-vals">Auto-calcolato da TipoEvento</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: RISULTATI ═══════════════════════ -->
+<div id="page-risultati" class="page active fade">
+  <div class="filter-bar">
+    <span class="filter-label">Filtri:</span>
+    <select id="rFiltComp"><option value="">Tutte le Competizioni</option></select>
+    <select id="rFiltVenue"><option value="">Casa + Trasferta</option><option value="Home">🏠 Casa</option><option value="Away">✈️ Trasferta</option></select>
+    <input type="date" id="rFiltStart" placeholder="Dal"/>
+    <input type="date" id="rFiltEnd" placeholder="Al"/>
+    <button class="btn sm" onclick="applyRisultati()">Applica</button>
+    <button class="btn ghost sm" onclick="resetRisultati()">Reset</button>
+  </div>
+
+  <div class="kpi-row" id="rKpi"></div>
+
+  <div class="g2 mb">
+    <div class="card">
+      <div class="card-title">Andamento Punti</div>
+      <div class="card-sub">Punti accumulati giornata per giornata</div>
+      <div class="chart-h"><canvas id="cPunti"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gol Fatti / Subiti</div>
+      <div class="card-sub">Produzione e tenuta difensiva</div>
+      <div class="chart-h"><canvas id="cGol"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g3 mb">
+    <div class="card">
+      <div class="card-title">Risultati</div>
+      <div class="card-sub">V · N · S distribuzione</div>
+      <div class="chart-h"><canvas id="cWDL"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Casa vs Trasferta</div>
+      <div class="card-sub">Punti medi per venue</div>
+      <div class="chart-h"><canvas id="cVenue"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gol per Competizione</div>
+      <div class="card-sub">Totale gol per competizione</div>
+      <div class="chart-h"><canvas id="cCompGol"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Registro Partite</div>
+    <div class="card-sub">Archivio completo risultati</div>
+    <div class="tbl-wrap">
+      <table class="tbl" id="tblRisultati">
+        <thead><tr><th>Data</th><th>Comp.</th><th>G.</th><th>Avversario</th><th>Venue</th><th>Campo</th><th>Risultato</th><th>Esito</th><th>Note</th></tr></thead>
+        <tbody id="tblRisultatiBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: PRESENZE ═══════════════════════ -->
+<div id="page-presenze" class="page fade">
+  <div class="filter-bar">
+    <span class="filter-label">Filtri:</span>
+    <select id="pFiltTipo"><option value="">Gara + Allenamento</option><option value="Gara">Gara</option><option value="Allenamento">Allenamento</option></select>
+    <select id="pFiltGioc"><option value="">Tutti i giocatori</option></select>
+    <input type="date" id="pFiltStart"/>
+    <input type="date" id="pFiltEnd"/>
+    <button class="btn sm" onclick="applyPresenze()">Applica</button>
+    <button class="btn ghost sm" onclick="resetPresenze()">Reset</button>
+  </div>
+
+  <div class="kpi-row" id="pKpi"></div>
+
+  <div class="g2 mb">
+    <div class="card">
+      <div class="card-title">% Presenze per Giocatore</div>
+      <div class="card-sub">Tutte le sessioni — ordine decrescente</div>
+      <div class="chart-h-xl"><canvas id="cPresenzeBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Minuti Totali per Giocatore</div>
+      <div class="card-sub">Carico di lavoro stagionale</div>
+      <div class="chart-h-xl"><canvas id="cMinutiBar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g3 mb">
+    <div class="card">
+      <div class="card-title">Presenti vs Assenti</div>
+      <div class="card-sub">Distribuzione stagionale</div>
+      <div class="chart-h"><canvas id="cPresDonut"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gara vs Allenamento</div>
+      <div class="card-sub">Distribuzione sessioni</div>
+      <div class="chart-h"><canvas id="cTipoDonut"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Titolari vs Riserve</div>
+      <div class="card-sub">Impiego stagionale</div>
+      <div class="chart-h"><canvas id="cRuoloDonut"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Classifica Presenze Giocatori</div>
+    <div class="card-sub">Dettaglio per ogni atleta</div>
+    <div class="tbl-wrap">
+      <table class="tbl" id="tblPresenze">
+        <thead><tr><th>#</th><th>Giocatore</th><th>Presenze Totali</th><th>% Presenza</th><th>Gare</th><th>Allenamenti</th><th>Titolare</th><th>Riserva</th><th>Min. Totali</th><th>Media Min.</th></tr></thead>
+        <tbody id="tblPresenzeBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Registro Presenze</div>
+    <div class="card-sub">Archivio completo</div>
+    <div style="margin-bottom:12px">
+      <input type="text" id="pSearch" placeholder="🔍 Cerca giocatore..." style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;width:280px" oninput="searchPresenze()"/>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Data</th><th>Giocatore</th><th>Tipo</th><th>Presente</th><th>Ruolo</th><th>Minuti</th><th>Nota</th></tr></thead>
+        <tbody id="tblPresenzeReg"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: ANALYTICS ═══════════════════════ -->
+<div id="page-analytics" class="page fade">
+  <div class="filter-bar">
+    <span class="filter-label">Filtri:</span>
+    <select id="aFiltGara"><option value="">Tutte le Gare</option></select>
+    <select id="aFiltComp"><option value="">Tutte le Competizioni</option></select>
+    <select id="aFiltEvento"><option value="">Tutti gli eventi</option></select>
+    <select id="aFiltPeriodo">
+      <option value="">Tutti i periodi</option>
+      <option value="1">P1: 1'–15'</option>
+      <option value="2">P2: 16'–30'</option>
+      <option value="3">P3: 31'–45'</option>
+      <option value="4">P4: 46'–60'</option>
+      <option value="5">P5: 61'–75'</option>
+      <option value="6">P6: 76'–90+'</option>
+    </select>
+    <button class="btn sm" onclick="applyAnalytics()">Applica</button>
+    <button class="btn ghost sm" onclick="resetAnalytics()">Reset</button>
+  </div>
+
+  <!-- KPI IPO -->
+  <div class="kpi-row" id="aKpi"></div>
+
+  <!-- IPO TOTALE + CAMPO -->
+  <div class="ipo-heatmap-grid" style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px">
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+      <div class="card-sub" style="margin-bottom:4px">PUNTEGGIO IPO TOTALE</div>
+      <div class="ipo-big" id="ipoTotale" style="color:var(--amber)">0</div>
+      <div style="font-size:12px;color:var(--muted2);margin-top:8px">Index of Playing Opportunities</div>
+      <div class="insight" id="ipoInsight" style="margin-top:12px;text-align:left"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Heatmap Zone Pericolosità</div>
+      <div class="card-sub">IPO totale per zona campo — più scuro = più pericoloso</div>
+      <div id="pitchHeatmap" style="position:relative;width:100%;aspect-ratio:1.5/1;background:#162316;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.06)"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;font-size:11px;color:var(--muted2)">
+        <span>Bassa pericolosità</span>
+        <div style="display:flex;gap:3px">
+          <div style="width:20px;height:10px;background:rgba(0,230,118,0.1);border-radius:3px"></div>
+          <div style="width:20px;height:10px;background:rgba(255,179,0,0.2);border-radius:3px"></div>
+          <div style="width:20px;height:10px;background:rgba(255,179,0,0.4);border-radius:3px"></div>
+          <div style="width:20px;height:10px;background:rgba(255,61,87,0.4);border-radius:3px"></div>
+          <div style="width:20px;height:10px;background:rgba(255,61,87,0.7);border-radius:3px"></div>
+          <div style="width:20px;height:10px;background:rgba(255,61,87,0.95);border-radius:3px"></div>
+        </div>
+        <span>Alta pericolosità</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ANALYTICS ROW 1 -->
+  <div class="g2 mb">
+    <div class="card">
+      <div class="card-title">IPO per Periodo di Gara</div>
+      <div class="card-sub">Pericolosità nei 6 momenti (P1–P6)</div>
+      <div class="chart-h"><canvas id="cIpoPeriodo"></canvas></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+        <span class="periodo">P1: 1'–15'</span>
+        <span class="periodo">P2: 16'–30'</span>
+        <span class="periodo">P3: 31'–45'</span>
+        <span class="periodo">P4: 46'–60'</span>
+        <span class="periodo">P5: 61'–75'</span>
+        <span class="periodo">P6: 76'–90+'</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">IPO per Giocatore</div>
+      <div class="card-sub">Chi contribuisce di più agli eventi pericolosi</div>
+      <div class="chart-h"><canvas id="cIpoGioc"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ANALYTICS ROW 2 -->
+  <div class="g2 mb">
+    <div class="card">
+      <div class="card-title">Tiri Totali per Periodo</div>
+      <div class="card-sub">Pressione offensiva nei 6 momenti</div>
+      <div class="chart-h"><canvas id="cTiriPeriodo"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Andamento Minuti — Densità Eventi</div>
+      <div class="card-sub">In quale minuto accade di più</div>
+      <div class="chart-h"><canvas id="cMinutiEventi"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ANALYTICS ROW 3 -->
+  <div class="g3 mb">
+    <div class="card">
+      <div class="card-title">Tipi di Evento</div>
+      <div class="card-sub">Distribuzione eventi registrati</div>
+      <div class="chart-h"><canvas id="cTipiEvento"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Esito Tiri</div>
+      <div class="card-sub">In porta, fuori, gol, parato...</div>
+      <div class="chart-h"><canvas id="cEsitoTiro"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tiri Totali vs In Porta</div>
+      <div class="card-sub">Efficienza offensiva per gara</div>
+      <div class="chart-h"><canvas id="cTiriInPorta"></canvas></div>
+    </div>
+  </div>
+
+  <!-- IPO PROGRESSIVO PER GARA -->
+  <div class="card mb">
+    <div class="card-title">Andamento IPO Progressivo</div>
+    <div class="card-sub">Punteggio IPO accumulato gara per gara</div>
+    <div class="chart-h-lg"><canvas id="cIpoProgressivo"></canvas></div>
+  </div>
+
+  <!-- TABELLA EVENTI -->
+  <div class="card mb">
+    <div class="card-title">Registro Eventi Analytics</div>
+    <div class="card-sub">Tutti gli eventi notazionali</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th>Data</th><th>Gara</th><th>Min.</th><th>Tipo Evento</th><th>Giocatore</th>
+          <th>Zona</th><th>IPO</th><th>Esito Tiro</th><th>Tipo Tiro</th>
+          <th>Zona Inizio</th><th>Zona Rif.</th><th>Gioc. Rif.</th><th>Nota</th>
+        </tr></thead>
+        <tbody id="tblAnalytics"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+let dataRisultati=[], dataPresenze=[], dataAnalytics=[];
+let fRisultati=[], fPresenze=[], fAnalytics=[];
+const C={};
+
+const IPO_WEIGHTS={
+  'Occasione da goal':10,'Azione promettente':4,'Tiro da fuori area':1,
+  'Cross senza conclusione':1,'Tiro in area di rigore':3,'Rigore':10,
+  'Punizione da zona centrale':3,'Punizione laterale':2,'Corner':1,
+  'Cartellino giallo':0,'Cartellino rosso':0
+};
+
+// Zone del campo (layout 4 col x 3 righe = 12 zone)
+// Coordinate % (left, top, width, height)
+const ZONES={
+  1:{l:0,   t:66.6, w:25,  h:33.4, label:'Z1'},
+  2:{l:25,  t:66.6, w:25,  h:33.4, label:'Z2'},
+  3:{l:50,  t:66.6, w:25,  h:33.4, label:'Z3'},
+  4:{l:75,  t:66.6, w:25,  h:33.4, label:'Z4'},
+  5:{l:0,   t:33.3, w:25,  h:33.3, label:'Z5'},
+  6:{l:25,  t:33.3, w:25,  h:33.3, label:'Z6'},
+  7:{l:50,  t:33.3, w:25,  h:33.3, label:'Z7'},
+  8:{l:75,  t:33.3, w:25,  h:33.3, label:'Z8'},
+  9:{l:0,   t:0,    w:25,  h:33.3, label:'Z9'},
+  10:{l:25, t:0,    w:25,  h:33.3, label:'Z10'},
+  11:{l:50, t:0,    w:25,  h:33.3, label:'Z11'},
+  12:{l:75, t:0,    w:25,  h:33.3, label:'Z12'},
+};
+
+// ─── FILE LOAD ────────────────────────────────────────────────────────────────
+function loadFile(inputId,nameId,callback){
+  const el=document.getElementById(inputId);
+  el.addEventListener('change',function(e){
+    const f=e.target.files[0]; if(!f) return;
+    document.getElementById(nameId).textContent=f.name;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      callback(data);
+    };
+    reader.readAsArrayBuffer(f);
+  });
+}
+
+loadFile('fileRisultati','nameRisultati',function(data){
+  dataRisultati=data; fRisultati=data;
+  populateRisultatiFilters(); renderRisultati(data);
+});
+loadFile('filePresenze','namePresenze',function(data){
+  dataPresenze=data; fPresenze=data;
+  populatePresenzeFilters(); renderPresenze(data);
+});
+loadFile('fileAnalytics','nameAnalytics',function(data){
+  // auto-calc IPO
+  data=data.map(r=>({...r, PunteggioIPO: IPO_WEIGHTS[r.TipoEvento]||0}));
+  dataAnalytics=data; fAnalytics=data;
+  populateAnalyticsFilters(); renderAnalytics(data);
+});
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─────────────────────── RISULTATI ───────────────────────────────────────────
+function populateRisultatiFilters(){
+  const comp=[...new Set(dataRisultati.map(d=>d.Competizione).filter(Boolean))];
+  const sel=document.getElementById('rFiltComp');
+  while(sel.options.length>1) sel.remove(1);
+  comp.forEach(c=>{const o=document.createElement('option');o.value=c;o.text=c;sel.add(o);});
+}
+function applyRisultati(){
+  const comp=document.getElementById('rFiltComp').value;
+  const venue=document.getElementById('rFiltVenue').value;
+  const s=document.getElementById('rFiltStart').value;
+  const e=document.getElementById('rFiltEnd').value;
+  fRisultati=dataRisultati.filter(r=>{
+    if(comp&&r.Competizione!==comp) return false;
+    if(venue&&r.Venue!==venue) return false;
+    if(s&&r.Data<s) return false;
+    if(e&&r.Data>e) return false;
+    return true;
+  });
+  renderRisultati(fRisultati);
+}
+function resetRisultati(){
+  ['rFiltComp','rFiltVenue','rFiltStart','rFiltEnd'].forEach(id=>document.getElementById(id).value='');
+  fRisultati=dataRisultati; renderRisultati(fRisultati);
+}
+
+function renderRisultati(data){
+  if(!data.length){ showEmpty('rKpi','tblRisultatiBody'); return; }
+
+  // Calcola esito
+  data=data.map(r=>{
+    const gf=Number(r.GolFatti||0), gs=Number(r.GolSubiti||0);
+    const esito=gf>gs?'V':gf===gs?'N':'S';
+    const punti=gf>gs?3:gf===gs?1:0;
+    return {...r,_gf:gf,_gs:gs,_esito:esito,_punti:punti};
+  });
+
+  const V=data.filter(r=>r._esito==='V').length;
+  const N=data.filter(r=>r._esito==='N').length;
+  const S=data.filter(r=>r._esito==='S').length;
+  const PG=data.length;
+  const GF=data.reduce((a,r)=>a+r._gf,0);
+  const GS=data.reduce((a,r)=>a+r._gs,0);
+  const PT=data.reduce((a,r)=>a+r._punti,0);
+  const mPunti=PG?(PT/PG).toFixed(2):0;
+
+  document.getElementById('rKpi').innerHTML=`
+    <div class="kpi b"><div class="kpi-label">Partite Giocate</div><div class="kpi-val">${PG}</div></div>
+    <div class="kpi g"><div class="kpi-label">Vittorie</div><div class="kpi-val">${V}</div></div>
+    <div class="kpi a"><div class="kpi-label">Pareggi</div><div class="kpi-val">${N}</div></div>
+    <div class="kpi r"><div class="kpi-label">Sconfitte</div><div class="kpi-val">${S}</div></div>
+    <div class="kpi c"><div class="kpi-label">Punti Totali</div><div class="kpi-val">${PT}</div></div>
+    <div class="kpi g"><div class="kpi-label">Media Punti</div><div class="kpi-val">${mPunti}</div></div>
+    <div class="kpi g"><div class="kpi-label">Gol Fatti</div><div class="kpi-val">${GF}</div></div>
+    <div class="kpi r"><div class="kpi-label">Gol Subiti</div><div class="kpi-val">${GS}</div></div>
+    <div class="kpi a"><div class="kpi-label">Differenza Reti</div><div class="kpi-val">${GF-GS>0?'+':''}${GF-GS}</div></div>
+  `;
+
+  // Punti chart
+  let cum=0;
+  const labels=data.map((r,i)=>`G${i+1}`);
+  const puntiCum=data.map(r=>{cum+=r._punti;return cum;});
+  const puntiPerGara=data.map(r=>r._punti);
+  dc('cPunti');
+  C['cPunti']=new Chart(document.getElementById('cPunti'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Punti Cumulati',data:puntiCum,borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,0.08)',fill:true,tension:0.4,borderWidth:2,pointRadius:3},
+      {label:'Punti a Gara',data:puntiPerGara,borderColor:'#00e676',backgroundColor:'rgba(0,230,118,0.06)',fill:true,tension:0.2,borderWidth:1.5,pointRadius:3,borderDash:[4,4]}
+    ]},options:CD()
+  });
+
+  // Gol chart
+  dc('cGol');
+  C['cGol']=new Chart(document.getElementById('cGol'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Gol Fatti',data:data.map(r=>r._gf),backgroundColor:'#00e676',borderRadius:4,borderSkipped:false},
+      {label:'Gol Subiti',data:data.map(r=>r._gs),backgroundColor:'#ff3d57',borderRadius:4,borderSkipped:false}
+    ]},options:CD()
+  });
+
+  // WDL donut
+  dc('cWDL');
+  C['cWDL']=new Chart(document.getElementById('cWDL'),{
+    type:'doughnut',
+    data:{labels:['Vittorie','Pareggi','Sconfitte'],
+      datasets:[{data:[V,N,S],backgroundColor:['#00e676','#ffb300','#ff3d57'],borderWidth:0,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}
+  });
+
+  // Venue bar
+  const homeData=data.filter(r=>r.Venue==='Home');
+  const awayData=data.filter(r=>r.Venue==='Away');
+  const hPt=homeData.reduce((a,r)=>a+r._punti,0);
+  const aPt=awayData.reduce((a,r)=>a+r._punti,0);
+  const hAvg=homeData.length?(hPt/homeData.length).toFixed(2):0;
+  const aAvg=awayData.length?(aPt/awayData.length).toFixed(2):0;
+  dc('cVenue');
+  C['cVenue']=new Chart(document.getElementById('cVenue'),{
+    type:'bar',
+    data:{labels:['🏠 Casa','✈️ Trasferta'],
+      datasets:[
+        {label:'Punti medi/gara',data:[hAvg,aAvg],backgroundColor:['#2979ff','#ffb300'],borderRadius:8,borderSkipped:false},
+        {label:'Gol fatti medi',data:[homeData.length?(homeData.reduce((a,r)=>a+r._gf,0)/homeData.length).toFixed(1):0,awayData.length?(awayData.reduce((a,r)=>a+r._gf,0)/awayData.length).toFixed(1):0],backgroundColor:['rgba(41,121,255,0.3)','rgba(255,179,0,0.3)'],borderRadius:8,borderSkipped:false}
+      ]},
+    options:CD()
+  });
+
+  // Comp Gol
+  const compMap={};
+  data.forEach(r=>{const c=r.Competizione||'N/D'; if(!compMap[c])compMap[c]={gf:0,gs:0}; compMap[c].gf+=r._gf; compMap[c].gs+=r._gs;});
+  dc('cCompGol');
+  C['cCompGol']=new Chart(document.getElementById('cCompGol'),{
+    type:'bar',
+    data:{labels:Object.keys(compMap),datasets:[
+      {label:'Gol Fatti',data:Object.values(compMap).map(v=>v.gf),backgroundColor:'#00e676',borderRadius:6,borderSkipped:false},
+      {label:'Gol Subiti',data:Object.values(compMap).map(v=>v.gs),backgroundColor:'#ff3d57',borderRadius:6,borderSkipped:false}
+    ]},
+    options:CD()
+  });
+
+  // Table
+  document.getElementById('tblRisultatiBody').innerHTML=data.map(r=>{
+    const cls=r._esito==='V'?'badge-g':r._esito==='N'?'badge-a':'badge-r';
+    const venueH=r.Venue==='Home'?'<span class="badge badge-b">🏠 Casa</span>':'<span class="badge badge-a">✈️ Trasf.</span>';
+    return`<tr>
+      <td>${r.Data||''}</td><td>${r.Competizione||''}</td><td>${r.Giornata||''}</td>
+      <td><strong>${r.Avversario||''}</strong></td><td>${venueH}</td><td>${r.Campo||''}</td>
+      <td><strong>${r._gf}–${r._gs}</strong></td>
+      <td><span class="badge ${cls}">${r._esito==='V'?'VITTORIA':r._esito==='N'?'PAREGGIO':'SCONFITTA'}</span></td>
+      <td style="color:var(--muted2);max-width:200px;overflow:hidden;text-overflow:ellipsis">${r.Note||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────── PRESENZE ────────────────────────────────────────────
+function populatePresenzeFilters(){
+  const gioc=[...new Set(dataPresenze.map(d=>`${d.Cognome||''} ${d.Nome||''}`.trim()).filter(Boolean))].sort();
+  const sel=document.getElementById('pFiltGioc');
+  while(sel.options.length>1) sel.remove(1);
+  gioc.forEach(g=>{const o=document.createElement('option');o.value=g;o.text=g;sel.add(o);});
+}
+function applyPresenze(){
+  const tipo=document.getElementById('pFiltTipo').value;
+  const gioc=document.getElementById('pFiltGioc').value;
+  const s=document.getElementById('pFiltStart').value;
+  const e=document.getElementById('pFiltEnd').value;
+  fPresenze=dataPresenze.filter(r=>{
+    const name=`${r.Cognome||''} ${r.Nome||''}`.trim();
+    if(tipo&&r.Tipo!==tipo) return false;
+    if(gioc&&name!==gioc) return false;
+    if(s&&r.Data<s) return false;
+    if(e&&r.Data>e) return false;
+    return true;
+  });
+  renderPresenze(fPresenze);
+}
+function resetPresenze(){
+  ['pFiltTipo','pFiltGioc','pFiltStart','pFiltEnd'].forEach(id=>document.getElementById(id).value='');
+  fPresenze=dataPresenze; renderPresenze(fPresenze);
+}
+
+function renderPresenze(data){
+  if(!data.length) return;
+  const totSess=[...new Set(data.map(d=>d.Data+'_'+d.Tipo))].length;
+  const presenti=data.filter(d=>d.Presente==='Si'||d.Presente==='Sì'||d.Presente===true||d.Presente==='si').length;
+  const assenti=data.length-presenti;
+  const minTot=data.reduce((a,d)=>a+Number(d.Minuti||0),0);
+  const tit=data.filter(d=>d.Ruolo==='Titolare').length;
+  const ris=data.filter(d=>d.Ruolo==='Riserva').length;
+
+  document.getElementById('pKpi').innerHTML=`
+    <div class="kpi b"><div class="kpi-label">Registrazioni</div><div class="kpi-val">${data.length}</div></div>
+    <div class="kpi g"><div class="kpi-label">Presenze</div><div class="kpi-val">${presenti}</div></div>
+    <div class="kpi r"><div class="kpi-label">Assenze</div><div class="kpi-val">${assenti}</div></div>
+    <div class="kpi a"><div class="kpi-label">% Presenza</div><div class="kpi-val">${data.length?Math.round(presenti/data.length*100):0}%</div></div>
+    <div class="kpi c"><div class="kpi-label">Min. Totali</div><div class="kpi-val">${minTot}</div></div>
+    <div class="kpi g"><div class="kpi-label">Titolari</div><div class="kpi-val">${tit}</div></div>
+    <div class="kpi a"><div class="kpi-label">Riserve</div><div class="kpi-val">${ris}</div></div>
+  `;
+
+  // Per giocatore
+  const gMap={};
+  const allSessMap={};
+  data.forEach(d=>{
+    const name=`${d.Cognome||''} ${d.Nome||''}`.trim();
+    if(!name) return;
+    if(!gMap[name]) gMap[name]={tot:0,pres:0,gare:0,all:0,tit:0,ris:0,min:0};
+    gMap[name].tot++;
+    const isP=d.Presente==='Si'||d.Presente==='Sì'||d.Presente===true||d.Presente==='si';
+    if(isP) gMap[name].pres++;
+    if(d.Tipo==='Gara') gMap[name].gare++;
+    else gMap[name].all++;
+    if(d.Ruolo==='Titolare') gMap[name].tit++;
+    if(d.Ruolo==='Riserva') gMap[name].ris++;
+    gMap[name].min+=Number(d.Minuti||0);
+  });
+
+  const giocatori=Object.entries(gMap).sort((a,b)=>b[1].pres-a[1].pres);
+
+  // Bar presenze %
+  dc('cPresenzeBar');
+  C['cPresenzeBar']=new Chart(document.getElementById('cPresenzeBar'),{
+    type:'bar',
+    data:{
+      labels:giocatori.map(g=>g[0]),
+      datasets:[{
+        label:'% Presenza',
+        data:giocatori.map(g=>Math.round(g[1].pres/g[1].tot*100)),
+        backgroundColor:giocatori.map(g=>{const p=g[1].pres/g[1].tot*100; return p>=80?'#00e676':p>=60?'#ffb300':'#ff3d57';}),
+        borderRadius:4,borderSkipped:false
+      }]},
+    options:{...CD(),indexAxis:'y',plugins:{legend:{display:false}}}
+  });
+
+  // Bar minuti
+  dc('cMinutiBar');
+  C['cMinutiBar']=new Chart(document.getElementById('cMinutiBar'),{
+    type:'bar',
+    data:{
+      labels:giocatori.map(g=>g[0]),
+      datasets:[{label:'Minuti Totali',data:giocatori.map(g=>g[1].min),backgroundColor:'#2979ff',borderRadius:4,borderSkipped:false}]},
+    options:{...CD(),indexAxis:'y',plugins:{legend:{display:false}}}
+  });
+
+  // Donuts
+  dc('cPresDonut');
+  C['cPresDonut']=new Chart(document.getElementById('cPresDonut'),{
+    type:'doughnut',
+    data:{labels:['Presenti','Assenti'],datasets:[{data:[presenti,assenti],backgroundColor:['#00e676','#ff3d57'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}
+  });
+
+  const gare=data.filter(d=>d.Tipo==='Gara').length;
+  const allenamenti=data.filter(d=>d.Tipo==='Allenamento').length;
+  dc('cTipoDonut');
+  C['cTipoDonut']=new Chart(document.getElementById('cTipoDonut'),{
+    type:'doughnut',
+    data:{labels:['Gare','Allenamenti'],datasets:[{data:[gare,allenamenti],backgroundColor:['#2979ff','#00e5ff'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}
+  });
+
+  dc('cRuoloDonut');
+  C['cRuoloDonut']=new Chart(document.getElementById('cRuoloDonut'),{
+    type:'doughnut',
+    data:{labels:['Titolari','Riserve'],datasets:[{data:[tit,ris],backgroundColor:['#7c4dff','#ffb300'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}
+  });
+
+  // Tabella classifica
+  document.getElementById('tblPresenzeBody').innerHTML=giocatori.map((g,i)=>{
+    const pct=Math.round(g[1].pres/g[1].tot*100);
+    const cls=pct>=80?'badge-g':pct>=60?'badge-a':'badge-r';
+    const media=g[1].pres?Math.round(g[1].min/g[1].pres):0;
+    return`<tr>
+      <td>${i+1}</td>
+      <td><strong>${g[0]}</strong></td>
+      <td>${g[1].pres}/${g[1].tot}</td>
+      <td><span class="badge ${cls}">${pct}%</span></td>
+      <td>${g[1].gare}</td>
+      <td>${g[1].all}</td>
+      <td>${g[1].tit}</td>
+      <td>${g[1].ris}</td>
+      <td>${g[1].min}</td>
+      <td>${media}</td>
+    </tr>`;
+  }).join('');
+
+  // Registro
+  renderPresenzeReg(data);
+}
+
+function renderPresenzeReg(data){
+  document.getElementById('tblPresenzeReg').innerHTML=data.map(d=>{
+    const name=`${d.Cognome||''} ${d.Nome||''}`.trim();
+    const isP=d.Presente==='Si'||d.Presente==='Sì'||d.Presente===true||d.Presente==='si';
+    return`<tr>
+      <td>${d.Data||''}</td>
+      <td><strong>${name}</strong></td>
+      <td>${d.Tipo||''}</td>
+      <td>${isP?'<span class="badge badge-g">✓ Presente</span>':'<span class="badge badge-r">✗ Assente</span>'}</td>
+      <td>${d.Ruolo||'—'}</td>
+      <td>${d.Minuti||0}</td>
+      <td style="color:var(--muted2)">${d.Nota||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function searchPresenze(){
+  const q=document.getElementById('pSearch').value.toLowerCase();
+  const filtered=fPresenze.filter(d=>JSON.stringify(d).toLowerCase().includes(q));
+  renderPresenzeReg(filtered);
+}
+
+// ─────────────────────── ANALYTICS ───────────────────────────────────────────
+function populateAnalyticsFilters(){
+  const sel1=document.getElementById('aFiltGara');
+  const sel2=document.getElementById('aFiltComp');
+  const sel3=document.getElementById('aFiltEvento');
+  while(sel1.options.length>1) sel1.remove(1);
+  while(sel2.options.length>1) sel2.remove(1);
+  while(sel3.options.length>1) sel3.remove(1);
+  [...new Set(dataAnalytics.map(d=>d.Gara).filter(Boolean))].forEach(v=>{const o=document.createElement('option');o.value=v;o.text=v;sel1.add(o);});
+  [...new Set(dataAnalytics.map(d=>d.Competizione).filter(Boolean))].forEach(v=>{const o=document.createElement('option');o.value=v;o.text=v;sel2.add(o);});
+  Object.keys(IPO_WEIGHTS).forEach(v=>{const o=document.createElement('option');o.value=v;o.text=v;sel3.add(o);});
+}
+function applyAnalytics(){
+  const gara=document.getElementById('aFiltGara').value;
+  const comp=document.getElementById('aFiltComp').value;
+  const ev=document.getElementById('aFiltEvento').value;
+  const per=document.getElementById('aFiltPeriodo').value;
+  fAnalytics=dataAnalytics.filter(r=>{
+    if(gara&&r.Gara!==gara) return false;
+    if(comp&&r.Competizione!==comp) return false;
+    if(ev&&r.TipoEvento!==ev) return false;
+    if(per){const m=Number(r.MinutoEvento||0); const p=getPeriodo(m); if(String(p)!==per) return false;}
+    return true;
+  });
+  renderAnalytics(fAnalytics);
+}
+function resetAnalytics(){
+  ['aFiltGara','aFiltComp','aFiltEvento','aFiltPeriodo'].forEach(id=>document.getElementById(id).value='');
+  fAnalytics=dataAnalytics; renderAnalytics(fAnalytics);
+}
+
+function getPeriodo(min){
+  if(min<=15) return 1;
+  if(min<=30) return 2;
+  if(min<=45) return 3;
+  if(min<=60) return 4;
+  if(min<=75) return 5;
+  return 6;
+}
+
+function renderAnalytics(data){
+  if(!data.length){
+    document.getElementById('ipoTotale').textContent='0';
+    document.getElementById('aKpi').innerHTML='<div class="empty"><div class="em-icon">📊</div><p>Carica il foglio Analytics</p></div>';
+    return;
+  }
+
+  const ipoTot=data.reduce((a,r)=>a+Number(r.PunteggioIPO||0),0);
+  const tiri=data.filter(r=>['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento));
+  const tiriInPorta=tiri.filter(r=>r.EsitoTiro==='In porta'||r.EsitoTiro==='Gol');
+  const gare=[...new Set(data.map(d=>d.Gara).filter(Boolean))].length;
+  const gialli=data.filter(r=>r.TipoEvento==='Cartellino giallo').length;
+  const rossi=data.filter(r=>r.TipoEvento==='Cartellino rosso').length;
+  const occasioni=data.filter(r=>r.TipoEvento==='Occasione da goal').length;
+
+  document.getElementById('ipoTotale').textContent=ipoTot;
+  document.getElementById('aKpi').innerHTML=`
+    <div class="kpi a"><div class="kpi-label">IPO Totale</div><div class="kpi-val">${ipoTot}</div></div>
+    <div class="kpi b"><div class="kpi-label">IPO / Gara</div><div class="kpi-val">${gare?(ipoTot/gare).toFixed(1):0}</div></div>
+    <div class="kpi c"><div class="kpi-label">Tiri Totali</div><div class="kpi-val">${tiri.length}</div></div>
+    <div class="kpi g"><div class="kpi-label">Tiri In Porta</div><div class="kpi-val">${tiriInPorta.length}</div></div>
+    <div class="kpi g"><div class="kpi-label">Occasioni</div><div class="kpi-val">${occasioni}</div></div>
+    <div class="kpi r"><div class="kpi-label">Cartellini G</div><div class="kpi-val">${gialli}</div></div>
+    <div class="kpi r"><div class="kpi-label">Cartellini R</div><div class="kpi-val">${rossi}</div></div>
+    <div class="kpi b"><div class="kpi-label">Gare Analizzate</div><div class="kpi-val">${gare}</div></div>
+  `;
+
+  const ipoAvgGara=gare?(ipoTot/gare).toFixed(1):0;
+  document.getElementById('ipoInsight').innerHTML=
+    `<strong>IPO medio/gara: ${ipoAvgGara}</strong> — ${ipoTot>gare*15?'Alta pericolosità offensiva.':ipoTot>gare*8?'Pericolosità nella norma.':'Bassa produzione offensiva, lavorare sulle occasioni.'} Tiri totali: ${tiri.length}, in porta: ${tiriInPorta.length} (${tiri.length?Math.round(tiriInPorta.length/tiri.length*100):0}%).`;
+
+  // Heatmap
+  buildHeatmap(data);
+
+  // IPO per periodo
+  const periodi=[1,2,3,4,5,6];
+  const ipoPerPer=periodi.map(p=>data.filter(r=>getPeriodo(Number(r.MinutoEvento||0))===p).reduce((a,r)=>a+Number(r.PunteggioIPO||0),0));
+  dc('cIpoPeriodo');
+  C['cIpoPeriodo']=new Chart(document.getElementById('cIpoPeriodo'),{
+    type:'bar',
+    data:{labels:["P1 1'–15'","P2 16'–30'","P3 31'–45'","P4 46'–60'","P5 61'–75'","P6 76'–90+'"],
+      datasets:[{label:'IPO',data:ipoPerPer,backgroundColor:ipoPerPer.map(v=>{const max=Math.max(...ipoPerPer); return v===max?'#ffb300':v>max*0.6?'rgba(255,179,0,0.5)':'rgba(41,121,255,0.4)';}),borderRadius:8,borderSkipped:false}]},
+    options:{...CD(),plugins:{legend:{display:false}}}
+  });
+
+  // IPO per giocatore
+  const gMap={};
+  data.forEach(r=>{
+    const g=r.GiocatoreEvento||'N/D';
+    gMap[g]=(gMap[g]||0)+Number(r.PunteggioIPO||0);
+  });
+  const gSorted=Object.entries(gMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  dc('cIpoGioc');
+  C['cIpoGioc']=new Chart(document.getElementById('cIpoGioc'),{
+    type:'bar',
+    data:{labels:gSorted.map(g=>g[0]),datasets:[{label:'IPO',data:gSorted.map(g=>g[1]),backgroundColor:'#00e5ff',borderRadius:4,borderSkipped:false}]},
+    options:{...CD(),indexAxis:'y',plugins:{legend:{display:false}}}
+  });
+
+  // Tiri per periodo
+  const tiriPerPer=periodi.map(p=>data.filter(r=>getPeriodo(Number(r.MinutoEvento||0))===p&&['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento)).length);
+  dc('cTiriPeriodo');
+  C['cTiriPeriodo']=new Chart(document.getElementById('cTiriPeriodo'),{
+    type:'bar',
+    data:{labels:["P1","P2","P3","P4","P5","P6"],datasets:[{label:'Tiri',data:tiriPerPer,backgroundColor:'#7c4dff',borderRadius:6,borderSkipped:false}]},
+    options:{...CD(),plugins:{legend:{display:false}}}
+  });
+
+  // Minuti densità (bucket da 5 minuti)
+  const buckets={};
+  for(let i=0;i<=90;i+=5) buckets[i]=0;
+  data.forEach(r=>{
+    const m=Number(r.MinutoEvento||0);
+    const b=Math.floor(m/5)*5;
+    if(buckets[b]!==undefined) buckets[b]++;
+  });
+  dc('cMinutiEventi');
+  C['cMinutiEventi']=new Chart(document.getElementById('cMinutiEventi'),{
+    type:'line',
+    data:{labels:Object.keys(buckets).map(k=>`${k}'`),datasets:[{label:'Eventi',data:Object.values(buckets),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,0.1)',fill:true,tension:0.4,borderWidth:2,pointRadius:2}]},
+    options:CD()
+  });
+
+  // Tipi evento
+  const evMap={};
+  data.forEach(r=>{const e=r.TipoEvento||'N/D'; evMap[e]=(evMap[e]||0)+1;});
+  dc('cTipiEvento');
+  C['cTipiEvento']=new Chart(document.getElementById('cTipiEvento'),{
+    type:'doughnut',
+    data:{labels:Object.keys(evMap),datasets:[{data:Object.values(evMap),backgroundColor:['#2979ff','#00e676','#ffb300','#ff3d57','#00e5ff','#7c4dff','#ff6d00','#1de9b6','#e040fb','#69f0ae','#ff5252'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:10}}}}}
+  });
+
+  // Esito tiri
+  const etMap={};
+  tiri.forEach(r=>{const e=r.EsitoTiro||'N/D'; etMap[e]=(etMap[e]||0)+1;});
+  dc('cEsitoTiro');
+  C['cEsitoTiro']=new Chart(document.getElementById('cEsitoTiro'),{
+    type:'doughnut',
+    data:{labels:Object.keys(etMap),datasets:[{data:Object.values(etMap),backgroundColor:['#00e676','#ff3d57','#ffb300','#2979ff','#7c4dff'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:10}}}}}
+  });
+
+  // Tiri vs in porta per gara
+  const garaList=[...new Set(data.map(d=>d.Gara).filter(Boolean))];
+  const tiriPerGara=garaList.map(g=>data.filter(r=>r.Gara===g&&['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento)).length);
+  const tiriIPGara=garaList.map(g=>data.filter(r=>r.Gara===g&&['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento)&&(r.EsitoTiro==='In porta'||r.EsitoTiro==='Gol')).length);
+  dc('cTiriInPorta');
+  C['cTiriInPorta']=new Chart(document.getElementById('cTiriInPorta'),{
+    type:'bar',
+    data:{labels:garaList,datasets:[
+      {label:'Tiri Totali',data:tiriPerGara,backgroundColor:'rgba(41,121,255,0.5)',borderRadius:4,borderSkipped:false},
+      {label:'In Porta',data:tiriIPGara,backgroundColor:'#00e676',borderRadius:4,borderSkipped:false}
+    ]},
+    options:CD()
+  });
+
+  // IPO progressivo
+  let cumIPO=0;
+  const ipoGara=garaList.map(g=>{cumIPO+=data.filter(r=>r.Gara===g).reduce((a,r)=>a+Number(r.PunteggioIPO||0),0); return cumIPO;});
+  dc('cIpoProgressivo');
+  C['cIpoProgressivo']=new Chart(document.getElementById('cIpoProgressivo'),{
+    type:'line',
+    data:{labels:garaList,datasets:[{label:'IPO Cumulato',data:ipoGara,borderColor:'#ffb300',backgroundColor:'rgba(255,179,0,0.08)',fill:true,tension:0.4,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#ffb300'}]},
+    options:CD()
+  });
+
+  // Tabella
+  document.getElementById('tblAnalytics').innerHTML=data.map(r=>{
+    const ipoCls=Number(r.PunteggioIPO)>=10?'badge-r':Number(r.PunteggioIPO)>=4?'badge-a':Number(r.PunteggioIPO)>=1?'badge-b':'';
+    return`<tr>
+      <td>${r.Data||''}</td><td>${r.Gara||''}</td>
+      <td><strong>${r.MinutoEvento||''}'</strong></td>
+      <td>${r.TipoEvento||''}</td>
+      <td>${r.GiocatoreEvento||'—'}</td>
+      <td><span class="badge badge-c">Z${r.ZonaEvento||'?'}</span></td>
+      <td><span class="badge ${ipoCls}">${r.PunteggioIPO||0}</span></td>
+      <td>${r.EsitoTiro||'—'}</td><td>${r.TipologiaTiro||'—'}</td>
+      <td>${r.ZonaInizioAzione||'—'}</td><td>${r.ZonaRifinitura||'—'}</td>
+      <td>${r.GiocatoreRifinitura||'—'}</td>
+      <td style="color:var(--muted2);max-width:150px;overflow:hidden;text-overflow:ellipsis">${r.NotaEvento||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildHeatmap(data){
+  const pitch=document.getElementById('pitchHeatmap');
+  pitch.innerHTML='';
+
+  // Calcola IPO per zona
+  const zoneIPO={};
+  for(let z=1;z<=12;z++) zoneIPO[z]=0;
+  data.forEach(r=>{
+    const z=Number(r.ZonaEvento);
+    if(z>=1&&z<=12) zoneIPO[z]+=Number(r.PunteggioIPO||0);
+  });
+  const maxIPO=Math.max(...Object.values(zoneIPO),1);
+
+  // Disegna campo SVG sovrapposto
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 100 67');
+  svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5';
+  // Linee campo
+  svg.innerHTML=`
+    <rect x="1" y="1" width="98" height="65" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+    <line x1="50" y1="1" x2="50" y2="66" stroke="rgba(255,255,255,0.1)" stroke-width="0.4"/>
+    <circle cx="50" cy="33.5" r="9" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.4"/>
+    <circle cx="50" cy="33.5" r="0.8" fill="rgba(255,255,255,0.2)"/>
+    <rect x="1" y="23" width="14" height="21" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.4"/>
+    <rect x="85" y="23" width="14" height="21" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.4"/>
+    <rect x="1" y="28" width="6" height="11" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.3"/>
+    <rect x="93" y="28" width="6" height="11" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.3"/>
+    <line x1="25" y1="1" x2="25" y2="66" stroke="rgba(255,255,255,0.05)" stroke-width="0.3"/>
+    <line x1="50" y1="1" x2="50" y2="66" stroke="rgba(255,255,255,0.05)" stroke-width="0.3"/>
+    <line x1="75" y1="1" x2="75" y2="66" stroke="rgba(255,255,255,0.05)" stroke-width="0.3"/>
+    <line x1="1" y1="22.3" x2="99" y2="22.3" stroke="rgba(255,255,255,0.05)" stroke-width="0.3"/>
+    <line x1="1" y1="44.3" x2="99" y2="44.3" stroke="rgba(255,255,255,0.05)" stroke-width="0.3"/>
+  `;
+  pitch.appendChild(svg);
+
+  // Zone heatmap
+  Object.entries(ZONES).forEach(([zNum,zDef])=>{
+    const ipo=zoneIPO[Number(zNum)]||0;
+    const ratio=ipo/maxIPO;
+    let bg;
+    if(ratio===0) bg='rgba(0,230,118,0.04)';
+    else if(ratio<0.2) bg='rgba(255,179,0,0.15)';
+    else if(ratio<0.4) bg='rgba(255,179,0,0.35)';
+    else if(ratio<0.6) bg='rgba(255,61,87,0.3)';
+    else if(ratio<0.8) bg='rgba(255,61,87,0.55)';
+    else bg='rgba(255,61,87,0.85)';
+
+    const div=document.createElement('div');
+    div.style.cssText=`
+      position:absolute;
+      left:${zDef.l}%;top:${zDef.t}%;
+      width:${zDef.w}%;height:${zDef.h}%;
+      background:${bg};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,0.06);
+      cursor:pointer;transition:0.2s;z-index:2;
+    `;
+    div.innerHTML=`<span style="font-family:'Barlow Condensed';font-size:clamp(10px,2vw,18px);font-weight:900;color:rgba(255,255,255,0.9);display:block;line-height:1">${ipo||0}</span><span style="font-size:clamp(7px,1.2vw,11px);color:rgba(255,255,255,0.4);letter-spacing:0.05em">Z${zNum}</span>`;
+    div.title=`Zona ${zNum}: IPO ${ipo}`;
+    div.addEventListener('mouseenter',function(){this.style.background=bg.replace(/[\d.]+\)$/,'0.95)');this.style.zIndex='10';});
+    div.addEventListener('mouseleave',function(){this.style.background=bg;this.style.zIndex='2';});
+    pitch.appendChild(div);
+  });
+}
+
+// ─── CHART DEFAULTS ───────────────────────────────────────────────────────────
+function CD(){
+  return{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'},boxWidth:12}}},
+    scales:{
+      x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:14},grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{ticks:{color:'#4a5568',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}
+    }
+  };
+}
+function dc(id){if(C[id]){C[id].destroy();delete C[id];}}
+function showEmpty(kpiId,tblId){
+  document.getElementById(kpiId).innerHTML='<div class="empty" style="grid-column:1/-1"><div class="em-icon">📂</div><p>Carica un file Excel per visualizzare i dati</p></div>';
+  if(tblId) document.getElementById(tblId).innerHTML='<tr><td colspan="20" class="empty"><p>Nessun dato caricato</p></td></tr>';
+}
+
+// ─── TEMPLATE DOWNLOAD ────────────────────────────────────────────────────────
+function downloadAllTemplates(){
+  const wb=XLSX.utils.book_new();
+
+  // RISULTATI
+  const risultati=[
+    {Data:'2024-09-15',Competizione:'Campionato',Giornata:1,Avversario:'FC Siena',Venue:'Home',Campo:'Stadio Artemio Franchi',GolFatti:2,GolSubiti:1,Note:'Ottima prestazione'},
+    {Data:'2024-09-22',Competizione:'Campionato',Giornata:2,Avversario:'AC Pisa',Venue:'Away',Campo:'Arena Garibaldi',GolFatti:0,GolSubiti:0,Note:'Pareggio difensivo'},
+    {Data:'2024-09-29',Competizione:'Coppa',Giornata:1,Avversario:'Empoli FC',Venue:'Home',Campo:'Stadio Artemio Franchi',GolFatti:3,GolSubiti:2,Note:'Rimonta nei supplementari'},
+    {Data:'2024-10-06',Competizione:'Campionato',Giornata:3,Avversario:'Livorno FC',Venue:'Away',Campo:'Armando Picchi',GolFatti:1,GolSubiti:2,Note:''},
+  ];
+  const wsR=XLSX.utils.json_to_sheet(risultati);
+  wsR['!cols']=[{wch:12},{wch:14},{wch:9},{wch:14},{wch:8},{wch:20},{wch:9},{wch:9},{wch:25}];
+  XLSX.utils.book_append_sheet(wb,wsR,'RISULTATI');
+
+  // PRESENZE
+  const presenze=[
+    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:''},
+    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:65,Ruolo:'Riserva',Nota:'Entrato al 25\''},
+    {Nome:'Andrea',Cognome:'Verdi',Data:'2024-09-15',Tipo:'Gara',Presente:'No',Minuti:0,Ruolo:'',Nota:'Infortunio'},
+    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:''},
+    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:''},
+    {Nome:'Andrea',Cognome:'Verdi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'No',Minuti:0,Ruolo:'',Nota:'Infortunio caviglia'},
+  ];
+  const wsP=XLSX.utils.json_to_sheet(presenze);
+  wsP['!cols']=[{wch:10},{wch:12},{wch:12},{wch:13},{wch:9},{wch:7},{wch:10},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,wsP,'PRESENZE');
+
+  // ANALYTICS
+  const analytics=[
+    {Data:'2024-09-15',Gara:'Malva vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,TipoEvento:'Occasione da goal',GiocatoreEvento:'Rossi M.',MinutoEvento:23,ZonaEvento:11,NotaEvento:'Contropiede',EsitoTiro:'Gol',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:6,GiocatoreRifinitura:'Bianchi L.',ZonaRifinitura:10,TipologiaRifinitura:'Assist',ZonaRecuperoPalla:5,GiocatoreCommessoFallo:'',GiocatoreSubitoFallo:'',PunteggioIPO:10},
+    {Data:'2024-09-15',Gara:'Malva vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,TipoEvento:'Azione promettente',GiocatoreEvento:'Verdi A.',MinutoEvento:34,ZonaEvento:10,NotaEvento:'Tiro di poco fuori',EsitoTiro:'Fuori',TipologiaTiro:'Sinistro',EsitoPallaInattiva:'',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',TipologiaRifinitura:'',ZonaRecuperoPalla:4,GiocatoreCommessoFallo:'',GiocatoreSubitoFallo:'',PunteggioIPO:4},
+    {Data:'2024-09-15',Gara:'Malva vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,TipoEvento:'Corner',GiocatoreEvento:'Neri P.',MinutoEvento:67,ZonaEvento:12,NotaEvento:'Corner battuto dalla destra',EsitoTiro:'',TipologiaTiro:'',EsitoPallaInattiva:'Non concluso',ZonaInizioAzione:12,GiocatoreRifinitura:'',ZonaRifinitura:'',TipologiaRifinitura:'',ZonaRecuperoPalla:'',GiocatoreCommessoFallo:'',GiocatoreSubitoFallo:'',PunteggioIPO:1},
+    {Data:'2024-09-15',Gara:'Malva vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,TipoEvento:'Tiro in area di rigore',GiocatoreEvento:'Rossi M.',MinutoEvento:78,ZonaEvento:11,NotaEvento:'Tiro angolato',EsitoTiro:'In porta',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:10,GiocatoreRifinitura:'Verdi A.',ZonaRifinitura:11,TipologiaRifinitura:'Filtrante',ZonaRecuperoPalla:6,GiocatoreCommessoFallo:'',GiocatoreSubitoFallo:'',PunteggioIPO:3},
+    {Data:'2024-09-22',Gara:'AC Pisa vs Malva',Risultato:'0-0',Competizione:'Campionato',Giornata:2,TipoEvento:'Punizione da zona centrale',GiocatoreEvento:'Bianchi L.',MinutoEvento:15,ZonaEvento:7,NotaEvento:'',EsitoTiro:'Parato',TipologiaTiro:'Destro',EsitoPallaInattiva:'Parato',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',TipologiaRifinitura:'',ZonaRecuperoPalla:'',GiocatoreCommessoFallo:'',GiocatoreSubitoFallo:'',PunteggioIPO:3},
+    {Data:'2024-09-22',Gara:'AC Pisa vs Malva',Risultato:'0-0',Competizione:'Campionato',Giornata:2,TipoEvento:'Cartellino giallo',GiocatoreEvento:'Conti G.',MinutoEvento:55,ZonaEvento:5,NotaEvento:'Fallo tattico',EsitoTiro:'',TipologiaTiro:'',EsitoPallaInattiva:'',ZonaInizioAzione:'',GiocatoreRifinitura:'',ZonaRifinitura:'',TipologiaRifinitura:'',ZonaRecuperoPalla:'',GiocatoreCommessoFallo:'Conti G.',GiocatoreSubitoFallo:'Avv. 10',PunteggioIPO:0},
+  ];
+  const wsA=XLSX.utils.json_to_sheet(analytics);
+  wsA['!cols']=[{wch:12},{wch:22},{wch:8},{wch:14},{wch:8},{wch:22},{wch:14},{wch:7},{wch:5},{wch:20},{wch:10},{wch:12},{wch:10},{wch:14},{wch:16},{wch:12},{wch:15},{wch:14},{wch:18},{wch:16},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,wsA,'ANALYTICS');
+
+  XLSX.writeFile(wb,'coachlab-template.xlsx');
+}
+</script>
+</body>
+</html>
