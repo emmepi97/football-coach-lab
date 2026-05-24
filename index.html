@@ -300,6 +300,50 @@ small, .muted, .sub, .hint, .ms, .sumHint{
 /* link (opzionale) */
 a{ color: #2563eb; }
 a:hover{ color:#1d4ed8; }
+
+  /* =========================================================
+   🔥 FIX FINALE SEZIONI NERE
+   ========================================================= */
+
+/* tutte le "card/blocchi" generici */
+.card,
+.kpi,
+.box,
+.panel,
+.section,
+.wrap,
+.widget,
+.block,
+.container,
+[class*="card"],
+[class*="box"],
+[class*="panel"]{
+  background: #ffffff !important;
+  color: var(--tx) !important;
+  border: 1px solid var(--bo) !important;
+}
+
+/* eventuali header interni */
+.card * ,
+.box * ,
+.panel * {
+  color: inherit !important;
+}
+
+/* fix per eventuali elementi scuri nascosti */
+div[style*="background:#0"],
+div[style*="background: #0"],
+div[style*="black"]{
+  background:#ffffff !important;
+  color:var(--tx) !important;
+}
+
+/* hover (evita che tornino scuri) */
+.card:hover,
+.box:hover,
+.panel:hover{
+  background:#f8fafc !important;
+}
   </style>
 </head>
 
