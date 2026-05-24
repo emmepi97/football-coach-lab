@@ -344,6 +344,39 @@ div[style*="black"]{
 .panel:hover{
   background:#f8fafc !important;
 }
+
+  /* =========================================================
+   🔒 LIGHT FORCE (mettilo SEMPRE in fondo allo style)
+   Serve a battere eventuali override dark già presenti.
+   ========================================================= */
+
+/* pagina */
+html, body{
+  background:#ffffff !important;
+  color: var(--tx) !important;
+}
+
+/* contenitori tipici (aggiungine altri se li usi) */
+#shell, #main, #fwrap, #chipsWrap, #landing, #afterLoad{
+  background:#ffffff !important;
+  color: var(--tx) !important;
+}
+
+/* elementi “card-like” comuni: se esistono nel tuo progetto */
+.card, .kpi, .panel, .box, .section, .wrap{
+  background: var(--bg) !important;
+  color: var(--tx) !important;
+  border-color: var(--bo) !important;
+}
+
+/* testi secondari */
+small, .muted, .sub, .hint, .ms, .sumHint{
+  color: var(--mu2) !important;
+}
+
+/* link (opzionale) */
+a{ color: #2563eb; }
+a:hover{ color:#1d4ed8; }
   </style>
 </head>
 
