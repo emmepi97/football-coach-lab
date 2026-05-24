@@ -5,9 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CoachLab</title>
 
-  https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap
-  https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.jsscript>
-  https://cdn.jsdelivr.net/npm/chart.jsscript>
+  <!-- ✅ FONT (fix: link vero, non testo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap">
+
+  <!-- ✅ LIBRERIE (fix: script veri, non testo) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js/auto"></script>
 
   <style>
     :root{
@@ -16,6 +22,11 @@
       --g:#00e676;--r:#ff3d57;--a:#ffb300;--b:#2979ff;--c:#00e5ff;--p:#7c4dff;--rosa:#ff4da6;
       --tx:#e8edf5;--mu:#4a5568;--mu2:#6b7a8d;
       --fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+
+      /* layout */
+      --shellH: 120px; /* verrà sovrascritto da JS */
+      --gap: 10px;
+      --radius: 16px;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);font-family:var(--fb);color:var(--tx);overflow-x:hidden}
@@ -48,7 +59,7 @@
       margin-top:2px;
     }
 
-    /* NAV TABS (migliorate) */
+    /* NAV TABS */
     .nav-tabs{
       display:flex;gap:6px;
       background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
@@ -72,6 +83,7 @@
       border:1px solid transparent;
       background:transparent;
       white-space:nowrap;
+      user-select:none;
     }
     .nt .ico{font-size:14px}
     .nt.active{
@@ -104,11 +116,12 @@
       cursor:pointer;transition:.15s;
       font-family:var(--fh);font-weight:800;letter-spacing:.06em;font-size:11px;
       display:flex;align-items:center;gap:8px;
+      user-select:none;
     }
     .head-btn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
     .head-btn.red:hover{border-color:rgba(255,61,87,.55);color:#ff97a5;background:rgba(255,61,87,.08)}
 
-    /* FILTER BAR (migliorata + collapsabile) */
+    /* FILTER BAR */
     #fwrap{
       max-width:1600px;margin:0 auto;
       padding:0 18px 10px;
@@ -138,6 +151,7 @@
       color:var(--tx);font-family:var(--fh);font-size:12px;font-weight:900;letter-spacing:.06em;
       cursor:pointer;transition:.15s;
       display:flex;align-items:center;gap:8px;
+      user-select:none;
     }
     .fbtn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
     .fbtn.red{border-color:rgba(255,61,87,.35);color:#ff97a5;background:rgba(255,61,87,.04)}
@@ -154,9 +168,8 @@
       overflow:hidden;
       transition:.18s;
     }
-    #frow.collapsed{
-      max-height:0;padding:0;border-width:0;opacity:0;pointer-events:none;
-    }
+    #frow.collapsed{max-height:0;padding:0;border-width:0;opacity:0;pointer-events:none}
+
     .fg{
       display:flex;flex-direction:column;gap:6px;
       padding:8px 10px;border-radius:14px;
@@ -194,45 +207,43 @@
     .col-6{grid-column:span 6}
     .col-12{grid-column:span 12}
 
-    @media(max-width:1200px){
-      #navrow{padding:10px 14px}
-      #fwrap{padding:0 14px 10px}
+    /* ✅ CHIPS (NUOVO: puliti, compatti, contatore, niente caos) */
+    #chipsWrap{
+      max-width:1600px;margin:0 auto;padding:0 18px 10px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
     }
-    @media(max-width:980px){
-      .nav-tabs{max-width: 64vw}
-      #frow{grid-template-columns:repeat(6,1fr)}
-      .col-3{grid-column:span 3}
-      .col-2{grid-column:span 3}
-      .col-4{grid-column:span 3}
-      .col-6{grid-column:span 6}
+    #chips{
+      display:flex;flex-wrap:wrap;gap:6px;min-height:10px;
     }
-    @media(max-width:640px){
-      #navrow{flex-wrap:wrap;justify-content:flex-start}
-      .nav-tabs{max-width: 100%}
-      .head-actions{width:100%;justify-content:space-between}
-      #frow{grid-template-columns:repeat(2,1fr)}
-      .col-3,.col-2,.col-4,.col-6{grid-column:span 2}
-      .head-pill{display:none}
-    }
-
-    /* CHIPS */
-    #chips{max-width:1600px;margin:0 auto;padding:0 18px 10px;display:flex;flex-wrap:wrap;gap:6px;min-height:8px}
     .chip{
       display:inline-flex;align-items:center;gap:7px;
       background:rgba(41,121,255,.10);
       border:1px solid rgba(41,121,255,.25);
       border-radius:999px;
       padding:6px 10px;
-      font-size:10px;color:#b9d6ff
+      font-size:10px;color:#b9d6ff;
+      user-select:none;
+      max-width:100%;
     }
+    .chip .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
     .chip.rosa{background:rgba(255,77,166,.10);border-color:rgba(255,77,166,.25);color:#ffb6da}
     .chip-x{cursor:pointer;font-size:12px;line-height:1;opacity:.75}
     .chip-x:hover{opacity:1}
+    .chipMeta{
+      display:flex;align-items:center;gap:8px;color:var(--mu2);font-size:11px;
+      background:rgba(255,255,255,.02);border:1px solid var(--bo);border-radius:12px;padding:6px 10px;
+    }
+    .chipMeta strong{color:var(--tx)}
+    .chipMeta button{
+      background:none;border:none;color:#ff97a5;cursor:pointer;font-weight:900;
+      font-family:var(--fh);letter-spacing:.06em;
+    }
+    .chipMeta button:hover{color:#ffd2d7}
 
     /* MAIN */
     #main{max-width:1600px;margin:0 auto;padding:12px 18px 40px;position:relative;z-index:1}
-    #landing{padding-top:150px}
-    #afterLoad{display:none;padding-top:148px}
+    #landing{padding-top:calc(var(--shellH) + 18px)}
+    #afterLoad{display:none;padding-top:calc(var(--shellH) + 12px)}
 
     /* UPLOAD */
     .upbar{background:var(--s1);border:1px solid var(--bo);border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
@@ -273,11 +284,14 @@
     .ct{font-family:var(--fh);font-size:15px;font-weight:900;letter-spacing:.04em;margin-bottom:1px}
     .cs{font-size:10px;color:var(--mu2);margin-bottom:8px;line-height:1.35}
 
-    /* CHART WRAPS */
-    .ch{position:relative}
-    .ch-sm{height:140px}.ch-md{height:175px}.ch-lg{height:220px}.ch-xl{height:270px}
+    /* ✅ CHART WRAPS (più compatti + responsive) */
+    .ch{position:relative;width:100%}
+    .ch-sm{height:clamp(130px, 22vh, 170px)}
+    .ch-md{height:clamp(160px, 26vh, 210px)}
+    .ch-lg{height:clamp(190px, 30vh, 250px)}
+    .ch-xl{height:clamp(220px, 38vh, 320px)}
 
-    /* DESCRIZIONI SOTTO GRAFICI (NUOVO) */
+    /* DESCRIZIONI SOTTO GRAFICI */
     .cd{
       margin-top:10px;
       padding:10px 12px;
@@ -292,25 +306,26 @@
     .cd .hint{color:rgba(107,122,141,.95)}
     .cd.rosa strong{color:#ff8ac7}
 
-    /* GRIDS */
-    .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
-    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
-    .g12{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:10px}
-    .g21{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px}
-    .mb{margin-bottom:10px}
-    @media(max-width:1200px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+    /* GRIDS (✅ auto-fit = davvero responsive + meno dispersione) */
+    .g2{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g4{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g12{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:var(--gap);margin-bottom:var(--gap)}
+    .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+    .mb{margin-bottom:var(--gap)}
+
+    @media(max-width:1200px){.g4{grid-template-columns:repeat(2, minmax(0,1fr))}.g3{grid-template-columns:repeat(2, minmax(0,1fr))}}
     @media(max-width:900px){.g2,.g3,.g4,.g12,.g21{grid-template-columns:1fr}}
 
     /* TABLE */
-    .tw{overflow:auto;max-height:380px}
+    .tw{overflow:auto;max-height:380px;border-radius:12px;border:1px solid rgba(255,255,255,.04)}
     .tbl{width:100%;border-collapse:collapse}
     .tbl th{
       background:var(--s2);color:var(--mu2);padding:8px 10px;font-size:10px;text-align:left;font-weight:900;
       text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;position:sticky;top:0;z-index:2
     }
     .tbl td{padding:8px 10px;border-top:1px solid var(--bo);font-size:11px;white-space:nowrap}
-    .tbl tr:hover td{background:var(--s2)}
+    .tbl tr:hover td{background:rgba(255,255,255,.03)}
     .tbl tr.sel td{background:rgba(255,77,166,.10)!important}
     .tbl tr.sel td:first-child{border-left:2px solid rgba(255,77,166,.9)}
 
@@ -331,10 +346,11 @@
     .insight.rosa strong{color:var(--rosa)}
 
     /* IPO BIG */
-    .ipo-big{font-family:var(--fh);font-size:60px;font-weight:900;line-height:1}
+    .ipo-big{font-family:var(--fh);font-size:56px;font-weight:900;line-height:1}
+    @media(max-width:520px){ .ipo-big{font-size:46px} }
 
     /* PITCH */
-    .pitch{position:relative;width:100%;aspect-ratio:1.6/1;background:#0d1f0d;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+    .pitch{position:relative;width:100%;aspect-ratio:1.65/1;background:#0d1f0d;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
 
     /* MODAL */
     .mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center}
@@ -346,10 +362,10 @@
     .ms{font-size:11px;color:var(--mu2);margin-bottom:14px}
 
     /* CALENDAR */
-    .cal-wrap{overflow:auto}
+    .cal-wrap{overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.04)}
     .cal-table{border-collapse:collapse;font-size:10px}
     .cal-table th{background:var(--s2);color:var(--mu2);padding:6px 8px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;position:sticky;top:0;z-index:2;border:1px solid var(--bo)}
-    .cal-table td{border:1px solid var(--bo);padding:5px 6px;white-space:nowrap;min-width:80px}
+    .cal-table td{border:1px solid var(--bo);padding:5px 6px;white-space:nowrap;min-width:72px}
     .cal-p{background:rgba(0,230,118,.18);color:var(--g);font-weight:900;text-align:center}
     .cal-a{background:rgba(255,61,87,.12);color:var(--r);text-align:center}
     .cal-g{background:rgba(255,179,0,.12);color:var(--a);text-align:center}
@@ -361,7 +377,7 @@
 
     /* PRINT */
     @media print{
-      #shell,#chips,.guide,#landing .upbar{display:none!important}
+      #shell,#chipsWrap,.guide,#landing .upbar{display:none!important}
       #afterLoad{padding-top:0!important}
       .card,.kpi{break-inside:avoid}
       body{background:#fff!important;color:#000!important}
@@ -369,10 +385,52 @@
 
     /* SECTION TITLES */
     .sec-title{
-      font-family:var(--fh);font-size:13px;font-weight:900;letter-spacing:.10em;color:var(--mu2);
-      text-transform:uppercase;margin:14px 0 8px;padding-left:8px;border-left:2px solid var(--b)
+      font-family:var(--fh);font-size:12px;font-weight:900;letter-spacing:.10em;color:var(--mu2);
+      text-transform:uppercase;margin:12px 0 8px;padding-left:8px;border-left:2px solid var(--b)
     }
     .sec-title.rosa{border-left-color:var(--rosa)}
+
+    /* ✅ Analytics compatti: details */
+    details.group{
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;
+      background:rgba(255,255,255,.015);
+      padding:10px 12px;
+      margin-bottom:10px;
+    }
+    details.group > summary{
+      cursor:pointer;
+      list-style:none;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-family:var(--fh);
+      font-weight:900;
+      letter-spacing:.08em;
+      color:#cbd5e1;
+      user-select:none;
+    }
+    details.group > summary::-webkit-details-marker{display:none}
+    .sumHint{font-family:var(--fb);font-weight:500;letter-spacing:0;color:var(--mu2);font-size:11px}
+
+    @media(max-width:1200px){
+      #navrow{padding:10px 14px}
+      #fwrap,#chipsWrap,#main{padding-left:14px;padding-right:14px}
+    }
+    @media(max-width:980px){
+      .nav-tabs{max-width: 100%}
+      #frow{grid-template-columns:repeat(6,1fr)}
+      .col-3{grid-column:span 3}
+      .col-2{grid-column:span 3}
+      .col-4{grid-column:span 3}
+      .col-6{grid-column:span 6}
+    }
+    @media(max-width:640px){
+      #navrow{flex-wrap:wrap;justify-content:flex-start}
+      .head-actions{width:100%;justify-content:space-between}
+      #frow{grid-template-columns:repeat(2,1fr)}
+      .col-3,.col-2,.col-4,.col-6{grid-column:span 2}
+      .head-pill{display:none}
+      .chip .t{max-width:180px}
+    }
   </style>
 </head>
 
@@ -382,7 +440,7 @@
   <div id="navrow">
     <div>
       <div class="logo">COACH<span>LAB</span></div>
-      <div class="subbrand">dashboard stagione • analisi & monitoraggio</div>
+      <div class="subbrand">dashboard stagione • analisi &amp; monitoraggio</div>
     </div>
 
     <div class="nav-tabs" role="tablist" aria-label="Navigazione pagine">
@@ -397,31 +455,31 @@
         <span>📂</span> <strong>Excel</strong> <span style="opacity:.7">→</span> <span>grafici</span>
       </div>
       <button class="head-btn" onclick="toggleFilters()"><span>🎛</span> FILTRI</button>
-      <button class="head-btn red" onclick="resetF()"><span>✕</span> RESET</button>
+      <button class="head-btn red" onclick="resetAllFilters()"><span>✕</span> RESET</button>
     </div>
   </div>
 
   <div id="fwrap">
     <div id="fcontrols">
       <div class="fleft">
-        <div class="tag"><span class="dot"></span> Filtri attivi</div>
-        <div style="opacity:.75">Usa i campi sotto per restringere i dati (competizione, date, giocatore, ecc.).</div>
+        <div class="tag"><span class="dot"></span> Filtri</div>
+        <div style="opacity:.75">Riduci i dati (competizione, date, giocatore, ecc.). I filtri attivi compaiono sotto come “chip”.</div>
       </div>
       <div class="fright">
         <button class="fbtn" onclick="toggleFilters()">Mostra/Nascondi</button>
-        <button class="fbtn red" onclick="resetF()">Reset filtri</button>
+        <button class="fbtn red" onclick="resetAllFilters()">Pulisci</button>
       </div>
     </div>
 
     <div id="frow">
       <div class="fg col-3" data-filter="fComp" id="w_fComp">
         <div class="fl2"><span class="i">🏆</span> Competizione</div>
-        <select id="fComp" onchange="onFC()"><option value="">Tutte le competizioni</option></select>
+        <select id="fComp" onchange="onFilterInput('fComp', this.value)"><option value="">Tutte le competizioni</option></select>
       </div>
 
       <div class="fg col-2" data-filter="fVenue" id="w_fVenue">
         <div class="fl2"><span class="i">🏟</span> Venue</div>
-        <select id="fVenue" onchange="onFC()">
+        <select id="fVenue" onchange="onFilterInput('fVenue', this.value)">
           <option value="">Casa+Trasferta</option>
           <option value="Home">🏠 Casa</option>
           <option value="Away">✈️ Away</option>
@@ -430,12 +488,12 @@
 
       <div class="fg col-3" data-filter="fGioc" id="w_fGioc">
         <div class="fl2"><span class="i">👤</span> Giocatore</div>
-        <select id="fGioc" onchange="onFC()"><option value="">Tutti i giocatori</option></select>
+        <select id="fGioc" onchange="onFilterInput('fGioc', this.value)"><option value="">Tutti i giocatori</option></select>
       </div>
 
       <div class="fg col-2" data-filter="fTipo" id="w_fTipo">
         <div class="fl2"><span class="i">📌</span> Tipo</div>
-        <select id="fTipo" onchange="onFC()">
+        <select id="fTipo" onchange="onFilterInput('fTipo', this.value)">
           <option value="">Gara+Allenamento</option>
           <option value="Gara">Gara</option>
           <option value="Allenamento">Allenamento</option>
@@ -444,22 +502,22 @@
 
       <div class="fg col-2" data-filter="fStagione" id="w_fStagione">
         <div class="fl2"><span class="i">🗓</span> Stagione (Anno)</div>
-        <select id="fStagione" onchange="onFC()"><option value="">Tutta la stagione</option></select>
+        <select id="fStagione" onchange="onFilterInput('fStagione', this.value)"><option value="">Tutta la stagione</option></select>
       </div>
 
       <div class="fg col-3" data-filter="fGara" id="w_fGara">
         <div class="fl2"><span class="i">🎯</span> Gara</div>
-        <select id="fGara" onchange="onFC()"><option value="">Tutte le gare</option></select>
+        <select id="fGara" onchange="onFilterInput('fGara', this.value)"><option value="">Tutte le gare</option></select>
       </div>
 
       <div class="fg col-3" data-filter="fEvento" id="w_fEvento">
         <div class="fl2"><span class="i">🧩</span> Evento</div>
-        <select id="fEvento" onchange="onFC()"><option value="">Tutti gli eventi</option></select>
+        <select id="fEvento" onchange="onFilterInput('fEvento', this.value)"><option value="">Tutti gli eventi</option></select>
       </div>
 
       <div class="fg col-2" data-filter="fPeriodo" id="w_fPeriodo">
         <div class="fl2"><span class="i">⏱</span> Periodo</div>
-        <select id="fPeriodo" onchange="onFC()">
+        <select id="fPeriodo" onchange="onFilterInput('fPeriodo', this.value)">
           <option value="">Tutti i periodi</option>
           <option value="1">P1 1'–15'</option><option value="2">P2 16'–30'</option>
           <option value="3">P3 31'–45'</option><option value="4">P4 46'–60'</option>
@@ -469,25 +527,32 @@
 
       <div class="fg col-2" data-filter="fS" id="w_fS">
         <div class="fl2"><span class="i">📅</span> Dal</div>
-        <input type="date" id="fS" onchange="onFC()"/>
+        <input type="date" id="fS" onchange="onFilterInput('fS', this.value)"/>
       </div>
 
       <div class="fg col-2" data-filter="fE" id="w_fE">
         <div class="fl2"><span class="i">📅</span> Al</div>
-        <input type="date" id="fE" onchange="onFC()"/>
+        <input type="date" id="fE" onchange="onFilterInput('fE', this.value)"/>
       </div>
 
       <div class="fg col-6" id="w_hint">
         <div class="fl2"><span class="i">💡</span> Suggerimenti</div>
         <div style="font-size:11px;color:rgba(232,237,245,.7);line-height:1.5">
-          • Clicca su alcuni grafici (es. “Casa vs Trasferta”, “Gol per competizione”, “IPO nel tempo”) per applicare filtri rapidi.<br/>
-          • I “chip” sotto l’header mostrano i filtri attivi: rimuovili con ✕ per tornare alla vista completa.
+          • Clicca su alcuni grafici (es. “Casa vs Trasferta”, “Gol per competizione”, “IPO nel tempo”) per filtri rapidi.<br/>
+          • I chip sotto l’header mostrano i filtri attivi: rimuovili con ✕ o usa “Pulisci”.
         </div>
       </div>
     </div>
   </div>
 
-  <div id="chips"></div>
+  <!-- ✅ chips bar nuova -->
+  <div id="chipsWrap">
+    <div id="chips"></div>
+    <div class="chipMeta" id="chipsMeta" style="display:none">
+      <span><strong id="chipsCount">0</strong> filtri attivi</span>
+      <button onclick="resetAllFilters()">Pulisci tutto</button>
+    </div>
+  </div>
 </div>
 
 <div id="main">
@@ -497,6 +562,7 @@
       <label class="uplabel">📂 Carica Excel (4 fogli) <input type="file" id="fw" accept=".xlsx,.xls"/></label>
       <span class="upname" id="wname">nessun file</span>
       <button class="btn gr" onclick="dlTpl()">⬇ Template Excel</button>
+      <span style="font-size:11px;color:var(--mu2)">Se carichi il template appena scaricato, la dashboard deve popolarsi subito.</span>
     </div>
 
     <div class="guide">
@@ -521,8 +587,8 @@
 
         <div>
           <div class="gcol-head" style="color:var(--c)">ANALYTICS</div>
-          <div class="gitem"><div class="gf">TipoEvento</div><div class="gv">Occasione da goal · Azione promettente · Tiro... · Cross... · Corner · Cartellino G/R</div></div>
-          <div class="gitem"><div class="gf">ZonaEvento · ZonaInizioAzione · ZonaRifinitura · ZonaRecuperoPalla</div><div class="gv">1–12 (griglia 4×3)</div></div>
+          <div class="gitem"><div class="gf">TipoEvento</div><div class="gv">Occasione · Azione promettente · Tiro... · Cross... · Corner · Cartellino G/R</div></div>
+          <div class="gitem"><div class="gf">ZonaEvento · Zone azione</div><div class="gv">1–12 (griglia 4×3)</div></div>
           <div class="gitem"><div class="gf">MinutoEvento · EsitoTiro · TipologiaTiro</div><div class="gv">In porta/Fuori/Gol/Parato/Palo — Destro/Sinistro/Testa</div></div>
           <div class="gitem"><div class="gf">GiocatoreEvento · GiocatoreRifinitura</div><div class="gv">Testo libero</div></div>
           <div class="gitem"><div class="gf">(Consigliato) COGNOME_NOME</div><div class="gv">Es: ROSSI_MARCO</div></div>
@@ -555,20 +621,14 @@
           <div class="ct">Punti Cumulati</div>
           <div class="cs">Progressione stagione — click per filtrare competizione</div>
           <div class="ch ch-md"><canvas id="cPuntiCum"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> la crescita dei punti nel tempo. Linea “piatta” = fase di stallo; salita costante = continuità.
-            <div class="hint">Utile per capire in quali periodi la squadra ha accelerato o rallentato.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> crescita nel tempo. Linea piatta = stallo; salita costante = continuità.</div>
         </div>
 
         <div class="card">
           <div class="ct">Punti per Giornata</div>
           <div class="cs">V=3 · N=1 · S=0</div>
           <div class="ch ch-md"><canvas id="cPuntiGara"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> la distribuzione dei risultati gara per gara. Colori diversi aiutano a vedere strisce positive/negative.
-            <div class="hint">Usalo per identificare cicli: picchi, cali, recuperi dopo sconfitte.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> distribuzione risultati gara per gara (strisce positive/negative).</div>
         </div>
       </div>
 
@@ -577,30 +637,21 @@
           <div class="ct">Gol Fatti / Subiti</div>
           <div class="cs">Per gara</div>
           <div class="ch ch-md"><canvas id="cGol"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> equilibrio tra fase offensiva e difensiva. Se i subiti crescono, valuta struttura e transizioni.
-            <div class="hint">Confronta le gare con “GF alti ma GS alti”: spesso indicano partite aperte e rischiose.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> equilibrio attacco/difesa. GS in crescita = attenzione a transizioni e struttura.</div>
         </div>
 
         <div class="card">
           <div class="ct">Clean Sheet</div>
           <div class="cs">Gare senza subire gol</div>
           <div class="ch ch-md"><canvas id="cClean"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> affidabilità difensiva. Aumenta quando la squadra controlla spazi e concede poche occasioni.
-            <div class="hint">Utile per valutare solidità nel lungo periodo, non solo singole prestazioni.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> affidabilità difensiva nel lungo periodo (non solo singole gare).</div>
         </div>
 
         <div class="card">
           <div class="ct">Differenza Reti</div>
           <div class="cs">GF–GS per gara</div>
           <div class="ch ch-md"><canvas id="cDiffReti"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> impatto reale di ogni partita. Valori positivi = dominio; negativi = difficoltà.
-            <div class="hint">Segnala subito le gare “critiche” (diff molto negativa) su cui lavorare in review.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> impatto reale per partita. Valori molto negativi = gare “critiche”.</div>
         </div>
       </div>
 
@@ -611,30 +662,21 @@
           <div class="ct">V · N · S</div>
           <div class="cs">Distribuzione risultati</div>
           <div class="ch ch-sm"><canvas id="cWDL"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> la “forma complessiva” della stagione. Troppi pareggi possono indicare difficoltà a chiudere le partite.
-            <div class="hint">Ottimo per confronto tra competizioni o periodi (usando filtri).</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> forma complessiva. Troppi pareggi → difficoltà a chiudere le partite.</div>
         </div>
 
         <div class="card dd">
           <div class="ct">Casa vs Trasferta</div>
           <div class="cs">Punti medi — click per filtrare</div>
           <div class="ch ch-sm"><canvas id="cVenue"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> eventuale “gap” di rendimento. Differenze grandi suggeriscono fattori ambientali o mentali.
-            <div class="hint">Clicca una barra per isolare Casa o Trasferta e leggere gli altri grafici coerentemente.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> gap di rendimento. Differenze grandi = fattori ambientali/mentali.</div>
         </div>
 
         <div class="card dd">
           <div class="ct">Gol per Competizione</div>
           <div class="cs">Click per filtrare</div>
           <div class="ch ch-sm"><canvas id="cCompGol"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> se il livello avversari/approccio cambia tra campionato e coppa.
-            <div class="hint">Cliccando una competizione filtri tutta la dashboard e vedi trend specifici.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> cambia approccio/livello tra campionato e coppa? Isola competizione.</div>
         </div>
       </div>
 
@@ -643,27 +685,21 @@
           <div class="ct">Media Gol Subiti</div>
           <div class="cs">Casa vs Trasferta</div>
           <div class="ch ch-sm"><canvas id="cGSVenue"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> vulnerabilità difensiva in contesti diversi. Se in trasferta sale molto, lavora su compattezza e gestione.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> vulnerabilità in contesti diversi. Trasferta alta = compattezza/gestione.</div>
         </div>
 
         <div class="card">
           <div class="ct">Striscia Form</div>
           <div class="cs">Ultime 5 gare</div>
           <div class="ch ch-sm"><canvas id="cForm"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> trend recente (momentum). Utile per capire se la squadra sta migliorando o calando.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> momentum recente (migliora/cala?).</div>
         </div>
 
         <div class="card">
           <div class="ct">Punti per Mese</div>
           <div class="cs">Andamento mensile</div>
           <div class="ch ch-sm"><canvas id="cMese"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> performance per macro-periodi. Calo mensile può essere legato a carichi, infortuni o calendario difficile.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> macro-periodi. Calo mensile = carichi/infortuni/calendario difficile.</div>
         </div>
       </div>
 
@@ -672,18 +708,14 @@
           <div class="ct">Gol 1° vs 2° Tempo</div>
           <div class="cs">Produttività per metà gara</div>
           <div class="ch ch-sm"><canvas id="cGolTempo"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> quando la squadra è più incisiva. Se segni poco nel 2° tempo, valuta gestione energie e cambi.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> quando sei più incisivo. Poco 2°T → gestione energie/cambi.</div>
         </div>
 
         <div class="card">
           <div class="ct">Punti per Fascia di Gol Fatti</div>
           <div class="cs">Relazione gol → punti</div>
           <div class="ch ch-sm"><canvas id="cCorrGolPt"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> “quanti gol servono” mediamente per vincere. Se con 1 gol fai pochi punti, il problema può essere difensivo.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> “quanti gol servono” per vincere. 1 gol = pochi punti? Problema difensivo.</div>
         </div>
       </div>
 
@@ -697,13 +729,15 @@
           <button class="btn sm gh" onclick="printR()">🖨 Stampa</button>
         </div>
         <div id="printHdr" style="display:none;margin-bottom:8px"><strong>CoachLab — Registro</strong> — <span id="printDate"></span></div>
-        <div class="tw"><table class="tbl"><thead><tr>
-          <th>Data</th><th>Comp.</th><th>G.</th><th>Avversario</th><th>Venue</th><th>Campo</th><th>Risultato</th><th>Esito</th><th>Note</th>
-        </tr></thead><tbody id="tRis"></tbody></table></div>
-        <div class="cd">
-          <strong>Cosa monitorare:</strong> usa la tabella per collegare i “picchi” dei grafici alle singole partite (note, venue, avversario).
-          <div class="hint">È il punto migliore per fare “review” qualitativa dopo l’analisi numerica.</div>
+        <div class="tw">
+          <table class="tbl">
+            <thead><tr>
+              <th>Data</th><th>Comp.</th><th>G.</th><th>Avversario</th><th>Venue</th><th>Campo</th><th>Risultato</th><th>Esito</th><th>Note</th>
+            </tr></thead>
+            <tbody id="tRis"></tbody>
+          </table>
         </div>
+        <div class="cd"><strong>Tip:</strong> collega “picchi” dei grafici alle singole partite (note, venue, avversario).</div>
       </div>
     </div>
 
@@ -718,28 +752,21 @@
           <div class="ct">% Presenze</div>
           <div class="cs">Click giocatore → dettaglio</div>
           <div class="ch ch-xl"><canvas id="cPresBar"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> affidabilità/disponibilità giocatori. Soglie tipiche: ≥80% (alto), 60–79% (medio), &lt;60% (basso).
-            <div class="hint">Clicca un giocatore per aprire il dettaglio con minuti e storico.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> affidabilità/disponibilità. Soglie: ≥80% alto, 60–79 medio, &lt;60 basso.</div>
         </div>
 
         <div class="card">
           <div class="ct">Minuti Totali</div>
           <div class="cs">Carico stagionale</div>
           <div class="ch ch-xl"><canvas id="cMinBar"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> distribuzione del carico. Identifica sovraccarichi (rischio infortuni) e sottoutilizzi (necessità integrazione).
-          </div>
+          <div class="cd"><strong>Lettura:</strong> sovraccarichi (rischio) e sottoutilizzi (necessità integrazione).</div>
         </div>
 
         <div class="card">
           <div class="ct">Presenze Cumulate</div>
           <div class="cs">Progressione nel tempo</div>
           <div class="ch ch-xl"><canvas id="cPresCum"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> intensità complessiva attività nel tempo e continuità presenza squadra.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> continuità presenza squadra nel tempo.</div>
         </div>
       </div>
 
@@ -747,65 +774,50 @@
         <div class="card dd">
           <div class="ct">Presenti/Assenti</div>
           <div class="ch ch-sm"><canvas id="cPresD"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> equilibrio globale presenze/assenze. Se le assenze salgono, valuta prevenzione e gestione carichi.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> equilibrio globale. Assenze in aumento = prevenzione e gestione carichi.</div>
         </div>
 
         <div class="card dd">
           <div class="ct">Gara/Allenamento</div>
           <div class="ch ch-sm"><canvas id="cTipoD"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> composizione del dataset. Utile per capire se le assenze sono più frequenti in gare o allenamenti.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> composizione dataset. Click per filtrare “Gara”/“Allenamento”.</div>
         </div>
 
         <div class="card">
           <div class="ct">Titolari/Riserve</div>
           <div class="ch ch-sm"><canvas id="cRuoloD"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> utilizzo gruppo. Se le riserve giocano pochissimo, rischio bassa prontezza quando servono.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> uso gruppo. Riserve troppo basse = prontezza ridotta quando servono.</div>
         </div>
 
         <div class="card">
           <div class="ct">Disponibilità Media %</div>
           <div class="cs">Per mese</div>
           <div class="ch ch-sm"><canvas id="cPresMese"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> mesi critici (calo disponibilità). Incrocia con carichi, calendario, infortuni.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> mesi critici (calo). Incrocia con carichi/infortuni.</div>
         </div>
       </div>
 
       <div class="sec-title">🔬 Correlazioni Presenze</div>
       <div class="g3 mb">
-        <div class="card">
+        <div class="card dd">
           <div class="ct">Minutaggio Progressivo</div>
           <div class="cs">Top 8 — cumulato</div>
           <div class="ch ch-lg"><canvas id="cMinCum"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> come cresce il carico per i giocatori più usati. Divergenze forti = carico concentrato su pochi.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> carico concentrato? Linee troppo separate = pochi molto caricati.</div>
         </div>
 
         <div class="card">
           <div class="ct">Tasso Presenza per Mese</div>
           <div class="cs">Squadra — % sessioni coperte</div>
           <div class="ch ch-lg"><canvas id="cPresMeseBar"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> regolarità mese per mese. Un mese “basso” evidenzia un periodo problematico.
-          </div>
+          <div class="cd"><strong>Lettura:</strong> regolarità mese per mese. Mese basso = periodo problematico.</div>
         </div>
 
         <div class="card">
           <div class="ct">Presenze Gara vs All.</div>
           <div class="cs">Per giocatore</div>
           <div class="ch ch-lg"><canvas id="cGaraVsAll"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> differenze di disponibilità in contesto gara vs allenamento.
-            <div class="hint">Cliccando un giocatore puoi aprire dettaglio e capire dove perde presenze.</div>
-          </div>
+          <div class="cd"><strong>Lettura:</strong> differenze di disponibilità. Click giocatore → dettaglio.</div>
         </div>
       </div>
 
@@ -814,264 +826,281 @@
         <div class="ct">Calendario Presenze per Giocatore</div>
         <div class="cs" style="margin-bottom:8px">🟢 Presente · 🔴 Assente · 🟡 Gara</div>
         <div class="cal-wrap"><div id="calGrid"></div></div>
-        <div class="cd">
-          <strong>Cosa monitorare:</strong> pattern di assenze (ripetute, a blocchi, vicino alle gare) e minuti registrati giorno per giorno.
-          <div class="hint">Molto utile per verificare continuità e gestione rientri.</div>
-        </div>
+        <div class="cd"><strong>Lettura:</strong> pattern assenze (ripetute, a blocchi) e minuti per giorno.</div>
       </div>
 
       <div class="sec-title">📋 Registro &amp; Dettaglio</div>
       <div class="card mb">
         <div class="ct">Classifica Presenze</div>
         <div class="cs">Click riga → dettaglio giocatore</div>
-        <div class="tw"><table class="tbl"><thead><tr>
-          <th>#</th><th>Giocatore</th><th>Pres.</th><th>%</th><th>Gare</th><th>All.</th><th>Titolare</th><th>Ris.</th><th>Min.</th><th>Media</th>
-        </tr></thead><tbody id="tPres"></tbody></table></div>
-        <div class="cd">
-          <strong>Cosa monitorare:</strong> ranking di affidabilità e carico. La “Media minuti” aiuta a capire l’impatto quando presente.
+        <div class="tw">
+          <table class="tbl">
+            <thead><tr>
+              <th>#</th><th>Giocatore</th><th>Pres.</th><th>%</th><th>Gare</th><th>All.</th><th>Titolare</th><th>Ris.</th><th>Min.</th><th>Media</th>
+            </tr></thead>
+            <tbody id="tPres"></tbody>
+          </table>
         </div>
+        <div class="cd"><strong>Lettura:</strong> ranking affidabilità e carico. Media minuti = impatto quando presente.</div>
       </div>
 
       <div class="card mb">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
           <div><div class="ct">Registro Presenze</div><div class="cs">Ricerca rapida testuale</div></div>
-          <input type="text" placeholder="🔍 Cerca..." id="pSrch" style="background:var(--s2);border:1px solid var(--bo);border-radius:12px;padding:8px 10px;color:var(--tx);font-size:11px;outline:none;width:200px" oninput="srchP()"/>
+          <input type="text" placeholder="🔍 Cerca..." id="pSrch"
+                 style="background:var(--s2);border:1px solid var(--bo);border-radius:12px;padding:8px 10px;color:var(--tx);font-size:11px;outline:none;width:min(240px,100%)"
+                 oninput="srchP()"/>
         </div>
-        <div class="tw"><table class="tbl"><thead><tr>
-          <th>Data</th><th>Giocatore</th><th>Tipo</th><th>Presente</th><th>Ruolo</th><th>Min.</th><th>Nota</th>
-        </tr></thead><tbody id="tPresReg"></tbody></table></div>
-        <div class="cd">
-          <strong>Cosa monitorare:</strong> qui trovi il “dato grezzo” per verificare perché un grafico mostra un’anomalia (assenza, minuti, note).
+        <div class="tw">
+          <table class="tbl">
+            <thead><tr>
+              <th>Data</th><th>Giocatore</th><th>Tipo</th><th>Presente</th><th>Ruolo</th><th>Min.</th><th>Nota</th>
+            </tr></thead>
+            <tbody id="tPresReg"></tbody>
+          </table>
         </div>
+        <div class="cd"><strong>Lettura:</strong> “dato grezzo” per verificare anomalie nei grafici.</div>
       </div>
     </div>
 
-    <!-- ═══ ANALYTICS ═══ -->
+    <!-- ═══ ANALYTICS (✅ compatta) ═══ -->
     <div id="page-analytics" class="page">
       <div class="krow" id="aKpi"></div>
 
-      <div class="sec-title">🎯 IPO &amp; Pericolosità</div>
-      <div class="g12 mb">
-        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px">
-          <div class="cs">IPO TOTALE</div>
-          <div class="ipo-big" id="ipoN" style="color:var(--a)">0</div>
-          <div style="font-size:9px;color:var(--mu2)">Index of Playing Opportunities</div>
+      <!-- Group 1 -->
+      <details class="group" open>
+        <summary>
+          <span>🎯 IPO &amp; Pericolosità</span>
+          <span class="sumHint">Sintesi offensiva “NOI” + confronto avversario</span>
+        </summary>
 
-          <div style="display:flex;gap:14px;margin-top:6px">
-            <div><div style="font-size:9px;color:var(--mu2)">NOI</div><div class="ipo-big" id="ipoNoi" style="font-size:32px;color:var(--b)">0</div></div>
-            <div><div style="font-size:9px;color:var(--mu2)">AVV.</div><div class="ipo-big" id="ipoAvv" style="font-size:32px;color:var(--r)">0</div></div>
+        <div class="g12 mb" style="margin-top:10px">
+          <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px">
+            <div class="cs">IPO OFFENSIVO (NOI)</div>
+            <div class="ipo-big" id="ipoN" style="color:var(--a)">0</div>
+            <div style="font-size:9px;color:var(--mu2)">Index of Playing Opportunities (offensivo)</div>
+
+            <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;justify-content:center">
+              <div>
+                <div style="font-size:9px;color:var(--mu2)">NOI</div>
+                <div class="ipo-big" id="ipoNoi" style="font-size:32px;color:var(--b)">0</div>
+              </div>
+              <div>
+                <div style="font-size:9px;color:var(--mu2)">AVV.</div>
+                <div class="ipo-big" id="ipoAvv" style="font-size:32px;color:var(--r)">0</div>
+              </div>
+              <div>
+                <div style="font-size:9px;color:var(--mu2)">QUOTA NOI</div>
+                <div class="ipo-big" id="ipoShare" style="font-size:32px;color:var(--g)">0%</div>
+              </div>
+            </div>
+
+            <div class="insight" id="ipoIns" style="text-align:left;font-size:10px"></div>
+
+            <div class="cd">
+              <strong>Lettura:</strong> IPO è la pericolosità offensiva. Qui la metrica “principale” è <strong>NOI</strong>, l’avversario è solo confronto.
+              <div class="hint">Quota NOI alta = crei più pericolo; quota bassa = concedi iniziativa.</div>
+            </div>
           </div>
 
-          <div class="insight" id="ipoIns" style="text-align:left;font-size:10px"></div>
+          <div class="card">
+            <div class="ct">IPO nel Tempo</div>
+            <div class="cs">Andamento gara per gara — Noi vs Avversario (click gara → filtro)</div>
+            <div class="ch ch-lg"><canvas id="cIpoTime"></canvas></div>
+            <div class="cd">
+              <strong>Lettura:</strong> picchi = gare dominate o molto aperte. Confronta linee per capire chi ha creato di più.
+              <div class="hint">Click su una gara per isolare e analizzare eventi/zone.</div>
+            </div>
+          </div>
+        </div>
+      </details>
 
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> IPO sintetizza “pericolosità” (occasioni, tiri, piazzati). Confronta NOI vs AVV per capire chi ha creato di più.
-            <div class="hint">Se IPO NOI è alto ma gol bassi → possibile inefficienza/precisione. Se IPO AVV alto → rischio difensivo.</div>
+      <!-- Group 2 -->
+      <details class="group" open>
+        <summary>
+          <span>🗺 Heatmap Pericolosità</span>
+          <span class="sumHint">Zone “calde” = dove nasce il pericolo</span>
+        </summary>
+
+        <div class="g3 mb" style="margin-top:10px">
+          <div class="card">
+            <div class="ct">Zona Evento — NOI</div>
+            <div class="cs">IPO per zona</div>
+            <div class="pitch" id="pitchNoi"></div>
+            <div class="cd"><strong>Lettura:</strong> pattern offensivo (corsie, mezzo spazio, area). Zone rosse = produzione alta.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Zona Evento — AVVERSARIO</div>
+            <div class="cs">Pericolosità concessa</div>
+            <div class="pitch" id="pitchAvv"></div>
+            <div class="cd"><strong>Lettura:</strong> dove concedi. Caldo centrale/area = problema protezione zona 14/area.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Zona Rifinitura</div>
+            <div class="cs">Dove nasce l’ultima giocata</div>
+            <div class="pitch" id="pitchRif"></div>
+            <div class="cd"><strong>Lettura:</strong> da fascia o corridoio centrale? Aiuta a leggere stile e rifinitura.</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="ct">IPO nel Tempo</div>
-          <div class="cs">Andamento gara per gara — Noi vs Avversario</div>
-          <div class="ch ch-lg"><canvas id="cIpoTime"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> trend di pericolosità nelle singole gare. Picchi = gare dominate o molto aperte.
-            <div class="hint">Clicca una gara per filtrare e analizzare dettagli (tiri, zone, eventi).</div>
+        <div class="g2 mb">
+          <div class="card">
+            <div class="ct">Zona Recupero Palla</div>
+            <div class="cs">Dove recuperi il possesso</div>
+            <div class="pitch" id="pitchRec"></div>
+            <div class="cd"><strong>Lettura:</strong> pressing alto vs recupero basso. Recuperi alti = più transizioni pericolose.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Zona Inizio Azione</div>
+            <div class="cs">Da dove parte l’azione</div>
+            <div class="pitch" id="pitchInizio"></div>
+            <div class="cd"><strong>Lettura:</strong> costruzione bassa vs ripartenze. Indizio forte sull’identità di gioco.</div>
           </div>
         </div>
-      </div>
+      </details>
 
-      <div class="sec-title">🗺 Heatmap Pericolosità</div>
-      <div class="g3 mb">
-        <div class="card">
-          <div class="ct">Zona Evento — NOI</div>
-          <div class="cs">IPO per zona</div>
-          <div class="pitch" id="pitchNoi"></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> dove crei pericolosità. Zone “calde” indicano il tuo pattern offensivo (corsie, rifinitura, area).
+      <!-- Group 3 -->
+      <details class="group">
+        <summary>
+          <span>⏱ Temporale &amp; Intensità</span>
+          <span class="sumHint">Quando crei (e quando soffri)</span>
+        </summary>
+
+        <div class="g2 mb" style="margin-top:10px">
+          <div class="card dd">
+            <div class="ct">IPO per Periodo — NOI vs AVV</div>
+            <div class="cs">Click periodo → filtro</div>
+            <div class="ch ch-md"><canvas id="cIpoPer"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> fasi forti/deboli (inizio/fine). Calo P5–P6 = gestione energie.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Densità per Minuto</div>
+            <div class="cs">Eventi totali — bucket 5'</div>
+            <div class="ch ch-md"><canvas id="cDens"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> momenti “caldi” (assalti/pressione/fasi caotiche).</div>
           </div>
         </div>
+      </details>
 
-        <div class="card">
-          <div class="ct">Zona Evento — AVVERSARIO</div>
-          <div class="cs">Pericolosità concessa</div>
-          <div class="pitch" id="pitchAvv"></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> dove concedi. Se l’avversario è “caldo” in area/mezze aree → problema di protezione zona centrale.
+      <!-- Group 4 -->
+      <details class="group">
+        <summary>
+          <span>🥅 Tiri</span>
+          <span class="sumHint">Quantità, qualità e precisione</span>
+        </summary>
+
+        <div class="g3 mb" style="margin-top:10px">
+          <div class="card dd">
+            <div class="ct">Tiri per Periodo — NOI vs AVV</div>
+            <div class="cs">Click periodo → filtro</div>
+            <div class="ch ch-md"><canvas id="cTiriPer"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> quando tiri e quando ti tirano. Se soffri nei finali → gestione e blocco.</div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="ct">Zona Rifinitura</div>
-          <div class="cs">Dove nasce l’ultima giocata</div>
-          <div class="pitch" id="pitchRif"></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> zone di assist/penultimo passaggio. Utile per capire se rifinisci da fascia o corridoio centrale.
+          <div class="card">
+            <div class="ct">Esito Tiri — NOI</div>
+            <div class="cs">In porta / Fuori / Gol / Parato / Palo</div>
+            <div class="ch ch-md"><canvas id="cEsitoNoi"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> qualità conclusioni. “Fuori” alto = selezione tiro; “Parato” alto = finalizzazione.</div>
           </div>
-        </div>
-      </div>
 
-      <div class="g2 mb">
-        <div class="card">
-          <div class="ct">Zona Recupero Palla</div>
-          <div class="cs">Dove recuperi il possesso</div>
-          <div class="pitch" id="pitchRec"></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> altezza del recupero (pressing alto vs recupero basso). Recuperi alti = più transizioni pericolose.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Zona Inizio Azione</div>
-          <div class="cs">Da dove parte l’azione</div>
-          <div class="pitch" id="pitchInizio"></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> origine delle azioni pericolose (costruzione bassa vs ripartenze). Aiuta a definire identità di gioco.
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-title">⏱ Analisi Temporale</div>
-      <div class="g2 mb">
-        <div class="card dd">
-          <div class="ct">IPO per Periodo — NOI vs AVV</div>
-          <div class="cs">Click periodo per filtrare</div>
-          <div class="ch ch-md"><canvas id="cIpoPer"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> fasi in cui sei più forte/debole (inizio, fine tempo, finali). Se cali nel P5-P6 → gestione energie.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Densità per Minuto</div>
-          <div class="cs">Eventi totali — bucket 5'</div>
-          <div class="ch ch-md"><canvas id="cDens"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> intensità partita. Picchi indicano momenti “caldi” (assalti, pressione, fasi caotiche).
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-title">🥅 Analisi Tiri</div>
-      <div class="g3 mb">
-        <div class="card dd">
-          <div class="ct">Tiri per Periodo — NOI vs AVV</div>
-          <div class="cs">Click periodo</div>
-          <div class="ch ch-md"><canvas id="cTiriPer"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> quando tiri (e quando ti tirano). Confronto utile per capire se subisci nei finali o parti forte.
+          <div class="card">
+            <div class="ct">Esito Tiri — AVVERSARIO</div>
+            <div class="cs">Pericolosità concessa</div>
+            <div class="ch ch-md"><canvas id="cEsitoAvv"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> se “In porta/Gol” avv. alti → protezione area e pressione su palla.</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="ct">Esito Tiri — NOI</div>
-          <div class="cs">In porta / Fuori / Gol / Parato / Palo</div>
-          <div class="ch ch-md"><canvas id="cEsitoNoi"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> qualità conclusioni. Alta quota “Fuori” = selezione tiro da rivedere; alta “Parato” = serve finalizzazione.
+        <div class="g3 mb">
+          <div class="card">
+            <div class="ct">Tipologia Tiro — NOI</div>
+            <div class="cs">Destro / Sinistro / Testa</div>
+            <div class="ch ch-sm"><canvas id="cTipoTiro"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> profilo conclusioni. Molti colpi di testa = cross; piede forte = sviluppo preferito.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">In Porta vs Totali — per Gara</div>
+            <div class="cs">Efficienza offensiva</div>
+            <div class="ch ch-sm"><canvas id="cTiriIP"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> tiri aumentano ma pochi in porta → qualità/decision making.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Tiri in Area vs Fuori Area</div>
+            <div class="cs">NOI vs AVV</div>
+            <div class="ch ch-sm"><canvas id="cTiriArea"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> selezione tiro. Più in area = chance migliori; troppi da fuori = attacco poco profondo.</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Group 5 -->
+      <details class="group">
+        <summary>
+          <span>📊 Distribuzione &amp; Contributi</span>
+          <span class="sumHint">Mix eventi + chi crea pericolo</span>
+        </summary>
+
+        <div class="g3 mb" style="margin-top:10px">
+          <div class="card dd">
+            <div class="ct">Tipi di Evento</div>
+            <div class="cs">Click per filtrare</div>
+            <div class="ch ch-md"><canvas id="cEventi"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> mix (manovra/piazzati/transizioni). Clicca un tipo per isolare.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Palle Inattive — NOI</div>
+            <div class="cs">Esito per palla inattiva</div>
+            <div class="ch ch-md"><canvas id="cPalleI"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> impatto piazzati. Utile per capire se crei vantaggio su corner/punizioni.</div>
+          </div>
+
+          <div class="card dd">
+            <div class="ct">IPO per Giocatore</div>
+            <div class="cs">Top 15 — click per filtrare</div>
+            <div class="ch ch-md"><canvas id="cIpoGioc"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> contributo individuale. Chi ha IPO alto spesso rifinisce o finalizza spesso.</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="ct">Esito Tiri — AVVERSARIO</div>
-          <div class="cs">Pericolosità concessa</div>
-          <div class="ch ch-md"><canvas id="cEsitoAvv"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> quanto concedi tiri pericolosi. Se “In porta/Gol” avversari alti → protezione area e pressing.
+        <div class="g2 mb">
+          <div class="card">
+            <div class="ct">IPO Progressivo Cumulato</div>
+            <div class="cs">Noi vs Avversario</div>
+            <div class="ch ch-lg"><canvas id="cIpoCum"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> dominio nel lungo periodo. Se Avv cresce più di Noi → concedi costantemente.</div>
+          </div>
+
+          <div class="card">
+            <div class="ct">Cartellini per Periodo</div>
+            <div class="cs">Gialli + Rossi — NOI vs AVV</div>
+            <div class="ch ch-lg"><canvas id="cCart"></canvas></div>
+            <div class="cd"><strong>Lettura:</strong> disciplina e stress. Picchi finali = nervosismo/calo lucidità.</div>
           </div>
         </div>
-      </div>
+      </details>
 
-      <div class="g3 mb">
-        <div class="card">
-          <div class="ct">Tipologia Tiro — NOI</div>
-          <div class="cs">Destro / Sinistro / Testa</div>
-          <div class="ch ch-sm"><canvas id="cTipoTiro"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> profilo conclusioni. Molti colpi di testa → gioco sulle fasce/cross; molti tiri piede forte → sviluppo preferito.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">In Porta vs Fuori — per Gara</div>
-          <div class="cs">Efficienza offensiva</div>
-          <div class="ch ch-sm"><canvas id="cTiriIP"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> precisione gara per gara. Se aumentano tiri ma non in porta → problema di qualità/decision making.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Tiri in Area vs Fuori Area</div>
-          <div class="cs">NOI vs AVV</div>
-          <div class="ch ch-sm"><canvas id="cTiriArea"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> selezione tiro. Più tiri in area = chance migliori. Troppi fuori area = attacco poco profondo.
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-title">📊 Distribuzione &amp; Correlazioni</div>
-      <div class="g3 mb">
-        <div class="card dd">
-          <div class="ct">Tipi di Evento</div>
-          <div class="cs">Click per filtrare</div>
-          <div class="ch ch-md"><canvas id="cEventi"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> “mix” di pericolosità (azioni manovrate, palle inattive, transizioni). Clicca un tipo per isolare.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Palle Inattive — NOI</div>
-          <div class="cs">Esito per palla inattiva</div>
-          <div class="ch ch-md"><canvas id="cPalleI"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> impatto dei piazzati. Utile per capire se la squadra crea “vantaggio” su corner/punizioni.
-          </div>
-        </div>
-
-        <div class="card dd">
-          <div class="ct">IPO per Giocatore</div>
-          <div class="cs">Top 15 — click per filtrare</div>
-          <div class="ch ch-md"><canvas id="cIpoGioc"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> contributo individuale alla pericolosità. Giocatori con IPO alto spesso guidano l’attacco o rifiniscono molto.
-          </div>
-        </div>
-      </div>
-
-      <div class="g2 mb">
-        <div class="card">
-          <div class="ct">IPO Progressivo Cumulato</div>
-          <div class="cs">Noi vs Avversario</div>
-          <div class="ch ch-lg"><canvas id="cIpoCum"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> chi “accumula” dominio nella stagione. Se Avv cresce più di Noi → attenzione: concedi costantemente.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="ct">Cartellini per Periodo</div>
-          <div class="cs">Gialli + Rossi — NOI vs AVV</div>
-          <div class="ch ch-lg"><canvas id="cCart"></canvas></div>
-          <div class="cd">
-            <strong>Cosa monitorare:</strong> disciplina e momenti di nervosismo. Cartellini finali spesso indicano stress e calo lucidità.
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-title">📋 Registro Eventi</div>
+      <div class="sec-title">📋 Registro Eventi Analytics</div>
       <div class="card mb">
-        <div class="ct">Registro Eventi Analytics</div>
+        <div class="ct">Registro Eventi</div>
         <div class="cs">Dati di dettaglio per verificare i grafici</div>
-        <div class="tw" style="margin-top:8px"><table class="tbl"><thead><tr>
-          <th>Data</th><th>Gara</th><th>Min.</th><th>Squadra</th><th>Evento</th><th>Giocatore</th>
-          <th>Zona</th><th>IPO</th><th>Esito Tiro</th><th>Tipo Tiro</th><th>Z.Inizio</th><th>Z.Rif.</th><th>Z.Rec.</th><th>Nota</th>
-        </tr></thead><tbody id="tAna"></tbody></table></div>
-        <div class="cd">
-          <strong>Cosa monitorare:</strong> verifica e “audit” dei dati: se un grafico sembra strano, qui trovi la riga che lo genera.
+        <div class="tw" style="margin-top:8px">
+          <table class="tbl">
+            <thead><tr>
+              <th>Data</th><th>Gara</th><th>Min.</th><th>Squadra</th><th>Evento</th><th>Giocatore</th>
+              <th>Zona</th><th>IPO</th><th>Esito Tiro</th><th>Tipo Tiro</th><th>Z.Inizio</th><th>Z.Rif.</th><th>Z.Rec.</th><th>Nota</th>
+            </tr></thead>
+            <tbody id="tAna"></tbody>
+          </table>
         </div>
+        <div class="cd"><strong>Tip:</strong> audit dei dati. Se un grafico è “strano”, qui trovi la riga che lo genera.</div>
       </div>
     </div>
 
@@ -1079,7 +1108,7 @@
     <div id="page-rosa" class="page">
       <div class="krow" id="roKpi"></div>
 
-      <div class="sec-title rosa">🌸 Rosa &amp; Riepilogo Stagione</div>
+      <div class="sec-title rosa">🌸 Rosa &amp; Riepilogo</div>
 
       <div class="g21 mb">
         <div class="card">
@@ -1097,33 +1126,22 @@
           <div class="tw" style="max-height:460px">
             <table class="tbl">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Giocatore</th>
-                  <th>Ruolo</th>
-                  <th>Pres.</th>
-                  <th>%</th>
-                  <th>Min.</th>
-                  <th>Gare</th>
-                  <th>All.</th>
-                  <th>IPO</th>
-                  <th>Gol</th>
-                  <th>Tiri</th>
-                  <th>Gialli</th>
-                  <th>Rossi</th>
-                </tr>
+              <tr>
+                <th>#</th><th>Giocatore</th><th>Ruolo</th><th>Pres.</th><th>%</th><th>Min.</th><th>Gare</th><th>All.</th>
+                <th>IPO</th><th>Gol</th><th>Tiri</th><th>Gialli</th><th>Rossi</th>
+              </tr>
               </thead>
               <tbody id="tRosa"></tbody>
             </table>
           </div>
 
           <div class="cd rosa">
-            <strong>Come usarla:</strong> questa tabella unisce ROSA + PRESENZE + ANALYTICS per dare un profilo completo del giocatore.
-            <div class="hint">Ordine e valori cambiano in base ai filtri (tipo, date, competizione).</div>
+            <strong>Lettura:</strong> profilo completo unendo ROSA + PRESENZE + ANALYTICS.
+            <div class="hint">Valori cambiano con i filtri (tipo, date, competizione).</div>
           </div>
 
           <div class="insight rosa" id="roHint">
-            <strong>Nota:</strong> se nel foglio <strong>ANALYTICS</strong> aggiungi la colonna <strong>COGNOME_NOME</strong>, l’aggancio giocatore sarà sempre perfetto.
+            <strong>Nota:</strong> se nel foglio <strong>ANALYTICS</strong> compili la colonna <strong>COGNOME_NOME</strong>, l’aggancio giocatore è perfetto.
           </div>
         </div>
 
@@ -1135,20 +1153,15 @@
 
           <div class="sec-title rosa" style="margin-top:12px">📈 Minuti nel tempo</div>
           <div class="ch ch-md"><canvas id="cRoMin"></canvas></div>
-          <div class="cd rosa">
-            <strong>Cosa monitorare:</strong> continuità di impiego. Picchi = gare/periodi di carico; “buchi” = assenze o rotazioni.
-          </div>
+          <div class="cd rosa"><strong>Lettura:</strong> continuità d’impiego. Picchi = carico; buchi = assenze/rotazioni.</div>
 
           <div class="sec-title rosa" style="margin-top:12px">🎯 IPO nel tempo (gare)</div>
           <div class="ch ch-md"><canvas id="cRoIpo"></canvas></div>
-          <div class="cd rosa">
-            <strong>Cosa monitorare:</strong> impatto nelle gare. Se IPO alto ma pochi gol, può essere un creatore più che finalizzatore.
-          </div>
+          <div class="cd rosa"><strong>Lettura:</strong> impatto nelle gare. IPO alto ma pochi gol = creatore più che finalizzatore.</div>
         </div>
       </div>
     </div>
 
-    <!-- GUIDA FONDO -->
     <div class="guide" style="margin-top:24px;opacity:.65">
       <div class="gtitle" style="font-size:14px">📖 Riferimento rapido colonne</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:10px;color:var(--mu2)">
@@ -1158,9 +1171,8 @@
         <div><strong style="color:var(--rosa)">ROSA:</strong> NOME · COGNOME · RUOLO PREFERITO · ALTRI RUOLI</div>
       </div>
     </div>
-
-  </div><!-- /afterLoad -->
-</div><!-- /main -->
+  </div>
+</div>
 
 <!-- MODAL GIOCATORE (PRESENZE) -->
 <div class="mbg" id="pModal">
@@ -1171,14 +1183,10 @@
     <div class="krow" id="mKpi"></div>
 
     <div class="ch ch-md" style="margin-bottom:12px"><canvas id="mChart"></canvas></div>
-    <div class="cd">
-      <strong>Cosa monitorare:</strong> minuti per sessione: identifica rientri graduali, picchi di carico e assenze (barre rosse).
-    </div>
+    <div class="cd"><strong>Lettura:</strong> minuti per sessione: rientri graduali, picchi carico e assenze (rosso).</div>
 
     <div class="ch ch-sm" style="margin:12px 0"><canvas id="mChart2"></canvas></div>
-    <div class="cd">
-      <strong>Cosa monitorare:</strong> cumulato minuti: mostra quanto il giocatore ha “macinato” carico nel tempo.
-    </div>
+    <div class="cd"><strong>Lettura:</strong> cumulato minuti: quanto “macina” carico nel tempo.</div>
 
     <div class="tw" style="max-height:200px;margin-top:12px">
       <table class="tbl"><thead><tr>
@@ -1193,7 +1201,8 @@
    DATA
 ───────────────────────────────────────────── */
 let DR=[],DP=[],DA=[],DRO=[];
-let FR=[],FP=[],FA=[],FRO=[];
+let FR=[],FP=[],FA=[];
+let FRO=[];
 const C={};
 
 const IPOW={
@@ -1221,34 +1230,177 @@ let _labelByKey={};
 let _keyByLabel={};
 
 /* ─────────────────────────────────────────────
-   UI: FILTRI COLLAPSABLE
+   ✅ FILTRI: state unico + chips pulite
+───────────────────────────────────────────── */
+const FILTER_META = {
+  fComp:     {label:'Competizione', type:'select'},
+  fVenue:    {label:'Venue', type:'select'},
+  fGioc:     {label:'Giocatore', type:'select', chipClass:'rosa'},
+  fTipo:     {label:'Tipo', type:'select'},
+  fGara:     {label:'Gara', type:'select'},
+  fEvento:   {label:'Evento', type:'select'},
+  fPeriodo:  {label:'Periodo', type:'select'},
+  fStagione: {label:'Anno', type:'select'},
+  fS:        {label:'Dal', type:'date'},
+  fE:        {label:'Al', type:'date'}
+};
+
+const FSTATE = {
+  fComp:'',fVenue:'',fGioc:'',fTipo:'',fGara:'',fEvento:'',fPeriodo:'',fStagione:'',fS:'',fE:''
+};
+
+function optionText(selectId,val){
+  const s=document.getElementById(selectId);
+  if(!s) return val;
+  const o=[...s.options].find(x=>x.value===val);
+  return o?o.text:val;
+}
+
+function onFilterInput(id, value){
+  setFilter(id, value, 'input');
+}
+
+function setFilter(id, value, source='sys'){
+  if(!(id in FSTATE)) return;
+  const prev = FSTATE[id] || '';
+  FSTATE[id] = value || '';
+
+  // sync UI input only if needed
+  const el = document.getElementById(id);
+  if(el && el.value !== FSTATE[id]) el.value = FSTATE[id];
+
+  // apply + chips
+  scheduleApplyAll();
+  renderChips();
+
+  // micro UX: se uguale a prima e arrivava da un click su chart -> toggle off
+  // (gestito altrove con setFilterToggle)
+}
+
+function setFilterToggle(id, value){
+  const v = (FSTATE[id] === value) ? '' : value;
+  setFilter(id, v, 'toggle');
+}
+
+function getF(){ return {...FSTATE}; }
+
+function resetAllFilters(){
+  Object.keys(FSTATE).forEach(k=>FSTATE[k]='');
+  // reset UI
+  Object.keys(FILTER_META).forEach(k=>{
+    const el=document.getElementById(k);
+    if(el) el.value='';
+  });
+  const ps=document.getElementById('pSrch'); if(ps) ps.value='';
+  renderChips();
+  scheduleApplyAll(true);
+}
+
+function renderChips(){
+  const chipsEl = document.getElementById('chips');
+  const metaEl  = document.getElementById('chipsMeta');
+  const countEl = document.getElementById('chipsCount');
+
+  const f=getF();
+  const active = Object.entries(f).filter(([,v])=>String(v||'').trim()!=='');
+  if(!active.length){
+    chipsEl.innerHTML='';
+    metaEl.style.display='none';
+    return;
+  }
+
+  const html = active.map(([k,v])=>{
+    const m = FILTER_META[k] || {label:k,type:'text'};
+    const isSelect = (m.type === 'select');
+    const disp = isSelect ? optionText(k,v) : v;
+    const cls = (m.chipClass==='rosa') ? 'chip rosa' : 'chip';
+    return `<span class="${cls}">
+      <span class="t">${m.label}: ${escapeHtml(String(disp))}</span>
+      <span class="chip-x" onclick="removeChip('${k}')">✕</span>
+    </span>`;
+  }).join('');
+
+  chipsEl.innerHTML = html;
+  metaEl.style.display='';
+  countEl.textContent = active.length;
+}
+
+function removeChip(key){
+  setFilter(key,'','chip');
+}
+
+/* ─────────────────────────────────────────────
+   UI: FILTRI COLLAPSABLE + responsive header height
 ───────────────────────────────────────────── */
 function toggleFilters(){
   const fr=document.getElementById('frow');
   fr.classList.toggle('collapsed');
+  syncShellHeight();
 }
 
+function syncShellHeight(){
+  const shell = document.getElementById('shell');
+  if(!shell) return;
+  const h = Math.round(shell.getBoundingClientRect().height);
+  document.documentElement.style.setProperty('--shellH', h+'px');
+}
+window.addEventListener('resize', syncShellHeight);
+window.addEventListener('load', syncShellHeight);
+
 /* ─────────────────────────────────────────────
-   LOAD EXCEL
+   LOAD EXCEL (✅ robust + fix template load)
 ───────────────────────────────────────────── */
 document.getElementById('fw').addEventListener('change',function(e){
   const f=e.target.files[0]; if(!f) return;
   document.getElementById('wname').textContent=f.name;
 
+  if(typeof XLSX === 'undefined'){
+    alert('Errore: libreria XLSX non caricata. Controlla la connessione o i tag <script>.');
+    return;
+  }
+  if(typeof Chart === 'undefined'){
+    alert('Errore: libreria Chart.js non caricata. Controlla la connessione o i tag <script>.');
+    return;
+  }
+
   const rd=new FileReader();
-  rd.onload=ev=>{
-    const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
-    if(wb.Sheets['RISULTATI']) DR=XLSX.utils.sheet_to_json(wb.Sheets['RISULTATI']);
-    if(wb.Sheets['PRESENZE'])  DP=XLSX.utils.sheet_to_json(wb.Sheets['PRESENZE']);
-    if(wb.Sheets['ANALYTICS']) DA=XLSX.utils.sheet_to_json(wb.Sheets['ANALYTICS']).map(r=>({...r,PunteggioIPO:IPOW[r.TipoEvento]||0}));
-    if(wb.Sheets['ROSA'])      DRO=XLSX.utils.sheet_to_json(wb.Sheets['ROSA']);
+  rd.onerror = ()=> alert('Errore lettura file. Riprova.');
+  rd.onload = ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
 
-    buildRosterIndex();
+      // sheet names robusti (case-insensitive)
+      const sn = wb.SheetNames.reduce((a,n)=>{a[n.toLowerCase()]=n;return a;},{});
+      const sh = (name)=> wb.Sheets[ sn[name.toLowerCase()] || name ] || null;
 
-    document.getElementById('landing').style.display='none';
-    document.getElementById('afterLoad').style.display='block';
-    populateFilters();
-    applyAll();
+      const sR = sh('RISULTATI');
+      const sP = sh('PRESENZE');
+      const sA = sh('ANALYTICS');
+      const sO = sh('ROSA');
+
+      DR = sR ? XLSX.utils.sheet_to_json(sR) : [];
+      DP = sP ? XLSX.utils.sheet_to_json(sP) : [];
+      DA = sA ? XLSX.utils.sheet_to_json(sA).map(r=>({...r,PunteggioIPO:IPOW[r.TipoEvento]||0})) : [];
+      DRO= sO ? XLSX.utils.sheet_to_json(sO) : [];
+
+      if(!DR.length && !DP.length && !DA.length && !DRO.length){
+        alert('Ho caricato il file ma non trovo dati nei 4 fogli. Controlla i nomi: RISULTATI, PRESENZE, ANALYTICS, ROSA.');
+        return;
+      }
+
+      buildRosterIndex();
+      populateFilters();
+
+      document.getElementById('landing').style.display='none';
+      document.getElementById('afterLoad').style.display='block';
+
+      renderChips();
+      scheduleApplyAll(true);
+      syncShellHeight();
+    }catch(err){
+      console.error(err);
+      alert('Errore durante la lettura dell’Excel. Verifica che il file non sia corrotto e che abbia i fogli richiesti.');
+    }
   };
   rd.readAsArrayBuffer(f);
 });
@@ -1256,8 +1408,6 @@ document.getElementById('fw').addEventListener('change',function(e){
 /* ─────────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────────── */
-const gv=id=>document.getElementById(id).value;
-const sv=(id,v)=>{document.getElementById(id).value=v;};
 const isP=r=>['Si','Sì','si','sì',true,'true','1',1].includes(r.Presente);
 const periodoOf=m=>m<=15?1:m<=30?2:m<=45?3:m<=60?4:m<=75?5:6;
 const isTiro=t=>['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(t);
@@ -1281,16 +1431,21 @@ function keyNC(cognome,nome){
 function capWords(s){ return String(s||'').toLowerCase().replace(/\b\w/g,m=>m.toUpperCase()); }
 function labelNC(cognome,nome){ return `${String(cognome||'').trim()} ${String(nome||'').trim()}`.trim(); }
 
-function optionText(selectId,val){
-  const s=document.getElementById(selectId);
-  const o=[...s.options].find(x=>x.value===val);
-  return o?o.text:val;
+function escapeHtml(str){
+  return str.replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
 }
+
 function dc(id){ if(C[id]){ C[id].destroy(); delete C[id]; } }
+
 function co(){
   return {
     responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'},boxWidth:9,padding:6}},tooltip:{mode:'index'}},
+    plugins:{
+      legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'},boxWidth:9,padding:6}},
+      tooltip:{mode:'index'}
+    },
     scales:{
       x:{ticks:{color:'#4a5568',font:{size:9},maxTicksLimit:12},grid:{color:'rgba(255,255,255,0.025)'}},
       y:{ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,0.025)'}}
@@ -1349,7 +1504,8 @@ function buildRosterIndex(){
       if(!key || seen.has(key)) return;
       seen.add(key);
       const lab=labelNC(capWords(r.Cognome),capWords(r.Nome));
-      _roIndex[key]={key,nome:capWords(r.Nome),cognome:capWords(r.Cognome),ruoloPref:'',altriRuoli:'',variants:new Set([norm(lab),norm(key),norm(`${r.Cognome} ${String(r.Nome||'')[0]||''}`)])};
+      _roIndex[key]={key,nome:capWords(r.Nome),cognome:capWords(r.Cognome),ruoloPref:'',altriRuoli:'',
+        variants:new Set([norm(lab),norm(key),norm(`${r.Cognome} ${String(r.Nome||'')[0]||''}`)])};
       _roOrder.push(key);
       _labelByKey[key]=lab;
       _keyByLabel[norm(lab)]=key;
@@ -1359,8 +1515,7 @@ function buildRosterIndex(){
 
   _roOrder=_roOrder.sort((a,b)=> (_labelByKey[a]||'').localeCompare(_labelByKey[b]||''));
   _roOrder.forEach(k=>{
-    const i=_roIndex[k];
-    if(!i) return;
+    const i=_roIndex[k]; if(!i) return;
     _keyByLabel[norm(`${i.cognome} ${i.nome}`)]=k;
     _keyByLabel[norm(`${i.cognome} ${String(i.nome||'')[0]||''}`)]=k;
   });
@@ -1396,17 +1551,19 @@ function showPage(id,btn){
   document.getElementById('page-'+id).classList.add('active');
   if(btn) btn.classList.add('active');
   updateFVis(id);
-  if(DR.length||DP.length||DA.length||DRO.length) applyAll();
+  scheduleApplyAll(true);
+  syncShellHeight();
 }
+
 const FV={
   risultati:{fComp:1,fVenue:1,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:0,fGara:0,fEvento:0,fPeriodo:0},
   presenze: {fComp:0,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:1,fTipo:1,fGara:0,fEvento:0,fPeriodo:0},
-  analytics:{fComp:1,fVenue:0,fS:0,fE:0,fStagione:0,fGioc:1,fTipo:0,fGara:1,fEvento:1,fPeriodo:1},
+  analytics:{fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:1,fTipo:0,fGara:1,fEvento:1,fPeriodo:1},
   rosa:     {fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:1,fGara:0,fEvento:0,fPeriodo:0}
 };
 function updateFVis(pg){
   const v=FV[pg]||{};
-  ['fComp','fVenue','fS','fE','fStagione','fGioc','fTipo','fGara','fEvento','fPeriodo'].forEach(id=>{
+  Object.keys(FILTER_META).forEach(id=>{
     const w=document.querySelector(`[data-filter="${id}"]`);
     if(w) w.style.display=(v[id]===0)?'none':'';
   });
@@ -1414,22 +1571,26 @@ function updateFVis(pg){
 updateFVis('risultati');
 
 /* ─────────────────────────────────────────────
-   FILTERS POP + CHIPS
+   FILTERS POP
 ───────────────────────────────────────────── */
 function populateFilters(){
-  const comps=[...new Set([...DR.map(d=>d.Competizione),...DA.map(d=>d.Competizione)].filter(Boolean))];
+  const comps=[...new Set([...DR.map(d=>d.Competizione),...DA.map(d=>d.Competizione)].filter(Boolean))].sort();
   const giocKeys=_roOrder.length?_roOrder:[...new Set(DP.map(playerKeyFromPresence).filter(Boolean))].sort();
   const giocVals=giocKeys.map(k=>({v:k,t:_labelByKey[k]||capWords(k.replace(/_/g,' '))}));
-  const gare=[...new Set(DA.map(d=>d.Gara).filter(Boolean))];
-  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||'')].map(d=>String(d).slice(0,4)).filter(Boolean))].sort();
+  const gare=[...new Set(DA.map(d=>d.Gara).filter(Boolean))].sort();
+  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||''),...DA.map(d=>d.Data||'')]
+      .map(d=>String(d).slice(0,4)).filter(a=>a && a!=='unde'))].sort();
+
   pop('fComp',comps);
   pop('fGioc',giocVals);
   pop('fGara',gare);
   pop('fEvento',Object.keys(IPOW));
   pop('fStagione',anni.map(a=>({v:a,t:`Stagione ${a}`})));
 }
+
 function pop(id,vals){
   const s=document.getElementById(id);
+  if(!s) return;
   while(s.options.length>1) s.remove(1);
   vals.forEach(v=>{
     const o=document.createElement('option');
@@ -1438,68 +1599,61 @@ function pop(id,vals){
     s.add(o);
   });
 }
-function getF(){
-  return{
-    comp:gv('fComp'),venue:gv('fVenue'),gioc:gv('fGioc'),tipo:gv('fTipo'),
-    gara:gv('fGara'),evento:gv('fEvento'),periodo:gv('fPeriodo'),
-    stagione:gv('fStagione'),start:gv('fS'),end:gv('fE')
-  };
-}
-function onFC(){ applyAll(); renderChips(); }
-function renderChips(){
-  const f=getF();
-  const lbl={comp:'Comp',venue:'Venue',gioc:'Giocatore',tipo:'Tipo',gara:'Gara',evento:'Evento',periodo:'Periodo',stagione:'Anno',start:'Dal',end:'Al'};
-  const map={comp:'fComp',venue:'fVenue',gioc:'fGioc',tipo:'fTipo',gara:'fGara',evento:'fEvento',periodo:'fPeriodo',stagione:'fStagione',start:'fS',end:'fE'};
-  const isSelect=(k)=>['comp','venue','gioc','tipo','gara','evento','periodo','stagione'].includes(k);
-
-  document.getElementById('chips').innerHTML =
-    Object.entries(f).filter(([,v])=>v).map(([k,v])=>{
-      const val = isSelect(k) ? optionText(map[k],v) : v;
-      const cls = (k==='gioc') ? 'chip rosa' : 'chip';
-      return `<span class="${cls}">${lbl[k]}: ${val} <span class="chip-x" onclick="sv('${map[k]}','');onFC()">✕</span></span>`;
-    }).join('');
-}
-function resetF(){
-  ['fComp','fVenue','fGioc','fTipo','fGara','fEvento','fPeriodo','fStagione','fS','fE'].forEach(id=>sv(id,''));
-  const ps=document.getElementById('pSrch'); if(ps) ps.value='';
-  applyAll(); renderChips();
-}
 
 /* ─────────────────────────────────────────────
-   APPLY FILTERS
+   APPLY FILTERS (✅ ora coerenti + date su analytics)
 ───────────────────────────────────────────── */
+let _applyTimer=null;
+function scheduleApplyAll(immediate=false){
+  if(immediate){
+    if(_applyTimer) clearTimeout(_applyTimer);
+    applyAll();
+    return;
+  }
+  if(_applyTimer) clearTimeout(_applyTimer);
+  _applyTimer=setTimeout(applyAll, 60);
+}
+
 function applyAll(){
   const f=getF();
 
   FR=DR.filter(r=>{
-    if(f.comp && r.Competizione!==f.comp) return false;
-    if(f.venue && r.Venue!==f.venue) return false;
-    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
-    if(f.start && (String(r.Data||'')<f.start)) return false;
-    if(f.end && (String(r.Data||'')>f.end)) return false;
+    if(f.fComp && r.Competizione!==f.fComp) return false;
+    if(f.fVenue && r.Venue!==f.fVenue) return false;
+    if(f.fStagione && !(String(r.Data||'').startsWith(f.fStagione))) return false;
+    if(f.fS && (String(r.Data||'')<f.fS)) return false;
+    if(f.fE && (String(r.Data||'')>f.fE)) return false;
     return true;
   });
 
   FP=DP.filter(r=>{
     const k=playerKeyFromPresence(r);
-    if(f.gioc && k!==f.gioc) return false;
-    if(f.tipo && r.Tipo!==f.tipo) return false;
-    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
-    if(f.start && (String(r.Data||'')<f.start)) return false;
-    if(f.end && (String(r.Data||'')>f.end)) return false;
+    if(f.fGioc && k!==f.fGioc) return false;
+    if(f.fTipo && r.Tipo!==f.fTipo) return false;
+    if(f.fStagione && !(String(r.Data||'').startsWith(f.fStagione))) return false;
+    if(f.fS && (String(r.Data||'')<f.fS)) return false;
+    if(f.fE && (String(r.Data||'')>f.fE)) return false;
     return true;
   });
 
   FA=DA.filter(r=>{
     const k=playerKeyFromAnalytics(r);
-    if(f.comp && r.Competizione!==f.comp) return false;
-    if(f.gara && r.Gara!==f.gara) return false;
-    if(f.evento && r.TipoEvento!==f.evento) return false;
-    if(f.periodo){
+
+    if(f.fComp && r.Competizione!==f.fComp) return false;
+    if(f.fGara && r.Gara!==f.fGara) return false;
+    if(f.fEvento && r.TipoEvento!==f.fEvento) return false;
+
+    if(f.fPeriodo){
       const p=periodoOf(Number(r.MinutoEvento||0));
-      if(String(p)!==f.periodo) return false;
+      if(String(p)!==f.fPeriodo) return false;
     }
-    if(f.gioc && k && k!==f.gioc) return false;
+
+    // ✅ FIX: date/stagione anche su analytics
+    if(f.fStagione && r.Data && !(String(r.Data).startsWith(f.fStagione))) return false;
+    if(f.fS && r.Data && (String(r.Data)<f.fS)) return false;
+    if(f.fE && r.Data && (String(r.Data)>f.fE)) return false;
+
+    if(f.fGioc && k && k!==f.fGioc) return false;
     return true;
   });
 
@@ -1512,7 +1666,7 @@ function applyAll(){
 }
 
 /* ─────────────────────────────────────────────
-   RISULTATI
+   RISULTATI (quasi invariato, solo toggle filtri click)
 ───────────────────────────────────────────── */
 function renderR(data){
   const d=data.map(r=>{
@@ -1538,14 +1692,14 @@ function renderR(data){
     <div class="kpi a"><div class="kl">Diff.</div><div class="kv">${GF-GS>=0?'+':''}${GF-GS}</div></div>
     <div class="kpi p"><div class="kl">Clean</div><div class="kv">${cs}</div></div>`;
 
-  if(!PG) return;
+  if(!PG){ document.getElementById('tRis').innerHTML=''; return; }
   const labs=d.map((_,i)=>`G${i+1}`);
   let cum=0; const cumPt=d.map(r=>{cum+=r.pt;return cum;});
 
   dc('cPuntiCum');
   C.cPuntiCum=new Chart(document.getElementById('cPuntiCum'),{type:'line',
     data:{labels:labs,datasets:[{label:'Punti cumulati',data:cumPt,borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
-    options:coc((i)=>{const r=d[i]; if(r && r.Competizione){ sv('fComp',r.Competizione); onFC(); }})});
+    options:coc((i)=>{const r=d[i]; if(r && r.Competizione){ setFilterToggle('fComp', r.Competizione); }})});
 
   dc('cPuntiGara');
   C.cPuntiGara=new Chart(document.getElementById('cPuntiGara'),{type:'bar',
@@ -1567,7 +1721,7 @@ function renderR(data){
 
   dc('cDiffReti');
   C.cDiffReti=new Chart(document.getElementById('cDiffReti'),{type:'bar',
-    data:{labels:labs,datasets:[{label:'Diff. Reti',data:d.map(r=>r.gf-r.gs),backgroundColor:d.map(r=>r.gf-r.gs>=0?'#00e676':'#ff3d57'),borderRadius:5,borderSkipped:false}]},
+    data:{labels:labs,datasets:[{label:'Diff. Reti',data:d.map(r=>r.gf-r.gs),backgroundColor:d.map(r=>(r.gf-r.gs)>=0?'#00e676':'#ff3d57'),borderRadius:5,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
 
   dc('cWDL');
@@ -1581,7 +1735,7 @@ function renderR(data){
   dc('cVenue');
   C.cVenue=new Chart(document.getElementById('cVenue'),{type:'bar',
     data:{labels:['🏠 Casa','✈️ Trasferta'],datasets:[{label:'Punti medi',data:[hA,aA],backgroundColor:['#2979ff','#ffb300'],borderRadius:10,borderSkipped:false}]},
-    options:coc((i)=>{sv('fVenue',i===0?'Home':'Away');onFC();})});
+    options:coc((i)=>{ setFilterToggle('fVenue', i===0?'Home':'Away'); })});
 
   const cm={}; d.forEach(r=>{const c=r.Competizione||'N/D'; if(!cm[c]) cm[c]={gf:0,gs:0}; cm[c].gf+=r.gf; cm[c].gs+=r.gs;});
   dc('cCompGol');
@@ -1590,7 +1744,7 @@ function renderR(data){
       {label:'Fatti',data:Object.values(cm).map(v=>v.gf),backgroundColor:'#00e676',borderRadius:6,borderSkipped:false},
       {label:'Subiti',data:Object.values(cm).map(v=>v.gs),backgroundColor:'#ff3d57',borderRadius:6,borderSkipped:false}
     ]},
-    options:coc((_,l)=>{sv('fComp',l);onFC();})});
+    options:coc((_,l)=>{ setFilterToggle('fComp', l); })});
 
   const hGS=hD.length?(hD.reduce((a,r)=>a+r.gs,0)/hD.length).toFixed(2):0;
   const aGS=aD.length?(aD.reduce((a,r)=>a+r.gs,0)/aD.length).toFixed(2):0;
@@ -1611,11 +1765,13 @@ function renderR(data){
     data:{labels:Object.keys(meseMap).sort(),datasets:[{label:'Punti',data:Object.keys(meseMap).sort().map(k=>meseMap[k]),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
     options:co()});
 
+  // Gol tempo: usa analytics filtrata (FA) se disponibile, altrimenti fallback
+  const useA=(FA && FA.length);
   const t1=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)<=45 && isNoi(r)).length;
   const t2=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)>45 && isNoi(r)).length;
-  const useA=(FA && FA.length);
   const g1=useA?t1:Math.round(GF/2);
   const g2=useA?t2:(GF-g1);
+
   dc('cGolTempo');
   C.cGolTempo=new Chart(document.getElementById('cGolTempo'),{type:'doughnut',
     data:{labels:["1° Tempo","2° Tempo"],datasets:[{data:[g1,g2],backgroundColor:['#2979ff','#00e5ff'],borderWidth:0}]},
@@ -1646,7 +1802,7 @@ function printR(){
 }
 
 /* ─────────────────────────────────────────────
-   PRESENZE
+   PRESENZE (come tuo, invariato dove possibile)
 ───────────────────────────────────────────── */
 function renderP(data){
   const tot=data.length;
@@ -1711,7 +1867,7 @@ function renderP(data){
   C.cTipoD=new Chart(document.getElementById('cTipoD'),{type:'doughnut',
     data:{labels:['Gare','Allenamenti'],datasets:[{data:[gare,allt],backgroundColor:['#2979ff','#00e5ff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-      onClick:function(_,els){if(els.length){sv('fTipo',els[0].index===0?'Gara':'Allenamento');onFC();}},
+      onClick:function(_,els){if(els.length){ setFilterToggle('fTipo', els[0].index===0?'Gara':'Allenamento'); }},
       plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
 
   dc('cRuoloD');
@@ -1779,7 +1935,7 @@ function buildCal(data,gm){
     return;
   }
   let html='<table class="cal-table"><thead><tr><th class="cal-name">Giocatore</th>';
-  dates.forEach(d=>html+=`<th style="min-width:70px">${String(d).slice(5)}</th>`);
+  dates.forEach(d=>html+=`<th style="min-width:66px">${String(d).slice(5)}</th>`);
   html+='</tr></thead><tbody>';
   players.forEach(pk=>{
     html+=`<tr><td class="cal-name">${gm[pk].label}</td>`;
@@ -1851,13 +2007,14 @@ function closeM(){document.getElementById('pModal').classList.remove('open');}
 document.getElementById('pModal').addEventListener('click',function(e){if(e.target===this)closeM();});
 
 /* ─────────────────────────────────────────────
-   ANALYTICS
+   ANALYTICS (✅ IPO non somma + filtri toggle + descrizioni già in HTML)
 ───────────────────────────────────────────── */
 function renderA(data){
   const noi=data.filter(isNoi),avv=data.filter(r=>!isNoi(r));
   const ipoNoi=noi.reduce((a,r)=>a+(+r.PunteggioIPO||0),0);
   const ipoAvv=avv.reduce((a,r)=>a+(+r.PunteggioIPO||0),0);
-  const ipoTot=ipoNoi+ipoAvv;
+  const denom = Math.max(ipoNoi+ipoAvv, 1);
+  const share = Math.round((ipoNoi/denom)*100);
 
   const tiriNoi=noi.filter(r=>isTiro(r.TipoEvento));
   const tiriAvv=avv.filter(r=>isTiro(r.TipoEvento));
@@ -1866,36 +2023,40 @@ function renderA(data){
   const gialli=data.filter(r=>r.TipoEvento==='Cartellino giallo').length;
   const rossi=data.filter(r=>r.TipoEvento==='Cartellino rosso').length;
 
-  document.getElementById('ipoN').textContent=ipoTot;
+  // ✅ IPO principale = NOI (non somma)
+  document.getElementById('ipoN').textContent=ipoNoi;
   document.getElementById('ipoNoi').textContent=ipoNoi;
   document.getElementById('ipoAvv').textContent=ipoAvv;
+  document.getElementById('ipoShare').textContent=share+'%';
 
+  const diff = ipoNoi - ipoAvv;
   document.getElementById('aKpi').innerHTML=`
-    <div class="kpi a"><div class="kl">IPO Noi</div><div class="kv">${ipoNoi}</div></div>
-    <div class="kpi r"><div class="kl">IPO Avv</div><div class="kv">${ipoAvv}</div></div>
-    <div class="kpi b"><div class="kl">IPO/Gara</div><div class="kv">${gare?(ipoNoi/gare).toFixed(1):0}</div></div>
-    <div class="kpi c"><div class="kl">Tiri Noi</div><div class="kv">${tiriNoi.length}</div></div>
+    <div class="kpi b"><div class="kl">IPO NOI</div><div class="kv">${ipoNoi}</div></div>
+    <div class="kpi r"><div class="kl">IPO AVV</div><div class="kv">${ipoAvv}</div></div>
+    <div class="kpi g"><div class="kl">Quota NOI</div><div class="kv">${share}%</div></div>
+    <div class="kpi a"><div class="kl">Diff IPO</div><div class="kv">${diff>=0?'+':''}${diff}</div></div>
+    <div class="kpi c"><div class="kl">Tiri NOI</div><div class="kv">${tiriNoi.length}</div></div>
     <div class="kpi g"><div class="kl">In Porta</div><div class="kv">${ipNoi.length}</div></div>
-    <div class="kpi r"><div class="kl">Tiri Avv</div><div class="kv">${tiriAvv.length}</div></div>
-    <div class="kpi r"><div class="kl">Gialli</div><div class="kv">${gialli}</div></div>
-    <div class="kpi r"><div class="kl">Rossi</div><div class="kv">${rossi}</div></div>
-    <div class="kpi b"><div class="kl">Gare</div><div class="kv">${gare}</div></div>`;
+    <div class="kpi r"><div class="kl">Tiri AVV</div><div class="kv">${tiriAvv.length}</div></div>
+    <div class="kpi b"><div class="kl">IPO/Gara</div><div class="kv">${gare?(ipoNoi/gare).toFixed(1):0}</div></div>
+    <div class="kpi a"><div class="kl">Gare</div><div class="kv">${gare}</div></div>
+    <div class="kpi r"><div class="kl">Cartellini</div><div class="kv">${gialli+rossi}</div></div>`;
 
   const avg=gare?(ipoNoi/gare).toFixed(1):0;
   document.getElementById('ipoIns').innerHTML=
-    `<strong>IPO medio/gara: ${avg}</strong> — ${ipoNoi>ipoAvv?'Dominio offensivo ✅':'Avversario più pericoloso ⚠️'}. `+
-    `Precisione tiri: ${tiriNoi.length?Math.round(ipNoi.length/tiriNoi.length*100):0}%. `+
-    `Saldo IPO: ${ipoNoi>=ipoAvv?'+':''}${ipoNoi-ipoAvv}.`;
+    `<strong>IPO NOI medio/gara: ${avg}</strong> — ${ipoNoi>ipoAvv?'Iniziativa NOI ✅':'Avversario più pericoloso ⚠️'}. `+
+    `Precisione tiri (NOI): ${tiriNoi.length?Math.round(ipNoi.length/tiriNoi.length*100):0}%. `+
+    `Saldo IPO: ${diff>=0?'+':''}${diff} · Quota NOI: ${share}%.`;
 
   const gl=[...new Set(data.map(d=>d.Gara).filter(Boolean))];
 
   dc('cIpoTime');
   C.cIpoTime=new Chart(document.getElementById('cIpoTime'),{type:'line',
     data:{labels:gl,datasets:[
-      {label:'Noi',data:gl.map(g=>noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3},
-      {label:'Avversario',data:gl.map(g=>avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}
+      {label:'Noi',data:gl.map(g=>noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:2},
+      {label:'Avversario',data:gl.map(g=>avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:2}
     ]},
-    options:coc((_,l)=>{sv('fGara',l);onFC();})});
+    options:coc((_,l)=>{ setFilterToggle('fGara', l); })});
 
   buildPitch('pitchNoi',noi,'ZonaEvento');
   buildPitch('pitchAvv',avv,'ZonaEvento');
@@ -1912,13 +2073,13 @@ function renderA(data){
       {label:'Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),backgroundColor:'rgba(41,121,255,.7)',borderRadius:8,borderSkipped:false},
       {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),backgroundColor:'rgba(255,61,87,.6)',borderRadius:8,borderSkipped:false}
     ]},
-    options:coc((i)=>{sv('fPeriodo',String(i+1));onFC();})});
+    options:coc((i)=>{ setFilterToggle('fPeriodo', String(i+1)); })});
 
   const bk={}; for(let i=0;i<=90;i+=5) bk[i]=0;
   data.forEach(r=>{const m=+r.MinutoEvento||0,b=Math.floor(m/5)*5;if(bk[b]!==undefined)bk[b]++;});
   dc('cDens');
   C.cDens=new Chart(document.getElementById('cDens'),{type:'line',
-    data:{labels:Object.keys(bk).map(k=>`${k}'`),datasets:[{label:'Eventi',data:Object.values(bk),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:1}]},
+    data:{labels:Object.keys(bk).map(k=>`${k}'`),datasets:[{label:'Eventi',data:Object.values(bk),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.08)',fill:true,tension:.35,borderWidth:2,pointRadius:0}]},
     options:co()});
 
   dc('cTiriPer');
@@ -1927,7 +2088,7 @@ function renderA(data){
       {label:'Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p && isTiro(r.TipoEvento)).length),backgroundColor:'rgba(41,121,255,.7)',borderRadius:8,borderSkipped:false},
       {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p && isTiro(r.TipoEvento)).length),backgroundColor:'rgba(255,61,87,.6)',borderRadius:8,borderSkipped:false}
     ]},
-    options:coc((i)=>{sv('fPeriodo',String(i+1));onFC();})});
+    options:coc((i)=>{ setFilterToggle('fPeriodo', String(i+1)); })});
 
   const etN={}; tiriNoi.forEach(r=>{const e=r.EsitoTiro||'N/D';etN[e]=(etN[e]||0)+1;});
   dc('cEsitoNoi');
@@ -1970,9 +2131,11 @@ function renderA(data){
   const em={}; data.forEach(r=>{const e=r.TipoEvento||'N/D';em[e]=(em[e]||0)+1;});
   dc('cEventi');
   C.cEventi=new Chart(document.getElementById('cEventi'),{type:'doughnut',
-    data:{labels:Object.keys(em),datasets:[{data:Object.values(em),backgroundColor:['#2979ff','#00e676','#ffb300','#ff3d57','#00e5ff','#7c4dff','#ff6d00','#1de9b6','#e040fb','#69f0ae','#ff5252'],borderWidth:0}]},
+    data:{labels:Object.keys(em),datasets:[{data:Object.values(em),
+      backgroundColor:['#2979ff','#00e676','#ffb300','#ff3d57','#00e5ff','#7c4dff','#ff6d00','#1de9b6','#e040fb','#69f0ae','#ff5252'],
+      borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'45%',
-      onClick:function(_,els){if(els.length){sv('fEvento',this.data.labels[els[0].index]);onFC();}},
+      onClick:function(_,els){ if(els.length){ setFilterToggle('fEvento', this.data.labels[els[0].index]); } },
       plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
 
   const pi={}; noi.filter(r=>r.EsitoPallaInattiva).forEach(r=>{const e=r.EsitoPallaInattiva;pi[e]=(pi[e]||0)+1;});
@@ -1991,23 +2154,23 @@ function renderA(data){
   const gs=Object.entries(gm).sort((a,b)=>b[1]-a[1]).slice(0,15);
   dc('cIpoGioc');
   C.cIpoGioc=new Chart(document.getElementById('cIpoGioc'),{type:'bar',
-    data:{labels:gs.map(g=>g[0].includes('_')?(_labelByKey[g[0]]||g[0].replace(/_/g,' ')):g[0]),datasets:[{label:'IPO',data:gs.map(g=>g[1]),backgroundColor:'#00e5ff',borderRadius:6,borderSkipped:false}]},
+    data:{labels:gs.map(g=>g[0].includes('_')?(_labelByKey[g[0]]||g[0].replace(/_/g,' ')):g[0]),
+      datasets:[{label:'IPO',data:gs.map(g=>g[1]),backgroundColor:'#00e5ff',borderRadius:6,borderSkipped:false}]},
     options:{...coc((i)=>{
       const rawKey=gs[i][0];
-      if(rawKey.includes('_')) sv('fGioc',rawKey);
+      if(rawKey.includes('_')) setFilterToggle('fGioc', rawKey);
       else{
         const maybe=_keyByLabel[norm(rawKey)];
-        if(maybe) sv('fGioc',maybe);
+        if(maybe) setFilterToggle('fGioc', maybe);
       }
-      onFC();
     }),indexAxis:'y',plugins:{legend:{display:false}}}});
 
   let cN=0,cA=0;
   dc('cIpoCum');
   C.cIpoCum=new Chart(document.getElementById('cIpoCum'),{type:'line',
     data:{labels:gl,datasets:[
-      {label:'Noi',data:gl.map(g=>{cN+=noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cN;}),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3},
-      {label:'Avversario',data:gl.map(g=>{cA+=avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cA;}),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}
+      {label:'Noi',data:gl.map(g=>{cN+=noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cN;}),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:1},
+      {label:'Avversario',data:gl.map(g=>{cA+=avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cA;}),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.35,borderWidth:2,pointRadius:1}
     ]},
     options:co()});
 
@@ -2036,8 +2199,10 @@ function renderA(data){
       <td style="color:var(--mu2);max-width:120px;overflow:hidden;text-overflow:ellipsis">${r.NotaEvento||''}</td></tr>`;
   }).join('');
 }
+
 function buildPitch(id,data,field){
-  const el=document.getElementById(id); el.innerHTML='';
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML='';
   const zi={}; for(let z=1;z<=12;z++) zi[z]=0;
   data.forEach(r=>{const z=+r[field]; if(z>=1&&z<=12) zi[z]+=(+r.PunteggioIPO||1);});
   const mx=Math.max(...Object.values(zi),1);
@@ -2057,41 +2222,41 @@ function buildPitch(id,data,field){
   el.appendChild(svg);
 
   Object.entries(ZONES).forEach(([zn,zd])=>{
-    const v=zi[+zn]||0,r=v/mx;
-    const bg=r===0?'rgba(0,230,118,.04)':r<.2?'rgba(255,179,0,.15)':r<.4?'rgba(255,179,0,.35)':r<.6?'rgba(255,61,87,.3)':r<.8?'rgba(255,61,87,.55)':'rgba(255,61,87,.85)';
+    const v=zi[+zn]||0,ratio=v/mx;
+    const bg=ratio===0?'rgba(0,230,118,.04)':ratio<.2?'rgba(255,179,0,.15)':ratio<.4?'rgba(255,179,0,.35)':ratio<.6?'rgba(255,61,87,.3)':ratio<.8?'rgba(255,61,87,.55)':'rgba(255,61,87,.85)';
     const div=document.createElement('div');
     div.style.cssText=`position:absolute;left:${zd.l}%;top:${zd.t}%;width:${zd.w}%;height:${zd.h}%;
       background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,.05);cursor:pointer;transition:.15s;z-index:2`;
+      border:1px solid rgba(255,255,255,.05);transition:.15s;z-index:2;user-select:none`;
     div.innerHTML=`<span style="font-family:'Barlow Condensed';font-size:clamp(9px,1.8vw,15px);font-weight:900;color:rgba(255,255,255,.92);line-height:1">${v}</span>
       <span style="font-size:clamp(6px,.9vw,9px);color:rgba(255,255,255,.35)">Z${zn}</span>`;
     div.title=`Z${zn}: ${v}`;
-    div.onmouseenter=function(){this.style.filter='brightness(1.35)';this.style.zIndex='10';};
+    div.onmouseenter=function(){this.style.filter='brightness(1.25)';this.style.zIndex='10';};
     div.onmouseleave=function(){this.style.filter='';this.style.zIndex='2';};
     el.appendChild(div);
   });
 }
 
 /* ─────────────────────────────────────────────
-   ROSA
+   ROSA (come tuo, invariato dove possibile)
 ───────────────────────────────────────────── */
 function rosterBasePresence(){
   const f=getF();
   return DP.filter(r=>{
-    if(f.tipo && r.Tipo!==f.tipo) return false;
-    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
-    if(f.start && (String(r.Data||'')<f.start)) return false;
-    if(f.end && (String(r.Data||'')>f.end)) return false;
+    if(f.fTipo && r.Tipo!==f.fTipo) return false;
+    if(f.fStagione && !(String(r.Data||'').startsWith(f.fStagione))) return false;
+    if(f.fS && (String(r.Data||'')<f.fS)) return false;
+    if(f.fE && (String(r.Data||'')>f.fE)) return false;
     return true;
   });
 }
 function rosterBaseAnalytics(){
   const f=getF();
   return DA.filter(r=>{
-    if(f.comp && r.Competizione!==f.comp) return false;
-    if(f.stagione && r.Data && !(String(r.Data).startsWith(f.stagione))) return false;
-    if(f.start && r.Data && (String(r.Data)<f.start)) return false;
-    if(f.end && r.Data && (String(r.Data)>f.end)) return false;
+    if(f.fComp && r.Competizione!==f.fComp) return false;
+    if(f.fStagione && r.Data && !(String(r.Data).startsWith(f.fStagione))) return false;
+    if(f.fS && r.Data && (String(r.Data)<f.fS)) return false;
+    if(f.fE && r.Data && (String(r.Data)>f.fE)) return false;
     return true;
   });
 }
@@ -2186,10 +2351,8 @@ function renderRo(){
   if(!_roSelKey && arr.length) _roSelKey=arr[0].key;
   renderRosaSide(S[_roSelKey]);
 }
-function selectRosa(key){
-  _roSelKey=key;
-  renderRo();
-}
+function selectRosa(key){ _roSelKey=key; renderRo(); }
+
 function renderRosaSide(x){
   if(!x){
     document.getElementById('roSelName').textContent='—';
@@ -2232,6 +2395,7 @@ function renderRosaSide(x){
     options:{...co(),plugins:{legend:{display:false}}}
   });
 }
+
 function exportRosaCSV(){
   const presBase = rosterBasePresence();
   const anaBase  = rosterBaseAnalytics();
@@ -2295,9 +2459,13 @@ function toCSV(arr){
 }
 
 /* ─────────────────────────────────────────────
-   TEMPLATE EXCEL (4 fogli)
+   TEMPLATE EXCEL (4 fogli) ✅
 ───────────────────────────────────────────── */
 function dlTpl(){
+  if(typeof XLSX === 'undefined'){
+    alert('Impossibile creare il template: XLSX non caricato.');
+    return;
+  }
   const wb=XLSX.utils.book_new();
 
   const R=[
@@ -2334,6 +2502,9 @@ function dlTpl(){
 
   XLSX.writeFile(wb,'coachlab-template.xlsx');
 }
+
+/* Avvio chips vuoti */
+renderChips();
 </script>
 </body>
 </html>
