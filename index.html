@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
   --bg:#06080f;--s1:#0f1525;--s2:#151e30;
@@ -14,6 +15,7 @@
   --g:#00e676;--r:#ff3d57;--a:#ffb300;--b:#2979ff;--c:#00e5ff;--p:#7c4dff;
   --tx:#e8edf5;--mu:#4a5568;--mu2:#6b7a8d;
   --fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+  --rosa:#ff4da6;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);font-family:var(--fb);color:var(--tx);overflow-x:hidden}
@@ -31,6 +33,9 @@ pointer-events:none;z-index:0}
 .nt{font-family:var(--fh);font-size:13px;font-weight:700;letter-spacing:.06em;padding:7px 16px;border-radius:9px;cursor:pointer;transition:.15s;color:var(--mu2);border:none;background:transparent}
 .nt.active{background:var(--b);color:#fff}
 .nt:hover:not(.active){color:var(--tx);background:var(--s2)}
+/* tab rosa */
+.nt.rosa.active{background:var(--rosa);color:#fff}
+.nt.rosa:hover:not(.active){color:#fff;background:rgba(255,77,166,.25)}
 
 /* FILTER ROW */
 #frow{max-width:1600px;margin:0 auto;padding:6px 20px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-top:1px solid var(--bo)}
@@ -46,6 +51,7 @@ pointer-events:none;z-index:0}
 /* CHIPS */
 #chips{max-width:1600px;margin:0 auto;padding:0 20px 4px;display:flex;flex-wrap:wrap;gap:4px;min-height:4px}
 .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(41,121,255,.12);border:1px solid rgba(41,121,255,.3);border-radius:999px;padding:2px 8px;font-size:10px;color:#90caf9}
+.chip.rosa{background:rgba(255,77,166,.10);border-color:rgba(255,77,166,.25);color:#ff8ac7}
 .chip-x{cursor:pointer;font-size:12px;line-height:1;opacity:.7}
 .chip-x:hover{opacity:1}
 
@@ -84,6 +90,7 @@ pointer-events:none;z-index:0}
 .kl{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--mu2);font-weight:600;margin-bottom:3px}
 .kv{font-family:var(--fh);font-size:24px;font-weight:800;line-height:1}
 .kpi.g .kv{color:var(--g)}.kpi.b .kv{color:var(--b)}.kpi.a .kv{color:var(--a)}.kpi.r .kv{color:var(--r)}.kpi.c .kv{color:var(--c)}.kpi.p .kv{color:var(--p)}
+.kpi.rosa .kv{color:var(--rosa)}
 
 /* CARD */
 .card{background:var(--s1);border:1px solid var(--bo);border-radius:12px;padding:12px 14px;transition:.15s;overflow:hidden}
@@ -110,6 +117,8 @@ pointer-events:none;z-index:0}
 .tbl th{background:var(--s2);color:var(--mu2);padding:7px 10px;font-size:10px;text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;position:sticky;top:0;z-index:2}
 .tbl td{padding:7px 10px;border-top:1px solid var(--bo);font-size:11px;white-space:nowrap}
 .tbl tr:hover td{background:var(--s2)}
+.tbl tr.sel td{background:rgba(255,77,166,.10)!important}
+.tbl tr.sel td:first-child{border-left:2px solid rgba(255,77,166,.9)}
 
 /* BADGE */
 .bd{display:inline-block;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700}
@@ -119,10 +128,13 @@ pointer-events:none;z-index:0}
 .bb{background:rgba(41,121,255,.13);color:var(--b)}
 .bc{background:rgba(0,229,255,.13);color:var(--c)}
 .bp{background:rgba(124,77,255,.13);color:var(--p)}
+.brosa{background:rgba(255,77,166,.13);color:#ff8ac7;border:1px solid rgba(255,77,166,.25)}
 
 /* INSIGHT */
 .insight{background:rgba(41,121,255,.07);border:1px solid rgba(41,121,255,.2);border-radius:9px;padding:9px 12px;font-size:11px;color:#90caf9;line-height:1.5;margin-top:8px}
 .insight strong{color:var(--b)}
+.insight.rosa{background:rgba(255,77,166,.07);border-color:rgba(255,77,166,.18);color:#ffb6da}
+.insight.rosa strong{color:var(--rosa)}
 
 /* IPO BIG */
 .ipo-big{font-family:var(--fh);font-size:60px;font-weight:900;line-height:1}
@@ -168,8 +180,10 @@ pointer-events:none;z-index:0}
 
 /* DIVIDER */
 .sec-title{font-family:var(--fh);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--mu2);text-transform:uppercase;margin:12px 0 6px;padding-left:2px;border-left:2px solid var(--b)}
+.sec-title.rosa{border-left-color:var(--rosa)}
 </style>
 </head>
+
 <body>
 
 <div id="shell">
@@ -179,13 +193,18 @@ pointer-events:none;z-index:0}
       <button class="nt active" onclick="showPage('risultati',this)">⚽ RISULTATI</button>
       <button class="nt" onclick="showPage('presenze',this)">👤 PRESENZE</button>
       <button class="nt" onclick="showPage('analytics',this)">📊 ANALYTICS</button>
+      <button class="nt rosa" onclick="showPage('rosa',this)">🌸 ROSA</button>
     </div>
   </div>
+
   <div id="frow">
     <span class="fl">Filtri:</span>
     <select id="fComp" onchange="onFC()"><option value="">Tutte le competizioni</option></select>
     <select id="fVenue" onchange="onFC()"><option value="">Casa+Trasferta</option><option value="Home">🏠 Casa</option><option value="Away">✈️ Away</option></select>
+
+    <!-- giocatore ora è KEY (COGNOME_NOME) -->
     <select id="fGioc" onchange="onFC()"><option value="">Tutti i giocatori</option></select>
+
     <select id="fTipo" onchange="onFC()"><option value="">Gara+Allenamento</option><option value="Gara">Gara</option><option value="Allenamento">Allenamento</option></select>
     <select id="fGara" onchange="onFC()"><option value="">Tutte le gare</option></select>
     <select id="fEvento" onchange="onFC()"><option value="">Tutti gli eventi</option></select>
@@ -196,354 +215,446 @@ pointer-events:none;z-index:0}
       <option value="5">P5 61'–75'</option><option value="6">P6 76'–90+'</option>
     </select>
     <select id="fStagione" onchange="onFC()"><option value="">Tutta la stagione</option></select>
-    <span class="fl">Dal</span><input type="date" id="fS" onchange="onFC()"/>
-    <span class="fl">Al</span><input type="date" id="fE" onchange="onFC()"/>
+
+    <span class="fl" id="lblS">Dal</span><input type="date" id="fS" onchange="onFC()"/>
+    <span class="fl" id="lblE">Al</span><input type="date" id="fE" onchange="onFC()"/>
+
     <button class="fbtn red" onclick="resetF()">✕ Reset</button>
   </div>
+
   <div id="chips"></div>
 </div>
 
 <div id="main">
-<!-- LANDING -->
-<div id="landing">
-  <div class="upbar">
-    <label class="uplabel">📂 Carica Excel (3 fogli)<input type="file" id="fw" accept=".xlsx,.xls"/></label>
-    <span class="upname" id="wname">nessun file</span>
-    <button class="btn gr" onclick="dlTpl()">⬇ Template Excel</button>
-  </div>
-  <div class="guide">
-    <div class="gtitle">📖 Guida Excel — 3 fogli</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
-      <div><div class="gcol-head" style="color:var(--g)">RISULTATI</div>
-        <div class="gitem"><div class="gf">Data</div><div class="gv">YYYY-MM-DD</div></div>
-        <div class="gitem"><div class="gf">Avversario · Venue · Campo</div><div class="gv">Home / Away</div></div>
-        <div class="gitem"><div class="gf">GolFatti · GolSubiti</div><div class="gv">Interi</div></div>
-        <div class="gitem"><div class="gf">Competizione · Giornata · Note</div><div class="gv">Testo libero</div></div>
+  <!-- LANDING -->
+  <div id="landing">
+    <div class="upbar">
+      <label class="uplabel">📂 Carica Excel (4 fogli) <input type="file" id="fw" accept=".xlsx,.xls"/></label>
+      <span class="upname" id="wname">nessun file</span>
+      <button class="btn gr" onclick="dlTpl()">⬇ Template Excel</button>
+    </div>
+
+    <div class="guide">
+      <div class="gtitle">📖 Guida Excel — 4 fogli</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+        <div>
+          <div class="gcol-head" style="color:var(--g)">RISULTATI</div>
+          <div class="gitem"><div class="gf">Data</div><div class="gv">YYYY-MM-DD</div></div>
+          <div class="gitem"><div class="gf">Avversario · Venue · Campo</div><div class="gv">Home / Away</div></div>
+          <div class="gitem"><div class="gf">GolFatti · GolSubiti</div><div class="gv">Interi</div></div>
+          <div class="gitem"><div class="gf">Competizione · Giornata · Note</div><div class="gv">Testo libero</div></div>
+        </div>
+
+        <div>
+          <div class="gcol-head" style="color:var(--a)">PRESENZE</div>
+          <div class="gitem"><div class="gf">Nome · Cognome · Data</div><div class="gv">YYYY-MM-DD</div></div>
+          <div class="gitem"><div class="gf">Tipo</div><div class="gv">Gara / Allenamento</div></div>
+          <div class="gitem"><div class="gf">Presente</div><div class="gv">Si / No</div></div>
+          <div class="gitem"><div class="gf">Minuti · Ruolo · Nota</div><div class="gv">Titolare / Riserva</div></div>
+          <div class="gitem"><div class="gf">(Consigliato) COGNOME_NOME</div><div class="gv">Es: ROSSI_MARCO</div></div>
+        </div>
+
+        <div>
+          <div class="gcol-head" style="color:var(--c)">ANALYTICS</div>
+          <div class="gitem"><div class="gf">TipoEvento</div><div class="gv">Occasione da goal · Azione promettente · Tiro... · Cross... · Corner · Cartellino G/R</div></div>
+          <div class="gitem"><div class="gf">ZonaEvento · ZonaInizioAzione · ZonaRifinitura · ZonaRecuperoPalla</div><div class="gv">1–12 (griglia 4×3)</div></div>
+          <div class="gitem"><div class="gf">MinutoEvento · EsitoTiro · TipologiaTiro</div><div class="gv">In porta/Fuori/Gol/Parato/Palo — Destro/Sinistro/Testa</div></div>
+          <div class="gitem"><div class="gf">GiocatoreEvento · GiocatoreRifinitura</div><div class="gv">Testo libero</div></div>
+          <div class="gitem"><div class="gf">(Consigliato) COGNOME_NOME</div><div class="gv">Es: ROSSI_MARCO</div></div>
+          <div class="gitem"><div class="gf">Squadra</div><div class="gv">Noi / Avversario</div></div>
+          <div class="gitem"><div class="gf">Gara · Competizione · Risultato</div><div class="gv">Identificativo gara</div></div>
+        </div>
+
+        <div>
+          <div class="gcol-head" style="color:var(--rosa)">ROSA</div>
+          <div class="gitem"><div class="gf">NOME · COGNOME</div><div class="gv">Anagrafica</div></div>
+          <div class="gitem"><div class="gf">RUOLO PREFERITO</div><div class="gv">Es: Portiere / Difensore / Centrocampista / Attaccante</div></div>
+          <div class="gitem"><div class="gf">ALTRI RUOLI</div><div class="gv">Es: Terzino; Esterno; Punta</div></div>
+          <div class="gitem"><div class="gf">Chiave</div><div class="gv">COGNOME_NOME (generata automaticamente)</div></div>
+        </div>
       </div>
-      <div><div class="gcol-head" style="color:var(--a)">PRESENZE</div>
-        <div class="gitem"><div class="gf">Nome · Cognome · Data</div><div class="gv">YYYY-MM-DD</div></div>
-        <div class="gitem"><div class="gf">Tipo</div><div class="gv">Gara / Allenamento</div></div>
-        <div class="gitem"><div class="gf">Presente</div><div class="gv">Si / No</div></div>
-        <div class="gitem"><div class="gf">Minuti · Ruolo · Nota</div><div class="gv">Titolare / Riserva</div></div>
+    </div>
+  </div>
+
+  <!-- AFTER LOAD -->
+  <div id="afterLoad">
+
+    <!-- ═══ RISULTATI ═══ -->
+    <div id="page-risultati" class="page active">
+      <div class="krow" id="rKpi"></div>
+
+      <div class="sec-title">📈 Andamento Stagionale</div>
+      <div class="g2 mb">
+        <div class="card dd">
+          <div class="ct">Punti Cumulati</div><div class="cs">Progressione stagionale — click gara per filtrare</div>
+          <div class="ch ch-md"><canvas id="cPuntiCum"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Punti per Giornata</div><div class="cs">V=3 N=1 S=0</div>
+          <div class="ch ch-md"><canvas id="cPuntiGara"></canvas></div>
+        </div>
       </div>
-      <div><div class="gcol-head" style="color:var(--c)">ANALYTICS</div>
-        <div class="gitem"><div class="gf">TipoEvento</div><div class="gv">Occasione da goal · Azione promettente · Tiro da fuori area · Tiro in area · Rigore · Cross · Punizione centrale/laterale · Corner · Cartellino G/R</div></div>
-        <div class="gitem"><div class="gf">ZonaEvento · ZonaInizioAzione · ZonaRifinitura · ZonaRecuperoPalla</div><div class="gv">1–12 (griglia 4×3)</div></div>
-        <div class="gitem"><div class="gf">MinutoEvento · EsitoTiro · TipologiaTiro</div><div class="gv">In porta/Fuori/Gol/Parato/Palo — Destro/Sinistro/Testa</div></div>
-        <div class="gitem"><div class="gf">GiocatoreEvento · GiocatoreRifinitura</div><div class="gv">Nome giocatore</div></div>
-        <div class="gitem"><div class="gf">Squadra</div><div class="gv">Noi / Avversario (per distinguere eventi)</div></div>
-        <div class="gitem"><div class="gf">Gara · Competizione · Risultato</div><div class="gv">Identificativo gara</div></div>
+
+      <div class="g3 mb">
+        <div class="card">
+          <div class="ct">Gol Fatti / Subiti</div><div class="cs">Per gara</div>
+          <div class="ch ch-md"><canvas id="cGol"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Clean Sheet</div><div class="cs">Gare senza subire gol</div>
+          <div class="ch ch-md"><canvas id="cClean"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Differenza Reti</div><div class="cs">GF–GS per gara</div>
+          <div class="ch ch-md"><canvas id="cDiffReti"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">🔬 Correlazioni &amp; Analisi</div>
+      <div class="g3 mb">
+        <div class="card dd">
+          <div class="ct">V · N · S</div><div class="cs">Distribuzione — click per filtrare</div>
+          <div class="ch ch-sm"><canvas id="cWDL"></canvas></div>
+        </div>
+        <div class="card dd">
+          <div class="ct">Casa vs Trasferta</div><div class="cs">Punti medi — click per filtrare</div>
+          <div class="ch ch-sm"><canvas id="cVenue"></canvas></div>
+        </div>
+        <div class="card dd">
+          <div class="ct">Gol per Competizione</div><div class="cs">Click per filtrare</div>
+          <div class="ch ch-sm"><canvas id="cCompGol"></canvas></div>
+        </div>
+      </div>
+
+      <div class="g3 mb">
+        <div class="card">
+          <div class="ct">Media Gol Subiti</div><div class="cs">Casa vs Trasferta</div>
+          <div class="ch ch-sm"><canvas id="cGSVenue"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Striscia Form</div><div class="cs">Ultime 5 gare (V/N/S)</div>
+          <div class="ch ch-sm"><canvas id="cForm"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Punti per Mese</div><div class="cs">Andamento mensile</div>
+          <div class="ch ch-sm"><canvas id="cMese"></canvas></div>
+        </div>
+      </div>
+
+      <div class="g2 mb">
+        <div class="card">
+          <div class="ct">Gol Fatti — 1° vs 2° Tempo</div><div class="cs">Produttività per metà gara</div>
+          <div class="ch ch-sm"><canvas id="cGolTempo"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Punti per Fascia di Gol Fatti</div><div class="cs">Correlazione gol→punti</div>
+          <div class="ch ch-sm"><canvas id="cCorrGolPt"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">📋 Registro Partite</div>
+      <div class="card mb">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div><div class="ct">Registro Partite</div><div class="cs">Archivio completo</div></div>
+          <button class="btn sm gh" onclick="printR()">🖨 Stampa</button>
+        </div>
+        <div id="printHdr" style="display:none;margin-bottom:8px"><strong>CoachLab — Registro</strong> — <span id="printDate"></span></div>
+        <div class="tw"><table class="tbl"><thead><tr>
+          <th>Data</th><th>Comp.</th><th>G.</th><th>Avversario</th><th>Venue</th><th>Campo</th><th>Risultato</th><th>Esito</th><th>Note</th>
+        </tr></thead><tbody id="tRis"></tbody></table></div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- AFTER LOAD -->
-<div id="afterLoad">
+    <!-- ═══ PRESENZE ═══ -->
+    <div id="page-presenze" class="page">
+      <div class="krow" id="pKpi"></div>
 
-<!-- ═══ RISULTATI ═══ -->
-<div id="page-risultati" class="page active">
-  <div class="krow" id="rKpi"></div>
-
-  <div class="sec-title">📈 Andamento Stagionale</div>
-  <div class="g2 mb">
-    <div class="card dd">
-      <div class="ct">Punti Cumulati</div><div class="cs">Progressione stagionale — click gara per filtrare</div>
-      <div class="ch ch-md"><canvas id="cPuntiCum"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Punti per Giornata</div><div class="cs">V=3 N=1 S=0</div>
-      <div class="ch ch-md"><canvas id="cPuntiGara"></canvas></div>
-    </div>
-  </div>
-  <div class="g3 mb">
-    <div class="card">
-      <div class="ct">Gol Fatti / Subiti</div><div class="cs">Per gara</div>
-      <div class="ch ch-md"><canvas id="cGol"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Clean Sheet</div><div class="cs">Gare senza subire gol</div>
-      <div class="ch ch-md"><canvas id="cClean"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Differenza Reti</div><div class="cs">GF–GS per gara</div>
-      <div class="ch ch-md"><canvas id="cDiffReti"></canvas></div>
-    </div>
-  </div>
-
-  <div class="sec-title">🔬 Correlazioni & Analisi</div>
-  <div class="g3 mb">
-    <div class="card dd">
-      <div class="ct">V · N · S</div><div class="cs">Distribuzione — click per filtrare</div>
-      <div class="ch ch-sm"><canvas id="cWDL"></canvas></div>
-    </div>
-    <div class="card dd">
-      <div class="ct">Casa vs Trasferta</div><div class="cs">Punti medi — click per filtrare</div>
-      <div class="ch ch-sm"><canvas id="cVenue"></canvas></div>
-    </div>
-    <div class="card dd">
-      <div class="ct">Gol per Competizione</div><div class="cs">Click per filtrare</div>
-      <div class="ch ch-sm"><canvas id="cCompGol"></canvas></div>
-    </div>
-  </div>
-  <div class="g3 mb">
-    <div class="card">
-      <div class="ct">Media Gol Subiti</div><div class="cs">Casa vs Trasferta</div>
-      <div class="ch ch-sm"><canvas id="cGSVenue"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Striscia Form</div><div class="cs">Ultime 5 gare (V/N/S)</div>
-      <div class="ch ch-sm"><canvas id="cForm"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Punti per Mese</div><div class="cs">Andamento mensile</div>
-      <div class="ch ch-sm"><canvas id="cMese"></canvas></div>
-    </div>
-  </div>
-  <div class="g2 mb">
-    <div class="card">
-      <div class="ct">Gol Fatti — 1° vs 2° Tempo</div><div class="cs">Produttività per metà gara</div>
-      <div class="ch ch-sm"><canvas id="cGolTempo"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Punti per Fascia di Gol Fatti</div><div class="cs">Correlazione gol→punti</div>
-      <div class="ch ch-sm"><canvas id="cCorrGolPt"></canvas></div>
-    </div>
-  </div>
-
-  <div class="sec-title">📋 Registro Partite</div>
-  <div class="card mb">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-      <div><div class="ct">Registro Partite</div><div class="cs">Archivio completo</div></div>
-      <button class="btn sm gh" onclick="printR()">🖨 Stampa</button>
-    </div>
-    <div id="printHdr" style="display:none;margin-bottom:8px"><strong>CoachLab — Registro</strong> — <span id="printDate"></span></div>
-    <div class="tw"><table class="tbl"><thead><tr>
-      <th>Data</th><th>Comp.</th><th>G.</th><th>Avversario</th><th>Venue</th><th>Campo</th><th>Risultato</th><th>Esito</th><th>Note</th>
-    </tr></thead><tbody id="tRis"></tbody></table></div>
-  </div>
-</div>
-
-<!-- ═══ PRESENZE ═══ -->
-<div id="page-presenze" class="page">
-  <div class="krow" id="pKpi"></div>
-
-  <div class="sec-title">📊 Panoramica Squadra</div>
-  <div class="g3 mb">
-    <div class="card dd">
-      <div class="ct">% Presenze</div><div class="cs">Click giocatore → dettaglio</div>
-      <div class="ch ch-xl"><canvas id="cPresBar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Minuti Totali</div><div class="cs">Carico stagionale</div>
-      <div class="ch ch-xl"><canvas id="cMinBar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Presenze Cumulate</div><div class="cs">Progressione squadra nel tempo</div>
-      <div class="ch ch-xl"><canvas id="cPresCum"></canvas></div>
-    </div>
-  </div>
-  <div class="g4 mb">
-    <div class="card dd">
-      <div class="ct">Presenti/Assenti</div>
-      <div class="ch ch-sm"><canvas id="cPresD"></canvas></div>
-    </div>
-    <div class="card dd">
-      <div class="ct">Gara/Allenamento</div>
-      <div class="ch ch-sm"><canvas id="cTipoD"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Titolari/Riserve</div>
-      <div class="ch ch-sm"><canvas id="cRuoloD"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Disponibilità Media %</div><div class="cs">Per mese</div>
-      <div class="ch ch-sm"><canvas id="cPresMese"></canvas></div>
-    </div>
-  </div>
-
-  <div class="sec-title">🔬 Correlazioni Presenze</div>
-  <div class="g3 mb">
-    <div class="card">
-      <div class="ct">Minutaggio Progressivo</div><div class="cs">Top 8 giocatori — minuti accumulati</div>
-      <div class="ch ch-lg"><canvas id="cMinCum"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Tasso Presenza per Mese</div><div class="cs">Squadra — % sessioni coperte</div>
-      <div class="ch ch-lg"><canvas id="cPresMeseBar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Presenze Gara vs All.</div><div class="cs">Per giocatore — comparativo</div>
-      <div class="ch ch-lg"><canvas id="cGaraVsAll"></canvas></div>
-    </div>
-  </div>
-
-  <div class="sec-title">📅 Calendario Presenze</div>
-  <div class="card mb">
-    <div class="ct">Calendario Presenze per Giocatore</div>
-    <div class="cs" style="margin-bottom:8px">🟢 Presente · 🔴 Assente · 🟡 Gara</div>
-    <div class="cal-wrap"><div id="calGrid"></div></div>
-  </div>
-
-  <div class="sec-title">📋 Registro & Dettaglio</div>
-  <div class="card mb">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-      <div><div class="ct">Classifica Presenze</div><div class="cs">Click riga → dettaglio giocatore</div></div>
-    </div>
-    <div class="tw"><table class="tbl"><thead><tr>
-      <th>#</th><th>Giocatore</th><th>Pres.</th><th>%</th><th>Gare</th><th>All.</th><th>Titolare</th><th>Ris.</th><th>Min.</th><th>Media</th>
-    </tr></thead><tbody id="tPres"></tbody></table></div>
-  </div>
-  <div class="card mb">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-      <div><div class="ct">Registro Presenze</div></div>
-      <input type="text" placeholder="🔍 Cerca..." id="pSrch" style="background:var(--s2);border:1px solid var(--bo);border-radius:8px;padding:5px 10px;color:var(--tx);font-size:11px;outline:none;width:180px" oninput="srchP()"/>
-    </div>
-    <div class="tw"><table class="tbl"><thead><tr>
-      <th>Data</th><th>Giocatore</th><th>Tipo</th><th>Presente</th><th>Ruolo</th><th>Min.</th><th>Nota</th>
-    </tr></thead><tbody id="tPresReg"></tbody></table></div>
-  </div>
-</div>
-
-<!-- ═══ ANALYTICS ═══ -->
-<div id="page-analytics" class="page">
-  <div class="krow" id="aKpi"></div>
-
-  <div class="sec-title">🎯 IPO & Pericolosità</div>
-  <div class="g12 mb">
-    <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px">
-      <div class="cs">IPO TOTALE</div>
-      <div class="ipo-big" id="ipoN" style="color:var(--a)">0</div>
-      <div style="font-size:9px;color:var(--mu2)">Index of Playing Opportunities</div>
-      <div style="display:flex;gap:12px;margin-top:6px">
-        <div><div style="font-size:9px;color:var(--mu2)">NOI</div><div class="ipo-big" id="ipoNoi" style="font-size:32px;color:var(--b)">0</div></div>
-        <div><div style="font-size:9px;color:var(--mu2)">AVV.</div><div class="ipo-big" id="ipoAvv" style="font-size:32px;color:var(--r)">0</div></div>
+      <div class="sec-title">📊 Panoramica Squadra</div>
+      <div class="g3 mb">
+        <div class="card dd">
+          <div class="ct">% Presenze</div><div class="cs">Click giocatore → dettaglio</div>
+          <div class="ch ch-xl"><canvas id="cPresBar"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Minuti Totali</div><div class="cs">Carico stagionale</div>
+          <div class="ch ch-xl"><canvas id="cMinBar"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Presenze Cumulate</div><div class="cs">Progressione squadra nel tempo</div>
+          <div class="ch ch-xl"><canvas id="cPresCum"></canvas></div>
+        </div>
       </div>
-      <div class="insight" id="ipoIns" style="text-align:left;font-size:10px"></div>
-    </div>
-    <div class="card">
-      <div class="ct">IPO nel Tempo</div><div class="cs">Andamento gara per gara — Noi vs Avversario</div>
-      <div class="ch ch-lg"><canvas id="cIpoTime"></canvas></div>
-    </div>
-  </div>
 
-  <div class="sec-title">🗺 Heatmap Pericolosità</div>
-  <div class="g3 mb">
-    <div class="card">
-      <div class="ct">Zona Evento — NOI</div><div class="cs">IPO per zona — click zona per filtrare</div>
-      <div class="pitch" id="pitchNoi"></div>
-    </div>
-    <div class="card">
-      <div class="ct">Zona Evento — AVVERSARIO</div><div class="cs">Pericolosità concessa</div>
-      <div class="pitch" id="pitchAvv"></div>
-    </div>
-    <div class="card">
-      <div class="ct">Zona Rifinitura</div><div class="cs">Dove nascono le azioni pericolose</div>
-      <div class="pitch" id="pitchRif"></div>
-    </div>
-  </div>
-  <div class="g2 mb">
-    <div class="card">
-      <div class="ct">Zona Recupero Palla</div><div class="cs">Dove recuperiamo il possesso</div>
-      <div class="pitch" id="pitchRec"></div>
-    </div>
-    <div class="card">
-      <div class="ct">Zona Inizio Azione</div><div class="cs">Da dove partono le azioni</div>
-      <div class="pitch" id="pitchInizio"></div>
-    </div>
-  </div>
+      <div class="g4 mb">
+        <div class="card dd">
+          <div class="ct">Presenti/Assenti</div>
+          <div class="ch ch-sm"><canvas id="cPresD"></canvas></div>
+        </div>
+        <div class="card dd">
+          <div class="ct">Gara/Allenamento</div>
+          <div class="ch ch-sm"><canvas id="cTipoD"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Titolari/Riserve</div>
+          <div class="ch ch-sm"><canvas id="cRuoloD"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Disponibilità Media %</div><div class="cs">Per mese</div>
+          <div class="ch ch-sm"><canvas id="cPresMese"></canvas></div>
+        </div>
+      </div>
 
-  <div class="sec-title">⏱ Analisi Temporale</div>
-  <div class="g2 mb">
-    <div class="card dd">
-      <div class="ct">IPO per Periodo — NOI vs AVV</div><div class="cs">Click periodo per filtrare</div>
-      <div class="ch ch-md"><canvas id="cIpoPer"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Densità per Minuto</div><div class="cs">Tutti gli eventi — bucket 5'</div>
-      <div class="ch ch-md"><canvas id="cDens"></canvas></div>
-    </div>
-  </div>
+      <div class="sec-title">🔬 Correlazioni Presenze</div>
+      <div class="g3 mb">
+        <div class="card">
+          <div class="ct">Minutaggio Progressivo</div><div class="cs">Top 8 giocatori — minuti accumulati</div>
+          <div class="ch ch-lg"><canvas id="cMinCum"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Tasso Presenza per Mese</div><div class="cs">Squadra — % sessioni coperte</div>
+          <div class="ch ch-lg"><canvas id="cPresMeseBar"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Presenze Gara vs All.</div><div class="cs">Per giocatore — comparativo</div>
+          <div class="ch ch-lg"><canvas id="cGaraVsAll"></canvas></div>
+        </div>
+      </div>
 
-  <div class="sec-title">🥅 Analisi Tiri</div>
-  <div class="g3 mb">
-    <div class="card dd">
-      <div class="ct">Tiri per Periodo — NOI vs AVV</div><div class="cs">Click per filtrare periodo</div>
-      <div class="ch ch-md"><canvas id="cTiriPer"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Esito Tiri — NOI</div><div class="cs">In porta / Fuori / Gol / Parato / Palo</div>
-      <div class="ch ch-md"><canvas id="cEsitoNoi"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Esito Tiri — AVVERSARIO</div><div class="cs">Pericolosità concessa</div>
-      <div class="ch ch-md"><canvas id="cEsitoAvv"></canvas></div>
-    </div>
-  </div>
-  <div class="g3 mb">
-    <div class="card">
-      <div class="ct">Tipologia Tiro — NOI</div><div class="cs">Destro / Sinistro / Testa</div>
-      <div class="ch ch-sm"><canvas id="cTipoTiro"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">In Porta vs Fuori — per Gara</div><div class="cs">Efficienza offensiva</div>
-      <div class="ch ch-sm"><canvas id="cTiriIP"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Tiri in Area vs Fuori Area</div><div class="cs">NOI vs AVV</div>
-      <div class="ch ch-sm"><canvas id="cTiriArea"></canvas></div>
-    </div>
-  </div>
+      <div class="sec-title">📅 Calendario Presenze</div>
+      <div class="card mb">
+        <div class="ct">Calendario Presenze per Giocatore</div>
+        <div class="cs" style="margin-bottom:8px">🟢 Presente · 🔴 Assente · 🟡 Gara</div>
+        <div class="cal-wrap"><div id="calGrid"></div></div>
+      </div>
 
-  <div class="sec-title">📊 Distribuzione & Correlazioni</div>
-  <div class="g3 mb">
-    <div class="card dd">
-      <div class="ct">Tipi di Evento</div><div class="cs">Click per filtrare</div>
-      <div class="ch ch-md"><canvas id="cEventi"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Palle Inattive — NOI</div><div class="cs">Esito per tipo palla inattiva</div>
-      <div class="ch ch-md"><canvas id="cPalleI"></canvas></div>
-    </div>
-    <div class="card dd">
-      <div class="ct">IPO per Giocatore</div><div class="cs">Top 15 — click per filtrare</div>
-      <div class="ch ch-md"><canvas id="cIpoGioc"></canvas></div>
-    </div>
-  </div>
-  <div class="g2 mb">
-    <div class="card">
-      <div class="ct">IPO Progressivo Cumulato</div><div class="cs">Noi vs Avversario nel tempo</div>
-      <div class="ch ch-lg"><canvas id="cIpoCum"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ct">Cartellini per Periodo</div><div class="cs">Gialli + Rossi — NOI vs AVV</div>
-      <div class="ch ch-lg"><canvas id="cCart"></canvas></div>
-    </div>
-  </div>
+      <div class="sec-title">📋 Registro &amp; Dettaglio</div>
+      <div class="card mb">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div><div class="ct">Classifica Presenze</div><div class="cs">Click riga → dettaglio giocatore</div></div>
+        </div>
+        <div class="tw"><table class="tbl"><thead><tr>
+          <th>#</th><th>Giocatore</th><th>Pres.</th><th>%</th><th>Gare</th><th>All.</th><th>Titolare</th><th>Ris.</th><th>Min.</th><th>Media</th>
+        </tr></thead><tbody id="tPres"></tbody></table></div>
+      </div>
 
-  <div class="sec-title">📋 Registro Eventi</div>
-  <div class="card mb">
-    <div class="ct">Registro Eventi Analytics</div>
-    <div class="tw" style="margin-top:8px"><table class="tbl"><thead><tr>
-      <th>Data</th><th>Gara</th><th>Min.</th><th>Squadra</th><th>Evento</th><th>Giocatore</th>
-      <th>Zona</th><th>IPO</th><th>Esito Tiro</th><th>Tipo Tiro</th><th>Z.Inizio</th><th>Z.Rif.</th><th>Z.Rec.</th><th>Nota</th>
-    </tr></thead><tbody id="tAna"></tbody></table></div>
-  </div>
-</div>
+      <div class="card mb">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div><div class="ct">Registro Presenze</div></div>
+          <input type="text" placeholder="🔍 Cerca..." id="pSrch" style="background:var(--s2);border:1px solid var(--bo);border-radius:8px;padding:5px 10px;color:var(--tx);font-size:11px;outline:none;width:180px" oninput="srchP()"/>
+        </div>
+        <div class="tw"><table class="tbl"><thead><tr>
+          <th>Data</th><th>Giocatore</th><th>Tipo</th><th>Presente</th><th>Ruolo</th><th>Min.</th><th>Nota</th>
+        </tr></thead><tbody id="tPresReg"></tbody></table></div>
+      </div>
+    </div>
 
-<!-- GUIDA FONDO -->
-<div class="guide" style="margin-top:24px;opacity:.6">
-  <div class="gtitle" style="font-size:14px">📖 Riferimento rapido colonne</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:10px;color:var(--mu2)">
-    <div><strong style="color:var(--g)">RISULTATI:</strong> Data · Avversario · Venue(Home/Away) · Campo · GolFatti · GolSubiti · Competizione · Giornata · Note</div>
-    <div><strong style="color:var(--a)">PRESENZE:</strong> Nome · Cognome · Data · Tipo(Gara/Allenamento) · Presente(Si/No) · Minuti · Ruolo(Titolare/Riserva) · Nota</div>
-    <div><strong style="color:var(--c)">ANALYTICS:</strong> TipoEvento · ZonaEvento(1-12) · ZonaInizioAzione · ZonaRifinitura · ZonaRecuperoPalla · MinutoEvento · EsitoTiro · TipologiaTiro · GiocatoreEvento · GiocatoreRifinitura · Squadra(Noi/Avversario) · Gara · Competizione · EsitoPallaInattiva</div>
-  </div>
-</div>
-</div><!-- /afterLoad -->
+    <!-- ═══ ANALYTICS ═══ -->
+    <div id="page-analytics" class="page">
+      <div class="krow" id="aKpi"></div>
+
+      <div class="sec-title">🎯 IPO &amp; Pericolosità</div>
+      <div class="g12 mb">
+        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px">
+          <div class="cs">IPO TOTALE</div>
+          <div class="ipo-big" id="ipoN" style="color:var(--a)">0</div>
+          <div style="font-size:9px;color:var(--mu2)">Index of Playing Opportunities</div>
+          <div style="display:flex;gap:12px;margin-top:6px">
+            <div><div style="font-size:9px;color:var(--mu2)">NOI</div><div class="ipo-big" id="ipoNoi" style="font-size:32px;color:var(--b)">0</div></div>
+            <div><div style="font-size:9px;color:var(--mu2)">AVV.</div><div class="ipo-big" id="ipoAvv" style="font-size:32px;color:var(--r)">0</div></div>
+          </div>
+          <div class="insight" id="ipoIns" style="text-align:left;font-size:10px"></div>
+        </div>
+        <div class="card">
+          <div class="ct">IPO nel Tempo</div><div class="cs">Andamento gara per gara — Noi vs Avversario</div>
+          <div class="ch ch-lg"><canvas id="cIpoTime"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">🗺 Heatmap Pericolosità</div>
+      <div class="g3 mb">
+        <div class="card">
+          <div class="ct">Zona Evento — NOI</div><div class="cs">IPO per zona — click zona per filtrare</div>
+          <div class="pitch" id="pitchNoi"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Zona Evento — AVVERSARIO</div><div class="cs">Pericolosità concessa</div>
+          <div class="pitch" id="pitchAvv"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Zona Rifinitura</div><div class="cs">Dove nascono le azioni pericolose</div>
+          <div class="pitch" id="pitchRif"></div>
+        </div>
+      </div>
+
+      <div class="g2 mb">
+        <div class="card">
+          <div class="ct">Zona Recupero Palla</div><div class="cs">Dove recuperiamo il possesso</div>
+          <div class="pitch" id="pitchRec"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Zona Inizio Azione</div><div class="cs">Da dove partono le azioni</div>
+          <div class="pitch" id="pitchInizio"></div>
+        </div>
+      </div>
+
+      <div class="sec-title">⏱ Analisi Temporale</div>
+      <div class="g2 mb">
+        <div class="card dd">
+          <div class="ct">IPO per Periodo — NOI vs AVV</div><div class="cs">Click periodo per filtrare</div>
+          <div class="ch ch-md"><canvas id="cIpoPer"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Densità per Minuto</div><div class="cs">Tutti gli eventi — bucket 5'</div>
+          <div class="ch ch-md"><canvas id="cDens"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">🥅 Analisi Tiri</div>
+      <div class="g3 mb">
+        <div class="card dd">
+          <div class="ct">Tiri per Periodo — NOI vs AVV</div><div class="cs">Click per filtrare periodo</div>
+          <div class="ch ch-md"><canvas id="cTiriPer"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Esito Tiri — NOI</div><div class="cs">In porta / Fuori / Gol / Parato / Palo</div>
+          <div class="ch ch-md"><canvas id="cEsitoNoi"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Esito Tiri — AVVERSARIO</div><div class="cs">Pericolosità concessa</div>
+          <div class="ch ch-md"><canvas id="cEsitoAvv"></canvas></div>
+        </div>
+      </div>
+
+      <div class="g3 mb">
+        <div class="card">
+          <div class="ct">Tipologia Tiro — NOI</div><div class="cs">Destro / Sinistro / Testa</div>
+          <div class="ch ch-sm"><canvas id="cTipoTiro"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">In Porta vs Fuori — per Gara</div><div class="cs">Efficienza offensiva</div>
+          <div class="ch ch-sm"><canvas id="cTiriIP"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Tiri in Area vs Fuori Area</div><div class="cs">NOI vs AVV</div>
+          <div class="ch ch-sm"><canvas id="cTiriArea"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">📊 Distribuzione &amp; Correlazioni</div>
+      <div class="g3 mb">
+        <div class="card dd">
+          <div class="ct">Tipi di Evento</div><div class="cs">Click per filtrare</div>
+          <div class="ch ch-md"><canvas id="cEventi"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Palle Inattive — NOI</div><div class="cs">Esito per tipo palla inattiva</div>
+          <div class="ch ch-md"><canvas id="cPalleI"></canvas></div>
+        </div>
+        <div class="card dd">
+          <div class="ct">IPO per Giocatore</div><div class="cs">Top 15 — click per filtrare</div>
+          <div class="ch ch-md"><canvas id="cIpoGioc"></canvas></div>
+        </div>
+      </div>
+
+      <div class="g2 mb">
+        <div class="card">
+          <div class="ct">IPO Progressivo Cumulato</div><div class="cs">Noi vs Avversario nel tempo</div>
+          <div class="ch ch-lg"><canvas id="cIpoCum"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="ct">Cartellini per Periodo</div><div class="cs">Gialli + Rossi — NOI vs AVV</div>
+          <div class="ch ch-lg"><canvas id="cCart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="sec-title">📋 Registro Eventi</div>
+      <div class="card mb">
+        <div class="ct">Registro Eventi Analytics</div>
+        <div class="tw" style="margin-top:8px"><table class="tbl"><thead><tr>
+          <th>Data</th><th>Gara</th><th>Min.</th><th>Squadra</th><th>Evento</th><th>Giocatore</th>
+          <th>Zona</th><th>IPO</th><th>Esito Tiro</th><th>Tipo Tiro</th><th>Z.Inizio</th><th>Z.Rif.</th><th>Z.Rec.</th><th>Nota</th>
+        </tr></thead><tbody id="tAna"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ ROSA ═══ -->
+    <div id="page-rosa" class="page">
+      <div class="krow" id="roKpi"></div>
+
+      <div class="sec-title rosa">🌸 Rosa &amp; Riepilogo Stagione</div>
+
+      <div class="g21 mb">
+        <!-- Tabella rosa -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <div>
+              <div class="ct">Rosa Completa</div>
+              <div class="cs">Click su un giocatore per vedere i dettagli a fianco</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span class="bd brosa" title="Chiave giocatore">COGNOME_NOME</span>
+              <button class="btn sm gh" onclick="exportRosaCSV()">⬇ CSV</button>
+            </div>
+          </div>
+
+          <div class="tw" style="max-height:460px">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Giocatore</th>
+                  <th>Ruolo</th>
+                  <th>Pres.</th>
+                  <th>%</th>
+                  <th>Min.</th>
+                  <th>Gare</th>
+                  <th>All.</th>
+                  <th>IPO</th>
+                  <th>Gol</th>
+                  <th>Tiri</th>
+                  <th>Gialli</th>
+                  <th>Rossi</th>
+                </tr>
+              </thead>
+              <tbody id="tRosa"></tbody>
+            </table>
+          </div>
+
+          <div class="insight rosa" id="roHint">
+            <strong>Nota:</strong> Se nel foglio <strong>ANALYTICS</strong> aggiungi la colonna <strong>COGNOME_NOME</strong>, l’aggancio giocatore sarà sempre perfetto.
+          </div>
+        </div>
+
+        <!-- Pannello laterale dettagli -->
+        <div class="card">
+          <div class="ct" id="roSelName">—</div>
+          <div class="cs" id="roSelRole">Seleziona un giocatore dalla tabella</div>
+
+          <div class="krow" id="roSelKpi" style="margin-top:8px"></div>
+
+          <div class="sec-title rosa" style="margin-top:10px">📈 Minuti nel tempo</div>
+          <div class="ch ch-md"><canvas id="cRoMin"></canvas></div>
+
+          <div class="sec-title rosa" style="margin-top:10px">🎯 IPO nel tempo (gare)</div>
+          <div class="ch ch-md"><canvas id="cRoIpo"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUIDA FONDO -->
+    <div class="guide" style="margin-top:24px;opacity:.6">
+      <div class="gtitle" style="font-size:14px">📖 Riferimento rapido colonne</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:10px;color:var(--mu2)">
+        <div><strong style="color:var(--g)">RISULTATI:</strong> Data · Avversario · Venue(Home/Away) · Campo · GolFatti · GolSubiti · Competizione · Giornata · Note</div>
+        <div><strong style="color:var(--a)">PRESENZE:</strong> Nome · Cognome · Data · Tipo(Gara/Allenamento) · Presente(Si/No) · Minuti · Ruolo(Titolare/Riserva) · Nota · (cons.) COGNOME_NOME</div>
+        <div><strong style="color:var(--c)">ANALYTICS:</strong> TipoEvento · ZonaEvento · ... · GiocatoreEvento · Squadra · Gara · Competizione · EsitoPallaInattiva · (cons.) COGNOME_NOME</div>
+        <div><strong style="color:var(--rosa)">ROSA:</strong> NOME · COGNOME · RUOLO PREFERITO · ALTRI RUOLI</div>
+      </div>
+    </div>
+  </div><!-- /afterLoad -->
 </div><!-- /main -->
 
-<!-- MODAL GIOCATORE -->
+<!-- MODAL GIOCATORE (usato in PRESENZE) -->
 <div class="mbg" id="pModal">
   <div class="modal">
     <button class="mcl" onclick="closeM()">✕</button>
@@ -559,9 +670,11 @@ pointer-events:none;z-index:0}
 </div>
 
 <script>
-// ══ DATA ══
-let DR=[],DP=[],DA=[];
-let FR=[],FP=[],FA=[];
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+let DR=[],DP=[],DA=[],DRO=[];
+let FR=[],FP=[],FA=[],FRO=[];
 const C={};
 const IPOW={
   'Occasione da goal':10,'Azione promettente':4,'Tiro da fuori area':1,
@@ -578,11 +691,19 @@ const ZONES={
   11:{l:50,t:0,w:25,h:33.3},12:{l:75,t:0,w:25,h:33.3}
 };
 let curPage='risultati';
-let _gmCache={};
+let _gmCache={};         // presenze cache per modal
+let _roSelKey='';        // selezione rosa
+let _roIndex={};         // indice rosa: key -> info + varianti
+let _roOrder=[];         // ordine keys
+let _labelByKey={};      // key -> "Cognome Nome"
+let _keyByLabel={};      // label normalizzato -> key (fallback)
+let _roCharts={};        // charts per ROSA
 
-// ══ LOAD ══
+// ═══════════════════════════════════════
+// LOAD EXCEL
+// ═══════════════════════════════════════
 document.getElementById('fw').addEventListener('change',function(e){
-  const f=e.target.files[0];if(!f)return;
+  const f=e.target.files[0]; if(!f) return;
   document.getElementById('wname').textContent=f.name;
   const rd=new FileReader();
   rd.onload=ev=>{
@@ -590,6 +711,11 @@ document.getElementById('fw').addEventListener('change',function(e){
     if(wb.Sheets['RISULTATI']) DR=XLSX.utils.sheet_to_json(wb.Sheets['RISULTATI']);
     if(wb.Sheets['PRESENZE'])  DP=XLSX.utils.sheet_to_json(wb.Sheets['PRESENZE']);
     if(wb.Sheets['ANALYTICS']) DA=XLSX.utils.sheet_to_json(wb.Sheets['ANALYTICS']).map(r=>({...r,PunteggioIPO:IPOW[r.TipoEvento]||0}));
+    if(wb.Sheets['ROSA'])      DRO=XLSX.utils.sheet_to_json(wb.Sheets['ROSA']);
+
+    // build roster index / mapping keys
+    buildRosterIndex();
+
     document.getElementById('landing').style.display='none';
     document.getElementById('afterLoad').style.display='block';
     populateFilters();
@@ -598,25 +724,57 @@ document.getElementById('fw').addEventListener('change',function(e){
   rd.readAsArrayBuffer(f);
 });
 
-// ══ HELPERS ══
+// ═══════════════════════════════════════
+// HELPERS / NORMALIZZAZIONE
+// ═══════════════════════════════════════
 const gv=id=>document.getElementById(id).value;
 const sv=(id,v)=>{document.getElementById(id).value=v;};
-const pname=r=>(`${r.Cognome||''} ${r.Nome||''}`).trim();
-const isP=r=>['Si','Sì','si','sì',true,'true'].includes(r.Presente);
+const isP=r=>['Si','Sì','si','sì',true,'true','1',1].includes(r.Presente);
 const periodoOf=m=>m<=15?1:m<=30?2:m<=45?3:m<=60?4:m<=75?5:6;
 const isTiro=t=>['Tiro da fuori area','Tiro in area di rigore','Rigore','Occasione da goal'].includes(t);
-const isNoi=r=>!r.Squadra||r.Squadra===''||String(r.Squadra).toLowerCase().includes('noi')||String(r.Squadra).toLowerCase()==='noi';
-function dc(id){if(C[id]){C[id].destroy();delete C[id];}}
-function co(onClickFn){
-  const o={responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'},boxWidth:9,padding:6}},tooltip:{mode:'index'}},
-    scales:{x:{ticks:{color:'#4a5568',font:{size:9},maxTicksLimit:12},grid:{color:'rgba(255,255,255,0.025)'}},
-      y:{ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,0.025)'}}}};
-  if(onClickFn) o.onClick=(_,els)=>{if(els.length){const i=els[0].index;onClickFn(i,C[Object.keys(C).find(k=>C[k]?.data?.labels===_?.chart?.data?.labels)]?.data?.labels[i]);}};
-  return o;
+const isNoi=r=>{
+  const s=String(r.Squadra||'').trim().toLowerCase();
+  if(!s) return true;
+  return s==='noi' || s.includes('noi');
+};
+function norm(s){
+  return String(s||'')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')  // rimuovi accenti
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
 }
-// Proper onClick for Chart.js — pass chart id
-function coc(chartId,onClickFn){
+function keyNC(cognome,nome){
+  const c=norm(cognome).replace(/\s+/g,'_');
+  const n=norm(nome).replace(/\s+/g,'_');
+  return (c && n) ? `${c}_${n}` : '';
+}
+function labelNC(cognome,nome){
+  const C=String(cognome||'').trim();
+  const N=String(nome||'').trim();
+  return `${C} ${N}`.trim();
+}
+function capWords(s){
+  return String(s||'').toLowerCase().replace(/\b\w/g,m=>m.toUpperCase());
+}
+function optionText(selectId,val){
+  const s=document.getElementById(selectId);
+  const o=[...s.options].find(x=>x.value===val);
+  return o?o.text:val;
+}
+function dc(id){ if(C[id]){ C[id].destroy(); delete C[id]; } }
+function co(){
+  return {
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'},boxWidth:9,padding:6}},tooltip:{mode:'index'}},
+    scales:{
+      x:{ticks:{color:'#4a5568',font:{size:9},maxTicksLimit:12},grid:{color:'rgba(255,255,255,0.025)'}},
+      y:{ticks:{color:'#4a5568',font:{size:9}},grid:{color:'rgba(255,255,255,0.025)'}}
+    }
+  };
+}
+function coc(onClickFn){
   const o=co();
   o.onClick=function(_,els){
     if(els.length){
@@ -628,114 +786,269 @@ function coc(chartId,onClickFn){
   return o;
 }
 
-// ══ NAV ══
+// ═══════════════════════════════════════
+// ROSA INDEX + MATCH GIOCATORI
+// ═══════════════════════════════════════
+function buildRosterIndex(){
+  _roIndex={}; _roOrder=[]; _labelByKey={}; _keyByLabel={};
+
+  // 1) carica ROSA (se presente)
+  (DRO||[]).forEach(r=>{
+    const nome=r.NOME ?? r.Nome ?? r.nome;
+    const cogn=r.COGNOME ?? r.Cognome ?? r.cognome;
+    const key=keyNC(cogn,nome);
+    if(!key) return;
+    const lab=labelNC(capWords(cogn),capWords(nome));
+
+    _roIndex[key]={
+      key,
+      nome:capWords(nome),
+      cognome:capWords(cogn),
+      ruoloPref:String(r['RUOLO PREFERITO'] ?? r.RuoloPreferito ?? r.Ruolo ?? '').trim(),
+      altriRuoli:String(r['ALTRI RUOLI'] ?? r.AltriRuoli ?? '').trim(),
+      variants:new Set()
+    };
+    _roOrder.push(key);
+    _labelByKey[key]=lab;
+
+    // varianti utili per agganciare ANALYTICS
+    const v1=norm(`${cogn} ${nome}`);
+    const v2=norm(`${cogn}_${nome}`);
+    const v3=norm(`${cogn} ${String(nome||'')[0]||''}`);
+    _roIndex[key].variants.add(v1);
+    _roIndex[key].variants.add(v2);
+    _roIndex[key].variants.add(v3);
+
+    // reverse map
+    _keyByLabel[v1]=key;
+    _keyByLabel[v2]=key;
+    _keyByLabel[v3]=key;
+  });
+
+  // 2) se ROSA è vuota, costruisci una rosa minima da PRESENZE
+  if(!_roOrder.length && DP && DP.length){
+    const seen=new Set();
+    DP.forEach(r=>{
+      const key = r.COGNOME_NOME ? norm(r.COGNOME_NOME).replace(/\s+/g,'_') : keyNC(r.Cognome,r.Nome);
+      if(!key || seen.has(key)) return;
+      seen.add(key);
+      const lab=labelNC(capWords(r.Cognome),capWords(r.Nome));
+      _roIndex[key]={key,nome:capWords(r.Nome),cognome:capWords(r.Cognome),ruoloPref:'',altriRuoli:'',variants:new Set([norm(lab),norm(key),norm(`${r.Cognome} ${String(r.Nome||'')[0]||''}`)])};
+      _roOrder.push(key);
+      _labelByKey[key]=lab;
+      _keyByLabel[norm(lab)]=key;
+      _keyByLabel[norm(key)]=key;
+    });
+  }
+
+  // ordina per cognome
+  _roOrder=_roOrder.sort((a,b)=> (_labelByKey[a]||'').localeCompare(_labelByKey[b]||''));
+
+  // 3) arricchisci reverse map anche con varianti “Rossi M.”
+  _roOrder.forEach(k=>{
+    const i=_roIndex[k];
+    if(!i) return;
+    const v=norm(`${i.cognome} ${i.nome}`);
+    const vShort=norm(`${i.cognome} ${String(i.nome||'')[0]||''}`);
+    _keyByLabel[v]=k;
+    _keyByLabel[vShort]=k;
+  });
+}
+function playerKeyFromPresence(r){
+  if(r.COGNOME_NOME) return norm(r.COGNOME_NOME).replace(/\s+/g,'_');
+  return keyNC(r.Cognome,r.Nome);
+}
+function playerKeyFromAnalytics(r){
+  // se c’è la colonna COGNOME_NOME: perfetto
+  if(r.COGNOME_NOME) return norm(r.COGNOME_NOME).replace(/\s+/g,'_');
+
+  // altrimenti prova a matchare GiocatoreEvento con le varianti della rosa
+  const g = norm(r.GiocatoreEvento || '');
+  if(!g) return '';
+  // caso tipo "Rossi M." -> normalizza già sopra, tentiamo lookup
+  if(_keyByLabel[g]) return _keyByLabel[g];
+
+  // fallback: prova a togliere punteggiatura e confrontare
+  const g2 = g.replace(/\./g,'').trim();
+  if(_keyByLabel[g2]) return _keyByLabel[g2];
+
+  // fallback generico: se inizia con un cognome presente
+  // (non perfetto ma aiuta quando scrivono "Rossi Marco" in modi diversi)
+  for(const k of _roOrder){
+    const info=_roIndex[k];
+    if(!info) continue;
+    for(const v of info.variants){
+      if(v && (v===g || v===g2)) return k;
+    }
+  }
+  return '';
+}
+
+// ═══════════════════════════════════════
+// NAV + VISIBILITÀ FILTRI
+// ═══════════════════════════════════════
 function showPage(id,btn){
   curPage=id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
+
   document.getElementById('page-'+id).classList.add('active');
-  if(btn)btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+
   updateFVis(id);
-  if(DR.length||DP.length||DA.length)applyAll();
+  if(DR.length||DP.length||DA.length||DRO.length) applyAll();
 }
+
 const FV={
   risultati:{fComp:1,fVenue:1,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:0,fGara:0,fEvento:0,fPeriodo:0},
-  presenze: {fComp:0,fVenue:0,fS:1,fE:1,fStagione:0,fGioc:1,fTipo:1,fGara:0,fEvento:0,fPeriodo:0},
-  analytics:{fComp:1,fVenue:0,fS:0,fE:0,fStagione:0,fGioc:0,fTipo:0,fGara:1,fEvento:1,fPeriodo:1}
+  presenze: {fComp:0,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:1,fTipo:1,fGara:0,fEvento:0,fPeriodo:0},
+  analytics:{fComp:1,fVenue:0,fS:0,fE:0,fStagione:0,fGioc:1,fTipo:0,fGara:1,fEvento:1,fPeriodo:1},
+  rosa:     {fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:1,fGara:0,fEvento:0,fPeriodo:0}
 };
 function updateFVis(pg){
   const v=FV[pg]||{};
   ['fComp','fVenue','fS','fE','fStagione','fGioc','fTipo','fGara','fEvento','fPeriodo'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.style.display=(v[id]===0)?'none':'';
-    // also hide labels before date inputs
+    const el=document.getElementById(id);
+    if(el) el.style.display=(v[id]===0)?'none':'';
   });
-  // Mostra/nascondi label "Dal" "Al"
-  document.querySelectorAll('#frow .fl').forEach(el=>{
-    if(el.textContent==='Dal'||el.textContent==='Al'){
-      el.style.display=(v.fS===0&&v.fE===0)?'none':'';
-    }
-  });
+  const ls=document.getElementById('lblS');
+  const le=document.getElementById('lblE');
+  if(ls) ls.style.display=(v.fS===0)?'none':'';
+  if(le) le.style.display=(v.fE===0)?'none':'';
 }
 updateFVis('risultati');
 
-// ══ FILTERS ══
+// ═══════════════════════════════════════
+// FILTERS POPOLAMENTO + CHIPS
+// ═══════════════════════════════════════
 function populateFilters(){
   const comps=[...new Set([...DR.map(d=>d.Competizione),...DA.map(d=>d.Competizione)].filter(Boolean))];
-  const gioc=[...new Set(DP.map(d=>pname(d)).filter(Boolean))].sort();
+
+  // giocatori: usa ROSA se presente, altrimenti presenze
+  const giocKeys=_roOrder.length?_roOrder:[...new Set(DP.map(playerKeyFromPresence).filter(Boolean))].sort();
+  const giocVals=giocKeys.map(k=>({v:k,t:_labelByKey[k]||capWords(k.replace(/_/g,' '))}));
+
   const gare=[...new Set(DA.map(d=>d.Gara).filter(Boolean))];
-  // stagioni da date
-  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||'')].map(d=>d.slice(0,4)).filter(Boolean))].sort();
-  pop('fComp',comps);pop('fGioc',gioc);pop('fGara',gare);pop('fEvento',Object.keys(IPOW));
+
+  // stagioni da date (RISULTATI+PRESENZE)
+  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||'')].map(d=>String(d).slice(0,4)).filter(Boolean))].sort();
+
+  pop('fComp',comps);
+  pop('fGioc',giocVals);
+  pop('fGara',gare);
+  pop('fEvento',Object.keys(IPOW));
   pop('fStagione',anni.map(a=>({v:a,t:`Stagione ${a}`})));
 }
+
 function pop(id,vals){
   const s=document.getElementById(id);
-  while(s.options.length>1)s.remove(1);
+  while(s.options.length>1) s.remove(1);
   vals.forEach(v=>{
     const o=document.createElement('option');
-    if(typeof v==='object'){o.value=v.v;o.text=v.t;}else{o.value=v;o.text=v;}
+    if(typeof v==='object'){o.value=v.v;o.text=v.t;}
+    else {o.value=v;o.text=v;}
     s.add(o);
   });
 }
+
 function getF(){
-  return{comp:gv('fComp'),venue:gv('fVenue'),gioc:gv('fGioc'),tipo:gv('fTipo'),
-    gara:gv('fGara'),evento:gv('fEvento'),periodo:gv('fPeriodo'),
-    stagione:gv('fStagione'),start:gv('fS'),end:gv('fE')};
+  return{
+    comp:gv('fComp'),
+    venue:gv('fVenue'),
+    gioc:gv('fGioc'),      // key COGNOME_NOME
+    tipo:gv('fTipo'),
+    gara:gv('fGara'),
+    evento:gv('fEvento'),
+    periodo:gv('fPeriodo'),
+    stagione:gv('fStagione'),
+    start:gv('fS'),
+    end:gv('fE')
+  };
 }
-function onFC(){applyAll();renderChips();}
+function onFC(){ applyAll(); renderChips(); }
+
 function renderChips(){
   const f=getF();
   const lbl={comp:'Comp',venue:'Venue',gioc:'Giocatore',tipo:'Tipo',gara:'Gara',evento:'Evento',periodo:'Periodo',stagione:'Anno',start:'Dal',end:'Al'};
   const map={comp:'fComp',venue:'fVenue',gioc:'fGioc',tipo:'fTipo',gara:'fGara',evento:'fEvento',periodo:'fPeriodo',stagione:'fStagione',start:'fS',end:'fE'};
-  document.getElementById('chips').innerHTML=Object.entries(f).filter(([,v])=>v)
-    .map(([k,v])=>`<span class="chip">${lbl[k]}: ${v} <span class="chip-x" onclick="sv('${map[k]}','');onFC()">✕</span></span>`).join('');
-}
-function resetF(){
-  ['fComp','fVenue','fGioc','fTipo','fGara','fEvento','fPeriodo','fStagione','fS','fE'].forEach(id=>sv(id,''));
-  onFC();
-}
-function applyAll(){
-  const f=getF();
-  FR=DR.filter(r=>{
-    if(f.comp&&r.Competizione!==f.comp)return false;
-    if(f.venue&&r.Venue!==f.venue)return false;
-    if(f.stagione&&!(r.Data||'').startsWith(f.stagione))return false;
-    if(f.start&&(r.Data||'')< f.start)return false;
-    if(f.end&&(r.Data||'')>f.end)return false;
-    return true;
-  });
-  FP=DP.filter(r=>{
-    const n=pname(r);
-    if(f.gioc&&n!==f.gioc)return false;
-    if(f.tipo&&r.Tipo!==f.tipo)return false;
-    if(f.start&&(r.Data||'')<f.start)return false;
-    if(f.end&&(r.Data||'')>f.end)return false;
-    return true;
-  });
-  FA=DA.filter(r=>{
-    if(f.comp&&r.Competizione!==f.comp)return false;
-    if(f.gara&&r.Gara!==f.gara)return false;
-    if(f.evento&&r.TipoEvento!==f.evento)return false;
-    if(f.periodo){const p=periodoOf(Number(r.MinutoEvento||0));if(String(p)!==f.periodo)return false;}
-    return true;
-  });
-  if(curPage==='risultati')renderR(FR);
-  else if(curPage==='presenze')renderP(FP);
-  else renderA(FA);
+  const isSelect=(k)=>['comp','venue','gioc','tipo','gara','evento','periodo','stagione'].includes(k);
+
+  document.getElementById('chips').innerHTML=
+    Object.entries(f).filter(([,v])=>v).map(([k,v])=>{
+      const val = isSelect(k) ? optionText(map[k],v) : v;
+      const cls = (k==='gioc') ? 'chip rosa' : 'chip';
+      return `<span class="${cls}">${lbl[k]}: ${val} <span class="chip-x" onclick="sv('${map[k]}','');onFC()">✕</span></span>`;
+    }).join('');
 }
 
-// ══ RISULTATI ══
+function resetF(){
+  ['fComp','fVenue','fGioc','fTipo','fGara','fEvento','fPeriodo','fStagione','fS','fE'].forEach(id=>sv(id,''));
+  const ps=document.getElementById('pSrch'); if(ps) ps.value='';
+  applyAll(); renderChips();
+}
+
+// ═══════════════════════════════════════
+// APPLY FILTERS -> FR / FP / FA / FRO
+// ═══════════════════════════════════════
+function applyAll(){
+  const f=getF();
+
+  FR=DR.filter(r=>{
+    if(f.comp && r.Competizione!==f.comp) return false;
+    if(f.venue && r.Venue!==f.venue) return false;
+    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
+    if(f.start && (String(r.Data||'')<f.start)) return false;
+    if(f.end && (String(r.Data||'')>f.end)) return false;
+    return true;
+  });
+
+  FP=DP.filter(r=>{
+    const k=playerKeyFromPresence(r);
+    if(f.gioc && k!==f.gioc) return false;
+    if(f.tipo && r.Tipo!==f.tipo) return false;
+    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
+    if(f.start && (String(r.Data||'')<f.start)) return false;
+    if(f.end && (String(r.Data||'')>f.end)) return false;
+    return true;
+  });
+
+  FA=DA.filter(r=>{
+    const k=playerKeyFromAnalytics(r);
+    if(f.comp && r.Competizione!==f.comp) return false;
+    if(f.gara && r.Gara!==f.gara) return false;
+    if(f.evento && r.TipoEvento!==f.evento) return false;
+    if(f.periodo){
+      const p=periodoOf(Number(r.MinutoEvento||0));
+      if(String(p)!==f.periodo) return false;
+    }
+    if(f.gioc && k && k!==f.gioc) return false; // se ho chiave e filtro giocatore, applica
+    return true;
+  });
+
+  // FRO: per ROSA vogliamo tutta la rosa ma con filtri stagionali / tipo / comp
+  FRO = _roOrder.slice();
+
+  if(curPage==='risultati') renderR(FR);
+  else if(curPage==='presenze') renderP(FP);
+  else if(curPage==='analytics') renderA(FA);
+  else renderRo(); // usa DP/DA + filtri correnti
+}
+
+// ═══════════════════════════════════════
+// RISULTATI (tuo originale + piccola fix gol tempo)
+// ═══════════════════════════════════════
 function renderR(data){
   const d=data.map(r=>{
     const gf=+r.GolFatti||0,gs=+r.GolSubiti||0;
     const e=gf>gs?'V':gf===gs?'N':'S';
-    const dt=r.Data||'';const mm=dt.slice(5,7);
-    return{...r,gf,gs,e,pt:gf>gs?3:gf===gs?1:0,mm};
+    const dt=r.Data||'';const mm=String(dt).slice(5,7);
+    return {...r,gf,gs,e,pt:gf>gs?3:gf===gs?1:0,mm};
   });
   const V=d.filter(r=>r.e==='V').length,N=d.filter(r=>r.e==='N').length,S=d.filter(r=>r.e==='S').length;
   const GF=d.reduce((a,r)=>a+r.gf,0),GS=d.reduce((a,r)=>a+r.gs,0);
   const PT=d.reduce((a,r)=>a+r.pt,0),PG=d.length;
   const cs=d.filter(r=>r.gs===0).length;
+
   document.getElementById('rKpi').innerHTML=`
     <div class="kpi b"><div class="kl">Partite</div><div class="kv">${PG}</div></div>
     <div class="kpi g"><div class="kl">Vittorie</div><div class="kv">${V}</div></div>
@@ -747,97 +1060,103 @@ function renderR(data){
     <div class="kpi r"><div class="kl">Gol Subiti</div><div class="kv">${GS}</div></div>
     <div class="kpi a"><div class="kl">Diff.</div><div class="kv">${GF-GS>=0?'+':''}${GF-GS}</div></div>
     <div class="kpi p"><div class="kl">Clean Sheet</div><div class="kv">${cs}</div></div>`;
-  if(!PG)return;
+
+  if(!PG) return;
+
   const labs=d.map((_,i)=>`G${i+1}`);
   let cum=0;const cumPt=d.map(r=>{cum+=r.pt;return cum;});
-  // Punti cumulati
+
   dc('cPuntiCum');
   C.cPuntiCum=new Chart(document.getElementById('cPuntiCum'),{type:'line',
     data:{labels:labs,datasets:[{label:'Punti cumulati',data:cumPt,borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
-    options:coc('cPuntiCum',(i,l)=>{const r=d[i];if(r&&r.Competizione){sv('fComp',r.Competizione);onFC();}})});
-  // Punti per gara (barre colorate)
+    options:coc((i)=>{const r=d[i];if(r&&r.Competizione){sv('fComp',r.Competizione);onFC();}})});
+
   dc('cPuntiGara');
   C.cPuntiGara=new Chart(document.getElementById('cPuntiGara'),{type:'bar',
     data:{labels:labs,datasets:[{label:'Punti',data:d.map(r=>r.pt),backgroundColor:d.map(r=>r.e==='V'?'#00e676':r.e==='N'?'#ffb300':'#ff3d57'),borderRadius:4,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Gol F/S
+
   dc('cGol');
   C.cGol=new Chart(document.getElementById('cGol'),{type:'bar',
     data:{labels:labs,datasets:[
       {label:'Fatti',data:d.map(r=>r.gf),backgroundColor:'#00e676',borderRadius:3,borderSkipped:false},
       {label:'Subiti',data:d.map(r=>r.gs),backgroundColor:'#ff3d57',borderRadius:3,borderSkipped:false}]},
     options:co()});
-  // Clean sheet
+
   dc('cClean');
   C.cClean=new Chart(document.getElementById('cClean'),{type:'doughnut',
     data:{labels:['Clean Sheet','Gol subiti'],datasets:[{data:[cs,PG-cs],backgroundColor:['#7c4dff','#ff3d57'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
-  // Diff reti
+
   dc('cDiffReti');
   C.cDiffReti=new Chart(document.getElementById('cDiffReti'),{type:'bar',
     data:{labels:labs,datasets:[{label:'Diff. Reti',data:d.map(r=>r.gf-r.gs),backgroundColor:d.map(r=>r.gf-r.gs>=0?'#00e676':'#ff3d57'),borderRadius:3,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // WDL
+
   dc('cWDL');
   C.cWDL=new Chart(document.getElementById('cWDL'),{type:'doughnut',
     data:{labels:['Vittorie','Pareggi','Sconfitte'],datasets:[{data:[V,N,S],backgroundColor:['#00e676','#ffb300','#ff3d57'],borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-      onClick:function(_,els){if(els.length){const lbl=['V','N','S'][els[0].index];/* nota: no filtro diretto su esito */}},
       plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
-  // Casa vs Trasferta
+
   const hD=d.filter(r=>r.Venue==='Home'),aD=d.filter(r=>r.Venue==='Away');
   const hA=hD.length?(hD.reduce((a,r)=>a+r.pt,0)/hD.length).toFixed(2):0;
   const aA=aD.length?(aD.reduce((a,r)=>a+r.pt,0)/aD.length).toFixed(2):0;
+
   dc('cVenue');
   C.cVenue=new Chart(document.getElementById('cVenue'),{type:'bar',
     data:{labels:['🏠 Casa','✈️ Trasferta'],datasets:[{label:'Punti medi',data:[hA,aA],backgroundColor:['#2979ff','#ffb300'],borderRadius:6,borderSkipped:false}]},
-    options:coc('cVenue',(i)=>{sv('fVenue',i===0?'Home':'Away');onFC();})});
-  // Gol per competizione
-  const cm={};d.forEach(r=>{const c=r.Competizione||'N/D';if(!cm[c])cm[c]={gf:0,gs:0};cm[c].gf+=r.gf;cm[c].gs+=r.gs;});
+    options:coc((i)=>{sv('fVenue',i===0?'Home':'Away');onFC();})});
+
+  const cm={}; d.forEach(r=>{const c=r.Competizione||'N/D';if(!cm[c])cm[c]={gf:0,gs:0};cm[c].gf+=r.gf;cm[c].gs+=r.gs;});
   dc('cCompGol');
   C.cCompGol=new Chart(document.getElementById('cCompGol'),{type:'bar',
     data:{labels:Object.keys(cm),datasets:[
       {label:'Fatti',data:Object.values(cm).map(v=>v.gf),backgroundColor:'#00e676',borderRadius:4,borderSkipped:false},
       {label:'Subiti',data:Object.values(cm).map(v=>v.gs),backgroundColor:'#ff3d57',borderRadius:4,borderSkipped:false}]},
-    options:coc('cCompGol',(_,l)=>{sv('fComp',l);onFC();})});
-  // GS Casa vs Trasferta
+    options:coc((_,l)=>{sv('fComp',l);onFC();})});
+
   const hGS=hD.length?(hD.reduce((a,r)=>a+r.gs,0)/hD.length).toFixed(2):0;
   const aGS=aD.length?(aD.reduce((a,r)=>a+r.gs,0)/aD.length).toFixed(2):0;
   dc('cGSVenue');
   C.cGSVenue=new Chart(document.getElementById('cGSVenue'),{type:'bar',
     data:{labels:['🏠 Casa','✈️ Trasferta'],datasets:[{label:'Media GS',data:[hGS,aGS],backgroundColor:['rgba(41,121,255,.5)','rgba(255,179,0,.5)'],borderRadius:6,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Form ultime 5
+
   const last5=d.slice(-5);
   dc('cForm');
   C.cForm=new Chart(document.getElementById('cForm'),{type:'bar',
     data:{labels:last5.map(r=>r.Avversario||'?'),datasets:[{label:'Punti',data:last5.map(r=>r.pt),backgroundColor:last5.map(r=>r.e==='V'?'#00e676':r.e==='N'?'#ffb300':'#ff3d57'),borderRadius:4,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Punti per mese
-  const meseMap={};d.forEach(r=>{const m=r.mm||'??';if(!meseMap[m])meseMap[m]=0;meseMap[m]+=r.pt;});
+
+  const meseMap={}; d.forEach(r=>{const m=r.mm||'??';if(!meseMap[m])meseMap[m]=0;meseMap[m]+=r.pt;});
   dc('cMese');
   C.cMese=new Chart(document.getElementById('cMese'),{type:'line',
     data:{labels:Object.keys(meseMap).sort(),datasets:[{label:'Punti',data:Object.keys(meseMap).sort().map(k=>meseMap[k]),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
     options:co()});
-  // Gol 1° vs 2° tempo (approssimazione: non abbiamo il dato diretto, usiamo analytics se presente)
-  const t1=FA.filter(r=>r.EsitoTiro==='Gol'&&Number(r.MinutoEvento||0)<=45&&isNoi(r)).length;
-  const t2=FA.filter(r=>r.EsitoTiro==='Gol'&&Number(r.MinutoEvento||0)>45&&isNoi(r)).length;
+
+  // Gol 1° vs 2° tempo: se non ho analytics, stima 50/50
+  const t1=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)<=45 && isNoi(r)).length;
+  const t2=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)>45 && isNoi(r)).length;
+  const useA = (FA && FA.length);
+  const g1 = useA ? t1 : Math.round(GF/2);
+  const g2 = useA ? t2 : (GF - g1);
   dc('cGolTempo');
   C.cGolTempo=new Chart(document.getElementById('cGolTempo'),{type:'doughnut',
-    data:{labels:["1° Tempo","2° Tempo"],datasets:[{data:[t1||GF,t2||0],backgroundColor:['#2979ff','#00e5ff'],borderWidth:0}]},
+    data:{labels:["1° Tempo","2° Tempo"],datasets:[{data:[g1,g2],backgroundColor:['#2979ff','#00e5ff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
-  // Correlazione gol→punti
-  const gfMap={};d.forEach(r=>{if(!gfMap[r.gf])gfMap[r.gf]={pt:0,n:0};gfMap[r.gf].pt+=r.pt;gfMap[r.gf].n++;});
+
+  const gfMap={}; d.forEach(r=>{if(!gfMap[r.gf])gfMap[r.gf]={pt:0,n:0};gfMap[r.gf].pt+=r.pt;gfMap[r.gf].n++;});
   const gfK=Object.keys(gfMap).sort((a,b)=>a-b);
   dc('cCorrGolPt');
   C.cCorrGolPt=new Chart(document.getElementById('cCorrGolPt'),{type:'bar',
     data:{labels:gfK.map(k=>`${k} gol`),datasets:[{label:'Punti medi',data:gfK.map(k=>(gfMap[k].pt/gfMap[k].n).toFixed(2)),backgroundColor:'#7c4dff',borderRadius:4,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Tabella
+
   document.getElementById('tRis').innerHTML=d.map(r=>{
     const cl=r.e==='V'?'bg':r.e==='N'?'ba':'br';
     const vh=r.Venue==='Home'?'<span class="bd bb">🏠</span>':'<span class="bd ba">✈️</span>';
-    return`<tr><td>${r.Data||''}</td><td>${r.Competizione||''}</td><td>${r.Giornata||''}</td>
+    return `<tr><td>${r.Data||''}</td><td>${r.Competizione||''}</td><td>${r.Giornata||''}</td>
       <td><strong>${r.Avversario||''}</strong></td><td>${vh}</td><td>${r.Campo||''}</td>
       <td><strong>${r.gf}–${r.gs}</strong></td>
       <td><span class="bd ${cl}">${r.e==='V'?'VITT':r.e==='N'?'PAR':'SCON'}</span></td>
@@ -851,12 +1170,15 @@ function printR(){
   setTimeout(()=>document.getElementById('printHdr').style.display='none',1000);
 }
 
-// ══ PRESENZE ══
+// ═══════════════════════════════════════
+// PRESENZE (ri-adattato a key giocatore)
+// ═══════════════════════════════════════
 function renderP(data){
   const tot=data.length;
   const pres=data.filter(isP).length,ass=tot-pres;
   const minT=data.reduce((a,d)=>a+(+d.Minuti||0),0);
   const tit=data.filter(d=>d.Ruolo==='Titolare').length,ris=data.filter(d=>d.Ruolo==='Riserva').length;
+
   document.getElementById('pKpi').innerHTML=`
     <div class="kpi b"><div class="kl">Registrazioni</div><div class="kv">${tot}</div></div>
     <div class="kpi g"><div class="kl">Presenze</div><div class="kv">${pres}</div></div>
@@ -865,44 +1187,50 @@ function renderP(data){
     <div class="kpi c"><div class="kl">Min. Totali</div><div class="kv">${minT}</div></div>
     <div class="kpi g"><div class="kl">Titolari</div><div class="kv">${tit}</div></div>
     <div class="kpi a"><div class="kl">Riserve</div><div class="kv">${ris}</div></div>`;
-  // Build player map
+
   const gm={};
   data.forEach(d=>{
-    const n=pname(d);if(!n)return;
-    if(!gm[n])gm[n]={tot:0,pres:0,gare:0,all:0,tit:0,ris:0,min:0,rows:[],byDate:{}};
-    gm[n].tot++;if(isP(d))gm[n].pres++;
-    if(d.Tipo==='Gara')gm[n].gare++;else gm[n].all++;
-    if(d.Ruolo==='Titolare')gm[n].tit++;if(d.Ruolo==='Riserva')gm[n].ris++;
-    gm[n].min+=(+d.Minuti||0);gm[n].rows.push(d);
-    gm[n].byDate[d.Data||'']={p:isP(d),tipo:d.Tipo,min:+d.Minuti||0};
+    const key=playerKeyFromPresence(d); if(!key) return;
+    const lab=_labelByKey[key] || labelNC(capWords(d.Cognome),capWords(d.Nome)) || key.replace(/_/g,' ');
+    if(!gm[key]) gm[key]={key,label:lab,tot:0,pres:0,gare:0,all:0,tit:0,ris:0,min:0,rows:[],byDate:{}};
+    gm[key].tot++; if(isP(d)) gm[key].pres++;
+    if(d.Tipo==='Gara') gm[key].gare++; else gm[key].all++;
+    if(d.Ruolo==='Titolare') gm[key].tit++; if(d.Ruolo==='Riserva') gm[key].ris++;
+    gm[key].min+=(+d.Minuti||0);
+    gm[key].rows.push(d);
+    gm[key].byDate[d.Data||'']={p:isP(d),tipo:d.Tipo,min:+d.Minuti||0};
   });
   _gmCache=gm;
+
   const gioc=Object.entries(gm).sort((a,b)=>b[1].pres-a[1].pres);
-  // % presenze bar
+  const labels=gioc.map(x=>x[1].label);
+  const keys=gioc.map(x=>x[0]);
+
   dc('cPresBar');
   C.cPresBar=new Chart(document.getElementById('cPresBar'),{type:'bar',
-    data:{labels:gioc.map(g=>g[0]),datasets:[{label:'% Presenza',
+    data:{labels,datasets:[{label:'% Presenza',
       data:gioc.map(g=>Math.round(g[1].pres/g[1].tot*100)),
       backgroundColor:gioc.map(g=>{const p=g[1].pres/g[1].tot*100;return p>=80?'#00e676':p>=60?'#ffb300':'#ff3d57';}),
       borderRadius:3,borderSkipped:false}]},
-    options:{...coc('cPresBar',(_,l)=>openModal(l)),indexAxis:'y',plugins:{legend:{display:false}}}});
-  // Minuti bar
+    options:{...coc((i)=>openModal(keys[i])),indexAxis:'y',plugins:{legend:{display:false}}}});
+
   dc('cMinBar');
   C.cMinBar=new Chart(document.getElementById('cMinBar'),{type:'bar',
-    data:{labels:gioc.map(g=>g[0]),datasets:[{label:'Min.',data:gioc.map(g=>g[1].min),backgroundColor:'#2979ff',borderRadius:3,borderSkipped:false}]},
+    data:{labels,datasets:[{label:'Min.',data:gioc.map(g=>g[1].min),backgroundColor:'#2979ff',borderRadius:3,borderSkipped:false}]},
     options:{...co(),indexAxis:'y',plugins:{legend:{display:false}}}});
-  // Presenze cumulate nel tempo (per data, conteggio presenti)
+
   const datesSorted=[...new Set(data.map(d=>d.Data||'').filter(Boolean))].sort();
-  let cumP=0;const cumArr=datesSorted.map(dt=>{cumP+=data.filter(d=>d.Data===dt&&isP(d)).length;return cumP;});
+  let cumP=0; const cumArr=datesSorted.map(dt=>{cumP+=data.filter(d=>d.Data===dt && isP(d)).length;return cumP;});
   dc('cPresCum');
   C.cPresCum=new Chart(document.getElementById('cPresCum'),{type:'line',
     data:{labels:datesSorted,datasets:[{label:'Presenze cumulate',data:cumArr,borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:2}]},
     options:co()});
-  // Donuts
+
   dc('cPresD');
   C.cPresD=new Chart(document.getElementById('cPresD'),{type:'doughnut',
     data:{labels:['Presenti','Assenti'],datasets:[{data:[pres,ass],backgroundColor:['#00e676','#ff3d57'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
+
   const gare=data.filter(d=>d.Tipo==='Gara').length,allt=data.filter(d=>d.Tipo==='Allenamento').length;
   dc('cTipoD');
   C.cTipoD=new Chart(document.getElementById('cTipoD'),{type:'doughnut',
@@ -910,19 +1238,24 @@ function renderP(data){
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
       onClick:function(_,els){if(els.length){sv('fTipo',els[0].index===0?'Gara':'Allenamento');onFC();}},
       plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
+
   dc('cRuoloD');
   C.cRuoloD=new Chart(document.getElementById('cRuoloD'),{type:'doughnut',
     data:{labels:['Titolari','Riserve'],datasets:[{data:[tit,ris],backgroundColor:['#7c4dff','#ffb300'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow'}}}}}});
-  // Disponibilità per mese
-  const mesePresMap={};const meseTotMap={};
-  data.forEach(d=>{const m=(d.Data||'').slice(0,7);if(!m)return;if(!mesePresMap[m])mesePresMap[m]=0;if(!meseTotMap[m])meseTotMap[m]=0;meseTotMap[m]++;if(isP(d))mesePresMap[m]++;});
+
+  const mesePresMap={},meseTotMap={};
+  data.forEach(d=>{
+    const m=String(d.Data||'').slice(0,7); if(!m) return;
+    meseTotMap[m]=(meseTotMap[m]||0)+1;
+    mesePresMap[m]=(mesePresMap[m]||0)+(isP(d)?1:0);
+  });
   const mesi=Object.keys(meseTotMap).sort();
   dc('cPresMese');
   C.cPresMese=new Chart(document.getElementById('cPresMese'),{type:'line',
     data:{labels:mesi,datasets:[{label:'% Disponibilità',data:mesi.map(m=>Math.round(mesePresMap[m]/meseTotMap[m]*100)),borderColor:'#ffb300',backgroundColor:'rgba(255,179,0,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:2}]},
     options:co()});
-  // Minutaggio progressivo top 8
+
   const top8=gioc.slice(0,8);
   dc('cMinCum');
   C.cMinCum=new Chart(document.getElementById('cMinCum'),{type:'line',
@@ -930,50 +1263,59 @@ function renderP(data){
       datasets:top8.map((g,i)=>{
         const cols=['#00e676','#2979ff','#ffb300','#ff3d57','#00e5ff','#7c4dff','#ff6d00','#1de9b6'];
         let cum=0;
-        return{label:g[0],data:datesSorted.map(dt=>{cum+=(g[1].byDate[dt]?.min||0);return cum;}),borderColor:cols[i],backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:.3};
+        return{
+          label:g[1].label,
+          data:datesSorted.map(dt=>{cum+=(g[1].byDate[dt]?.min||0);return cum;}),
+          borderColor:cols[i],backgroundColor:'transparent',borderWidth:1.5,pointRadius:0,tension:.3
+        };
       })},
     options:co()});
-  // Tasso presenza per mese - bar
+
   dc('cPresMeseBar');
   C.cPresMeseBar=new Chart(document.getElementById('cPresMeseBar'),{type:'bar',
     data:{labels:mesi,datasets:[{label:'% Presenza',data:mesi.map(m=>Math.round(mesePresMap[m]/meseTotMap[m]*100)),backgroundColor:'rgba(0,229,255,.5)',borderRadius:4,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Gare vs All per giocatore
+
   dc('cGaraVsAll');
   C.cGaraVsAll=new Chart(document.getElementById('cGaraVsAll'),{type:'bar',
-    data:{labels:gioc.map(g=>g[0]),datasets:[
+    data:{labels,datasets:[
       {label:'Gare',data:gioc.map(g=>g[1].gare),backgroundColor:'#2979ff',borderRadius:3,borderSkipped:false},
-      {label:'Allenamenti',data:gioc.map(g=>g[1].all),backgroundColor:'rgba(0,229,255,.4)',borderRadius:3,borderSkipped:false}]},
-    options:{...coc('cGaraVsAll',(_,l)=>openModal(l)),indexAxis:'y'}});
-  // Calendario
+      {label:'Allenamenti',data:gioc.map(g=>g[1].all),backgroundColor:'rgba(0,229,255,.4)',borderRadius:3,borderSkipped:false}
+    ]},
+    options:{...coc((i)=>openModal(keys[i])),indexAxis:'y'}});
+
   buildCal(data,gm);
-  // Classifica
+
   document.getElementById('tPres').innerHTML=gioc.map((g,i)=>{
     const pct=Math.round(g[1].pres/g[1].tot*100);
     const cl=pct>=80?'bg':pct>=60?'ba':'br';
     const med=g[1].pres?Math.round(g[1].min/g[1].pres):0;
-    return`<tr style="cursor:pointer" onclick="openModal('${g[0].replace(/'/g,"\\'")}')">
-      <td>${i+1}</td><td><strong>${g[0]}</strong></td>
+    return `<tr style="cursor:pointer" onclick="openModal('${g[0]}')">
+      <td>${i+1}</td><td><strong>${g[1].label}</strong></td>
       <td>${g[1].pres}/${g[1].tot}</td><td><span class="bd ${cl}">${pct}%</span></td>
       <td>${g[1].gare}</td><td>${g[1].all}</td>
       <td>${g[1].tit}</td><td>${g[1].ris}</td>
       <td>${g[1].min}</td><td>${med}</td></tr>`;
   }).join('');
+
   renderPReg(data);
 }
 function buildCal(data,gm){
   const dates=[...new Set(data.map(d=>d.Data||'').filter(Boolean))].sort();
-  const players=Object.keys(gm).sort();
-  if(!dates.length||!players.length){document.getElementById('calGrid').innerHTML='<div style="color:var(--mu2);font-size:11px;padding:10px">Nessun dato</div>';return;}
+  const players=Object.keys(gm).sort((a,b)=>(gm[a].label||'').localeCompare(gm[b].label||''));
+  if(!dates.length||!players.length){
+    document.getElementById('calGrid').innerHTML='<div style="color:var(--mu2);font-size:11px;padding:10px">Nessun dato</div>';
+    return;
+  }
   let html='<table class="cal-table"><thead><tr><th class="cal-name">Giocatore</th>';
-  dates.forEach(d=>html+=`<th style="min-width:70px">${d.slice(5)}</th>`);
+  dates.forEach(d=>html+=`<th style="min-width:70px">${String(d).slice(5)}</th>`);
   html+='</tr></thead><tbody>';
-  players.forEach(pl=>{
-    html+=`<tr><td class="cal-name">${pl}</td>`;
+  players.forEach(pk=>{
+    html+=`<tr><td class="cal-name">${gm[pk].label}</td>`;
     dates.forEach(d=>{
-      const e=gm[pl].byDate[d];
+      const e=gm[pk].byDate[d];
       if(!e){html+='<td></td>';return;}
-      if(e.tipo==='Gara'&&e.p) html+=`<td class="cal-g" title="${e.min}'">${e.min}'🟡</td>`;
+      if(e.tipo==='Gara' && e.p) html+=`<td class="cal-g" title="${e.min}'">${e.min}'🟡</td>`;
       else if(e.p) html+=`<td class="cal-p" title="${e.min}'">${e.min}'</td>`;
       else html+=`<td class="cal-a">✗</td>`;
     });
@@ -984,8 +1326,10 @@ function buildCal(data,gm){
 }
 function renderPReg(data){
   document.getElementById('tPresReg').innerHTML=data.map(d=>{
-    const n=pname(d),p=isP(d);
-    return`<tr><td>${d.Data||''}</td><td><strong>${n}</strong></td><td>${d.Tipo||''}</td>
+    const key=playerKeyFromPresence(d);
+    const n=_labelByKey[key] || labelNC(capWords(d.Cognome),capWords(d.Nome)) || '—';
+    const p=isP(d);
+    return `<tr><td>${d.Data||''}</td><td><strong>${n}</strong></td><td>${d.Tipo||''}</td>
       <td>${p?'<span class="bd bg">✓</span>':'<span class="bd br">✗</span>'}</td>
       <td>${d.Ruolo||'—'}</td><td>${d.Minuti||0}</td><td style="color:var(--mu2)">${d.Nota||''}</td></tr>`;
   }).join('');
@@ -995,11 +1339,13 @@ function srchP(){
   renderPReg(FP.filter(d=>JSON.stringify(d).toLowerCase().includes(q)));
 }
 
-// ══ MODAL ══
-function openModal(name){
-  const g=_gmCache[name];if(!g)return;
+// ═══════════════════════════════════════
+// MODAL PRESENZE (usa key)
+// ═══════════════════════════════════════
+function openModal(key){
+  const g=_gmCache[key]; if(!g) return;
   const pct=Math.round(g.pres/g.tot*100);
-  document.getElementById('mName').textContent=name;
+  document.getElementById('mName').textContent=g.label || key.replace(/_/g,' ');
   document.getElementById('mSub').textContent=`${g.tot} sessioni · ${g.gare} gare · ${g.all} allenamenti`;
   document.getElementById('mKpi').innerHTML=`
     <div class="kpi a"><div class="kl">% Presenza</div><div class="kv">${pct}%</div></div>
@@ -1008,42 +1354,51 @@ function openModal(name){
     <div class="kpi b"><div class="kl">Titolare</div><div class="kv">${g.tit}</div></div>
     <div class="kpi c"><div class="kl">Min. Tot.</div><div class="kv">${g.min}</div></div>
     <div class="kpi p"><div class="kl">Media Min.</div><div class="kv">${g.pres?Math.round(g.min/g.pres):0}</div></div>`;
+
   const rows=g.rows.sort((a,b)=>(a.Data||'').localeCompare(b.Data||''));
+
   dc('mChart');
   C.mChart=new Chart(document.getElementById('mChart'),{type:'bar',
-    data:{labels:rows.map(r=>r.Data||''),datasets:[{label:'Min.',data:rows.map(r=>+r.Minuti||0),backgroundColor:rows.map(r=>isP(r)?r.Tipo==='Gara'?'#ffb300':'#00e676':'#ff3d57'),borderRadius:3,borderSkipped:false}]},
+    data:{labels:rows.map(r=>r.Data||''),datasets:[{label:'Min.',data:rows.map(r=>+r.Minuti||0),backgroundColor:rows.map(r=>isP(r)?(r.Tipo==='Gara'?'#ffb300':'#00e676'):'#ff3d57'),borderRadius:3,borderSkipped:false}]},
     options:{...co(),plugins:{legend:{display:false}}}});
-  // Minutaggio cumulato nel modal
-  let cm=0;const cumMin=rows.map(r=>{cm+=(+r.Minuti||0);return cm;});
+
+  let cm=0; const cumMin=rows.map(r=>{cm+=(+r.Minuti||0);return cm;});
   dc('mChart2');
   C.mChart2=new Chart(document.getElementById('mChart2'),{type:'line',
     data:{labels:rows.map(r=>r.Data||''),datasets:[{label:'Min. cumulati',data:cumMin,borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:2}]},
     options:co()});
+
   document.getElementById('mTbl').innerHTML=rows.map(r=>`<tr>
     <td>${r.Data||''}</td><td>${r.Tipo||''}</td>
     <td>${isP(r)?'<span class="bd bg">✓</span>':'<span class="bd br">✗</span>'}</td>
     <td>${r.Ruolo||'—'}</td><td>${r.Minuti||0}</td>
     <td style="color:var(--mu2)">${r.Nota||''}</td></tr>`).join('');
+
   document.getElementById('pModal').classList.add('open');
 }
 function closeM(){document.getElementById('pModal').classList.remove('open');}
 document.getElementById('pModal').addEventListener('click',function(e){if(e.target===this)closeM();});
 
-// ══ ANALYTICS ══
+// ═══════════════════════════════════════
+// ANALYTICS (originale, con click giocatore -> filtro key)
+// ═══════════════════════════════════════
 function renderA(data){
   const noi=data.filter(isNoi),avv=data.filter(r=>!isNoi(r));
   const ipoNoi=noi.reduce((a,r)=>a+(+r.PunteggioIPO||0),0);
   const ipoAvv=avv.reduce((a,r)=>a+(+r.PunteggioIPO||0),0);
   const ipoTot=ipoNoi+ipoAvv;
+
   const tiriNoi=noi.filter(r=>isTiro(r.TipoEvento));
   const tiriAvv=avv.filter(r=>isTiro(r.TipoEvento));
   const ipNoi=tiriNoi.filter(r=>r.EsitoTiro==='In porta'||r.EsitoTiro==='Gol');
   const gare=[...new Set(data.map(d=>d.Gara).filter(Boolean))].length;
   const gialli=data.filter(r=>r.TipoEvento==='Cartellino giallo').length;
   const rossi=data.filter(r=>r.TipoEvento==='Cartellino rosso').length;
+
   document.getElementById('ipoN').textContent=ipoTot;
   document.getElementById('ipoNoi').textContent=ipoNoi;
   document.getElementById('ipoAvv').textContent=ipoAvv;
+
   document.getElementById('aKpi').innerHTML=`
     <div class="kpi a"><div class="kl">IPO Noi</div><div class="kv">${ipoNoi}</div></div>
     <div class="kpi r"><div class="kl">IPO Avv.</div><div class="kv">${ipoAvv}</div></div>
@@ -1054,71 +1409,78 @@ function renderA(data){
     <div class="kpi r"><div class="kl">Gialli</div><div class="kv">${gialli}</div></div>
     <div class="kpi r"><div class="kl">Rossi</div><div class="kv">${rossi}</div></div>
     <div class="kpi b"><div class="kl">Gare</div><div class="kv">${gare}</div></div>`;
+
   const avg=gare?(ipoNoi/gare).toFixed(1):0;
   document.getElementById('ipoIns').innerHTML=`<strong>IPO medio/gara: ${avg}</strong> — ${ipoNoi>ipoAvv?'Dominio offensivo ✅':'Attenzione: avversario più pericoloso ⚠️'}. Precisione tiri: ${tiriNoi.length?Math.round(ipNoi.length/tiriNoi.length*100):0}%. Saldo IPO: ${ipoNoi>=ipoAvv?'+':''}${ipoNoi-ipoAvv}.`;
-  // IPO nel tempo
+
   const gl=[...new Set(data.map(d=>d.Gara).filter(Boolean))];
+
   dc('cIpoTime');
   C.cIpoTime=new Chart(document.getElementById('cIpoTime'),{type:'line',
     data:{labels:gl,datasets:[
       {label:'Noi',data:gl.map(g=>noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3},
-      {label:'Avversario',data:gl.map(g=>avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
-    options:coc('cIpoTime',(_,l)=>{sv('fGara',l);onFC();})});
-  // Heatmaps
+      {label:'Avversario',data:gl.map(g=>avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}
+    ]},
+    options:coc((_,l)=>{sv('fGara',l);onFC();})});
+
   buildPitch('pitchNoi',noi,'ZonaEvento');
   buildPitch('pitchAvv',avv,'ZonaEvento');
   buildPitch('pitchRif',noi.filter(r=>r.ZonaRifinitura),'ZonaRifinitura');
   buildPitch('pitchRec',noi.filter(r=>r.ZonaRecuperoPalla),'ZonaRecuperoPalla');
   buildPitch('pitchInizio',noi.filter(r=>r.ZonaInizioAzione),'ZonaInizioAzione');
-  // IPO per periodo noi vs avv
+
   const pers=[1,2,3,4,5,6];
   const perLab=["P1 1'–15'","P2 16'–30'","P3 31'–45'","P4 46'–60'","P5 61'–75'","P6 76'–90+'"];
+
   dc('cIpoPer');
   C.cIpoPer=new Chart(document.getElementById('cIpoPer'),{type:'bar',
     data:{labels:perLab,datasets:[
       {label:'Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),backgroundColor:'rgba(41,121,255,.7)',borderRadius:4,borderSkipped:false},
-      {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}]},
-    options:coc('cIpoPer',(i)=>{sv('fPeriodo',String(i+1));onFC();})});
-  // Densità minuti
-  const bk={};for(let i=0;i<=90;i+=5)bk[i]=0;
+      {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p).reduce((a,r)=>a+(+r.PunteggioIPO||0),0)),backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}
+    ]},
+    options:coc((i)=>{sv('fPeriodo',String(i+1));onFC();})});
+
+  const bk={}; for(let i=0;i<=90;i+=5) bk[i]=0;
   data.forEach(r=>{const m=+r.MinutoEvento||0,b=Math.floor(m/5)*5;if(bk[b]!==undefined)bk[b]++;});
   dc('cDens');
   C.cDens=new Chart(document.getElementById('cDens'),{type:'line',
     data:{labels:Object.keys(bk).map(k=>`${k}'`),datasets:[{label:'Eventi',data:Object.values(bk),borderColor:'#00e676',backgroundColor:'rgba(0,230,118,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:1}]},
     options:co()});
-  // Tiri per periodo noi vs avv
+
   dc('cTiriPer');
   C.cTiriPer=new Chart(document.getElementById('cTiriPer'),{type:'bar',
     data:{labels:['P1','P2','P3','P4','P5','P6'],datasets:[
-      {label:'Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&isTiro(r.TipoEvento)).length),backgroundColor:'rgba(41,121,255,.7)',borderRadius:4,borderSkipped:false},
-      {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&isTiro(r.TipoEvento)).length),backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}]},
-    options:coc('cTiriPer',(i)=>{sv('fPeriodo',String(i+1));onFC();})});
-  // Esito tiri noi
-  const etN={};tiriNoi.forEach(r=>{const e=r.EsitoTiro||'N/D';etN[e]=(etN[e]||0)+1;});
+      {label:'Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p && isTiro(r.TipoEvento)).length),backgroundColor:'rgba(41,121,255,.7)',borderRadius:4,borderSkipped:false},
+      {label:'Avversario',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p && isTiro(r.TipoEvento)).length),backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}
+    ]},
+    options:coc((i)=>{sv('fPeriodo',String(i+1));onFC();})});
+
+  const etN={}; tiriNoi.forEach(r=>{const e=r.EsitoTiro||'N/D';etN[e]=(etN[e]||0)+1;});
   dc('cEsitoNoi');
   C.cEsitoNoi=new Chart(document.getElementById('cEsitoNoi'),{type:'doughnut',
     data:{labels:Object.keys(etN),datasets:[{data:Object.values(etN),backgroundColor:['#00e676','#ff3d57','#ffb300','#2979ff','#7c4dff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
-  // Esito tiri avv
-  const etA={};tiriAvv.forEach(r=>{const e=r.EsitoTiro||'N/D';etA[e]=(etA[e]||0)+1;});
+
+  const etA={}; tiriAvv.forEach(r=>{const e=r.EsitoTiro||'N/D';etA[e]=(etA[e]||0)+1;});
   dc('cEsitoAvv');
   C.cEsitoAvv=new Chart(document.getElementById('cEsitoAvv'),{type:'doughnut',
     data:{labels:Object.keys(etA),datasets:[{data:Object.values(etA),backgroundColor:['#ff3d57','#00e676','#ffb300','#2979ff','#7c4dff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
-  // Tipo tiro
-  const tt={};noi.forEach(r=>{if(r.TipologiaTiro){tt[r.TipologiaTiro]=(tt[r.TipologiaTiro]||0)+1;}});
+
+  const tt={}; noi.forEach(r=>{if(r.TipologiaTiro){tt[r.TipologiaTiro]=(tt[r.TipologiaTiro]||0)+1;}});
   dc('cTipoTiro');
   C.cTipoTiro=new Chart(document.getElementById('cTipoTiro'),{type:'doughnut',
     data:{labels:Object.keys(tt),datasets:[{data:Object.values(tt),backgroundColor:['#2979ff','#00e5ff','#7c4dff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
-  // Tiri in porta vs fuori per gara
+
   dc('cTiriIP');
   C.cTiriIP=new Chart(document.getElementById('cTiriIP'),{type:'bar',
     data:{labels:gl,datasets:[
-      {label:'Totali',data:gl.map(g=>noi.filter(r=>r.Gara===g&&isTiro(r.TipoEvento)).length),backgroundColor:'rgba(41,121,255,.4)',borderRadius:3,borderSkipped:false},
-      {label:'In porta',data:gl.map(g=>noi.filter(r=>r.Gara===g&&isTiro(r.TipoEvento)&&(r.EsitoTiro==='In porta'||r.EsitoTiro==='Gol')).length),backgroundColor:'#00e676',borderRadius:3,borderSkipped:false}]},
+      {label:'Totali',data:gl.map(g=>noi.filter(r=>r.Gara===g && isTiro(r.TipoEvento)).length),backgroundColor:'rgba(41,121,255,.4)',borderRadius:3,borderSkipped:false},
+      {label:'In porta',data:gl.map(g=>noi.filter(r=>r.Gara===g && isTiro(r.TipoEvento) && (r.EsitoTiro==='In porta'||r.EsitoTiro==='Gol')).length),backgroundColor:'#00e676',borderRadius:3,borderSkipped:false}
+    ]},
     options:co()});
-  // Tiri in area vs fuori area
+
   const tIA_N=noi.filter(r=>['Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento)).length;
   const tFA_N=noi.filter(r=>r.TipoEvento==='Tiro da fuori area').length;
   const tIA_A=avv.filter(r=>['Tiro in area di rigore','Rigore','Occasione da goal'].includes(r.TipoEvento)).length;
@@ -1127,53 +1489,74 @@ function renderA(data){
   C.cTiriArea=new Chart(document.getElementById('cTiriArea'),{type:'bar',
     data:{labels:['In Area','Fuori Area'],datasets:[
       {label:'Noi',data:[tIA_N,tFA_N],backgroundColor:'rgba(41,121,255,.7)',borderRadius:4,borderSkipped:false},
-      {label:'Avversario',data:[tIA_A,tFA_A],backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}]},
+      {label:'Avversario',data:[tIA_A,tFA_A],backgroundColor:'rgba(255,61,87,.6)',borderRadius:4,borderSkipped:false}
+    ]},
     options:co()});
-  // Tipi evento donut
-  const em={};data.forEach(r=>{const e=r.TipoEvento||'N/D';em[e]=(em[e]||0)+1;});
+
+  const em={}; data.forEach(r=>{const e=r.TipoEvento||'N/D';em[e]=(em[e]||0)+1;});
   dc('cEventi');
   C.cEventi=new Chart(document.getElementById('cEventi'),{type:'doughnut',
     data:{labels:Object.keys(em),datasets:[{data:Object.values(em),backgroundColor:['#2979ff','#00e676','#ffb300','#ff3d57','#00e5ff','#7c4dff','#ff6d00','#1de9b6','#e040fb','#69f0ae','#ff5252'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'45%',
       onClick:function(_,els){if(els.length){sv('fEvento',this.data.labels[els[0].index]);onFC();}},
       plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
-  // Palle inattive
-  const pi={};noi.filter(r=>r.EsitoPallaInattiva).forEach(r=>{const e=r.EsitoPallaInattiva;pi[e]=(pi[e]||0)+1;});
+
+  const pi={}; noi.filter(r=>r.EsitoPallaInattiva).forEach(r=>{const e=r.EsitoPallaInattiva;pi[e]=(pi[e]||0)+1;});
   dc('cPalleI');
   C.cPalleI=new Chart(document.getElementById('cPalleI'),{type:'doughnut',
     data:{labels:Object.keys(pi).length?Object.keys(pi):['Nessun dato'],datasets:[{data:Object.keys(pi).length?Object.values(pi):[1],backgroundColor:['#00e676','#ff3d57','#ffb300','#2979ff'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{labels:{color:'#6b7a8d',font:{family:'Barlow',size:9}}}}}});
-  // IPO per giocatore
-  const gm={};noi.forEach(r=>{const g=r.GiocatoreEvento||'N/D';gm[g]=(gm[g]||0)+(+r.PunteggioIPO||0);});
+
+  // IPO per giocatore (Top 15) -> usa chiave se possibile
+  const gm={};
+  noi.forEach(r=>{
+    const k=playerKeyFromAnalytics(r);
+    const lab = k ? (_labelByKey[k]||k.replace(/_/g,' ')) : (r.GiocatoreEvento||'N/D');
+    const key = k || norm(lab);
+    gm[key]=(gm[key]||0)+(+r.PunteggioIPO||0);
+  });
   const gs=Object.entries(gm).sort((a,b)=>b[1]-a[1]).slice(0,15);
   dc('cIpoGioc');
   C.cIpoGioc=new Chart(document.getElementById('cIpoGioc'),{type:'bar',
-    data:{labels:gs.map(g=>g[0]),datasets:[{label:'IPO',data:gs.map(g=>g[1]),backgroundColor:'#00e5ff',borderRadius:3,borderSkipped:false}]},
-    options:{...coc('cIpoGioc',(_,l)=>{sv('fGioc',l);onFC();}),indexAxis:'y',plugins:{legend:{display:false}}}});
-  // IPO cumulato progressivo noi vs avv
+    data:{labels:gs.map(g=>g[0].includes('_')?(_labelByKey[g[0]]||g[0].replace(/_/g,' ')):g[0]),datasets:[{label:'IPO',data:gs.map(g=>g[1]),backgroundColor:'#00e5ff',borderRadius:3,borderSkipped:false}]},
+    options:{...coc((i)=>{
+      const rawKey=gs[i][0];
+      // se è una key vera (cognome_nome), filtra, altrimenti prova a risolvere
+      if(rawKey.includes('_')) sv('fGioc',rawKey);
+      else{
+        const maybe=_keyByLabel[norm(rawKey)];
+        if(maybe) sv('fGioc',maybe);
+      }
+      onFC();
+    }),indexAxis:'y',plugins:{legend:{display:false}}}});
+
   let cN=0,cA=0;
   dc('cIpoCum');
   C.cIpoCum=new Chart(document.getElementById('cIpoCum'),{type:'line',
     data:{labels:gl,datasets:[
       {label:'Noi',data:gl.map(g=>{cN+=noi.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cN;}),borderColor:'#2979ff',backgroundColor:'rgba(41,121,255,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3},
-      {label:'Avversario',data:gl.map(g=>{cA+=avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cA;}),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
+      {label:'Avversario',data:gl.map(g=>{cA+=avv.filter(r=>r.Gara===g).reduce((a,r)=>a+(+r.PunteggioIPO||0),0);return cA;}),borderColor:'#ff3d57',backgroundColor:'rgba(255,61,87,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:3}
+    ]},
     options:co()});
-  // Cartellini per periodo
+
   dc('cCart');
   C.cCart=new Chart(document.getElementById('cCart'),{type:'bar',
     data:{labels:perLab,datasets:[
-      {label:'Gialli Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&r.TipoEvento==='Cartellino giallo').length),backgroundColor:'rgba(255,179,0,.7)',borderRadius:3,borderSkipped:false},
-      {label:'Rossi Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&r.TipoEvento==='Cartellino rosso').length),backgroundColor:'rgba(255,61,87,.7)',borderRadius:3,borderSkipped:false},
-      {label:'Gialli Avv',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&r.TipoEvento==='Cartellino giallo').length),backgroundColor:'rgba(255,179,0,.3)',borderRadius:3,borderSkipped:false},
-      {label:'Rossi Avv',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p&&r.TipoEvento==='Cartellino rosso').length),backgroundColor:'rgba(255,61,87,.3)',borderRadius:3,borderSkipped:false}]},
+      {label:'Gialli Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p && r.TipoEvento==='Cartellino giallo').length),backgroundColor:'rgba(255,179,0,.7)',borderRadius:3,borderSkipped:false},
+      {label:'Rossi Noi',data:pers.map(p=>noi.filter(r=>periodoOf(+r.MinutoEvento||0)===p && r.TipoEvento==='Cartellino rosso').length),backgroundColor:'rgba(255,61,87,.7)',borderRadius:3,borderSkipped:false},
+      {label:'Gialli Avv',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p && r.TipoEvento==='Cartellino giallo').length),backgroundColor:'rgba(255,179,0,.3)',borderRadius:3,borderSkipped:false},
+      {label:'Rossi Avv',data:pers.map(p=>avv.filter(r=>periodoOf(+r.MinutoEvento||0)===p && r.TipoEvento==='Cartellino rosso').length),backgroundColor:'rgba(255,61,87,.3)',borderRadius:3,borderSkipped:false}
+    ]},
     options:co()});
-  // Tabella
+
   document.getElementById('tAna').innerHTML=data.map(r=>{
     const ic=+r.PunteggioIPO>=10?'br':+r.PunteggioIPO>=4?'ba':+r.PunteggioIPO>=1?'bb':'';
     const sq=isNoi(r)?'<span class="bd bb">Noi</span>':'<span class="bd br">Avv.</span>';
-    return`<tr><td>${r.Data||''}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${r.Gara||''}</td>
+    const k=playerKeyFromAnalytics(r);
+    const gLab = k ? (_labelByKey[k]||k.replace(/_/g,' ')) : (r.GiocatoreEvento||'—');
+    return `<tr><td>${r.Data||''}</td><td style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${r.Gara||''}</td>
       <td><strong>${r.MinutoEvento||''}'</strong></td><td>${sq}</td>
-      <td>${r.TipoEvento||''}</td><td>${r.GiocatoreEvento||'—'}</td>
+      <td>${r.TipoEvento||''}</td><td>${gLab}</td>
       <td><span class="bd bc">Z${r.ZonaEvento||'?'}</span></td>
       <td><span class="bd ${ic}">${r.PunteggioIPO||0}</span></td>
       <td>${r.EsitoTiro||'—'}</td><td>${r.TipologiaTiro||'—'}</td>
@@ -1181,12 +1564,13 @@ function renderA(data){
       <td style="color:var(--mu2);max-width:100px;overflow:hidden;text-overflow:ellipsis">${r.NotaEvento||''}</td></tr>`;
   }).join('');
 }
+
 function buildPitch(id,data,field){
-  const el=document.getElementById(id);el.innerHTML='';
-  const zi={};for(let z=1;z<=12;z++)zi[z]=0;
-  data.forEach(r=>{const z=+r[field];if(z>=1&&z<=12)zi[z]+=(+r.PunteggioIPO||1);});
+  const el=document.getElementById(id); el.innerHTML='';
+  const zi={}; for(let z=1;z<=12;z++) zi[z]=0;
+  data.forEach(r=>{const z=+r[field]; if(z>=1&&z<=12) zi[z]+=(+r.PunteggioIPO||1);});
   const mx=Math.max(...Object.values(zi),1);
-  // SVG field lines
+
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox','0 0 100 67');
   svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5';
@@ -1200,6 +1584,7 @@ function buildPitch(id,data,field){
     <line x1="1" y1="22.3" x2="99" y2="22.3" stroke="rgba(255,255,255,.04)" stroke-width=".3"/>
     <line x1="1" y1="44.3" x2="99" y2="44.3" stroke="rgba(255,255,255,.04)" stroke-width=".3"/>`;
   el.appendChild(svg);
+
   Object.entries(ZONES).forEach(([zn,zd])=>{
     const v=zi[+zn]||0,r=v/mx;
     const bg=r===0?'rgba(0,230,118,.04)':r<.2?'rgba(255,179,0,.15)':r<.4?'rgba(255,179,0,.35)':r<.6?'rgba(255,61,87,.3)':r<.8?'rgba(255,61,87,.55)':'rgba(255,61,87,.85)';
@@ -1213,9 +1598,267 @@ function buildPitch(id,data,field){
   });
 }
 
-// ══ TEMPLATE ══
+// ═══════════════════════════════════════
+// ROSA: tabella + pannello laterale + export
+// ═══════════════════════════════════════
+function rosterBasePresence(){
+  const f=getF();
+  return DP.filter(r=>{
+    if(f.tipo && r.Tipo!==f.tipo) return false;
+    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
+    if(f.start && (String(r.Data||'')<f.start)) return false;
+    if(f.end && (String(r.Data||'')>f.end)) return false;
+    return true;
+  });
+}
+function rosterBaseAnalytics(){
+  const f=getF();
+  return DA.filter(r=>{
+    if(f.comp && r.Competizione!==f.comp) return false;
+    // per rosa di solito non filtriamo per gara/evento/periodo
+    if(f.stagione && !(String(r.Data||'').startsWith(f.stagione))) return false;
+    // start/end non sono sempre usati su analytics ma li applichiamo se presenti
+    if(f.start && r.Data && (String(r.Data)<f.start)) return false;
+    if(f.end && r.Data && (String(r.Data)>f.end)) return false;
+    return true;
+  });
+}
+function renderRo(){
+  const presBase = rosterBasePresence();
+  const anaBase  = rosterBaseAnalytics();
+
+  // stats per player
+  const S={}; // key -> stats
+  _roOrder.forEach(k=>{
+    const info=_roIndex[k]||{ruoloPref:'',altriRuoli:'',nome:'',cognome:''};
+    S[k]={
+      key:k,
+      label:_labelByKey[k] || `${info.cognome||''} ${info.nome||''}`.trim() || k.replace(/_/g,' '),
+      ruoloPref:info.ruoloPref||'—',
+      altriRuoli:info.altriRuoli||'',
+      totSess:0,pres:0,ass:0,
+      gare:0,all:0,
+      min:0,
+      ipo:0,
+      gol:0,
+      tiri:0,
+      gialli:0,
+      rossi:0,
+      minByDate:{},
+      ipoByGara:{}
+    };
+  });
+
+  presBase.forEach(r=>{
+    const k=playerKeyFromPresence(r); if(!k || !S[k]) return;
+    S[k].totSess++;
+    if(isP(r)) S[k].pres++; else S[k].ass++;
+    if(r.Tipo==='Gara') S[k].gare++; else S[k].all++;
+    const m=(+r.Minuti||0);
+    S[k].min += m;
+    const dt=r.Data||'';
+    if(dt){
+      if(!S[k].minByDate[dt]) S[k].minByDate[dt]=0;
+      S[k].minByDate[dt]+=m;
+    }
+  });
+
+  anaBase.forEach(r=>{
+    if(!isNoi(r)) return;
+    const k=playerKeyFromAnalytics(r); if(!k || !S[k]) return;
+    S[k].ipo += (+r.PunteggioIPO||0);
+    if(isTiro(r.TipoEvento)) S[k].tiri++;
+    if(r.EsitoTiro==='Gol') S[k].gol++;
+    if(r.TipoEvento==='Cartellino giallo') S[k].gialli++;
+    if(r.TipoEvento==='Cartellino rosso') S[k].rossi++;
+    const g=r.Gara||'';
+    if(g){
+      if(!S[k].ipoByGara[g]) S[k].ipoByGara[g]=0;
+      S[k].ipoByGara[g]+= (+r.PunteggioIPO||0);
+    }
+  });
+
+  // ordina rosa: minuti desc
+  const arr=_roOrder.map(k=>S[k]).sort((a,b)=> (b.pres-b.ass) - (a.pres-a.ass) || (b.min-a.min));
+
+  // KPI squadra
+  const head=arr.length;
+  const totSess=arr.reduce((a,x)=>a+x.totSess,0);
+  const pres=arr.reduce((a,x)=>a+x.pres,0);
+  const minT=arr.reduce((a,x)=>a+x.min,0);
+  const ipoT=arr.reduce((a,x)=>a+x.ipo,0);
+  const golT=arr.reduce((a,x)=>a+x.gol,0);
+
+  document.getElementById('roKpi').innerHTML=`
+    <div class="kpi rosa"><div class="kl">Giocatori</div><div class="kv">${head}</div></div>
+    <div class="kpi g"><div class="kl">Presenze</div><div class="kv">${pres}</div></div>
+    <div class="kpi a"><div class="kl">% Pres.</div><div class="kv">${totSess?Math.round(pres/totSess*100):0}%</div></div>
+    <div class="kpi c"><div class="kl">Minuti</div><div class="kv">${minT}</div></div>
+    <div class="kpi b"><div class="kl">IPO (Noi)</div><div class="kv">${ipoT}</div></div>
+    <div class="kpi g"><div class="kl">Gol (Noi)</div><div class="kv">${golT}</div></div>`;
+
+  // tabella
+  document.getElementById('tRosa').innerHTML=arr.map((x,i)=>{
+    const pct=x.totSess?Math.round(x.pres/x.totSess*100):0;
+    const cl=pct>=80?'bg':pct>=60?'ba':'br';
+    const ru=x.ruoloPref && x.ruoloPref!=='—' ? `<span class="bd brosa">${x.ruoloPref}</span>` : `<span class="bd bb">—</span>`;
+    const sel=(x.key===_roSelKey)?'sel':'';
+    return `<tr class="${sel}" style="cursor:pointer" onclick="selectRosa('${x.key}')">
+      <td>${i+1}</td>
+      <td><strong>${x.label}</strong><div style="font-size:10px;color:var(--mu2)">${x.altriRuoli||''}</div></td>
+      <td>${ru}</td>
+      <td>${x.pres}/${x.totSess}</td>
+      <td><span class="bd ${cl}">${pct}%</span></td>
+      <td>${x.min}</td>
+      <td>${x.gare}</td>
+      <td>${x.all}</td>
+      <td><span class="bd bb">${x.ipo}</span></td>
+      <td><span class="bd bg">${x.gol}</span></td>
+      <td>${x.tiri}</td>
+      <td>${x.gialli}</td>
+      <td>${x.rossi}</td>
+    </tr>`;
+  }).join('');
+
+  // selezione default
+  if(!_roSelKey && arr.length) _roSelKey=arr[0].key;
+  // aggiorna class sel
+  document.querySelectorAll('#tRosa tr').forEach(tr=>{
+    if(tr.getAttribute('onclick')?.includes(_roSelKey)) tr.classList.add('sel');
+  });
+
+  // render pannello laterale
+  renderRosaSide(S[_roSelKey],presBase,anaBase);
+}
+
+function selectRosa(key){
+  _roSelKey=key;
+  // aggiorna evidenziazione
+  document.querySelectorAll('#tRosa tr').forEach(tr=>tr.classList.remove('sel'));
+  // trova riga con onclick corrispondente
+  const rows=[...document.querySelectorAll('#tRosa tr')];
+  rows.forEach(r=>{
+    const oc=r.getAttribute('onclick')||'';
+    if(oc.includes(`'${key}'`)) r.classList.add('sel');
+  });
+  renderRo();
+}
+
+function renderRosaSide(x,presBase,anaBase){
+  if(!x){ 
+    document.getElementById('roSelName').textContent='—';
+    document.getElementById('roSelRole').textContent='Seleziona un giocatore';
+    document.getElementById('roSelKpi').innerHTML='';
+    return;
+  }
+  const pct=x.totSess?Math.round(x.pres/x.totSess*100):0;
+  const med=x.pres?Math.round(x.min/x.pres):0;
+
+  document.getElementById('roSelName').textContent=x.label;
+  const roles = x.ruoloPref && x.ruoloPref!=='—' ? `${x.ruoloPref}${x.altriRuoli?` · ${x.altriRuoli}`:''}` : (x.altriRuoli||'Ruoli non indicati');
+  document.getElementById('roSelRole').textContent=roles;
+
+  document.getElementById('roSelKpi').innerHTML=`
+    <div class="kpi a"><div class="kl">% Presenza</div><div class="kv">${pct}%</div></div>
+    <div class="kpi g"><div class="kl">Presenze</div><div class="kv">${x.pres}</div></div>
+    <div class="kpi r"><div class="kl">Assenze</div><div class="kv">${x.ass}</div></div>
+    <div class="kpi c"><div class="kl">Minuti</div><div class="kv">${x.min}</div></div>
+    <div class="kpi p"><div class="kl">Media Min.</div><div class="kv">${med}</div></div>
+    <div class="kpi b"><div class="kl">IPO</div><div class="kv">${x.ipo}</div></div>
+    <div class="kpi g"><div class="kl">Gol</div><div class="kv">${x.gol}</div></div>
+    <div class="kpi a"><div class="kl">Tiri</div><div class="kv">${x.tiri}</div></div>`;
+
+  // chart minuti nel tempo (date)
+  const dates=Object.keys(x.minByDate).sort();
+  const mins=dates.map(d=>x.minByDate[d]);
+  dc('cRoMin');
+  C.cRoMin=new Chart(document.getElementById('cRoMin'),{
+    type:'line',
+    data:{labels:dates,datasets:[{label:'Minuti',data:mins,borderColor:'rgba(255,77,166,.95)',backgroundColor:'rgba(255,77,166,.12)',fill:true,tension:.35,borderWidth:2,pointRadius:2}]},
+    options:co()
+  });
+
+  // chart IPO per gara (solo quelle dove appare)
+  const g=Object.keys(x.ipoByGara);
+  const labs=g.slice(0,14); // evita grafico troppo lungo
+  const vals=labs.map(k=>x.ipoByGara[k]);
+  dc('cRoIpo');
+  C.cRoIpo=new Chart(document.getElementById('cRoIpo'),{
+    type:'bar',
+    data:{labels:labs,datasets:[{label:'IPO',data:vals,backgroundColor:'rgba(41,121,255,.55)',borderRadius:4,borderSkipped:false}]},
+    options:{...co(),plugins:{legend:{display:false}}}
+  });
+}
+
+function exportRosaCSV(){
+  // esporta tabella corrente (come vista)
+  const presBase = rosterBasePresence();
+  const anaBase  = rosterBaseAnalytics();
+  const S={};
+  _roOrder.forEach(k=>{
+    const info=_roIndex[k]||{};
+    S[k]={key:k,label:_labelByKey[k]||k.replace(/_/g,' '),ruoloPref:info.ruoloPref||'',altriRuoli:info.altriRuoli||'',
+      totSess:0,pres:0,min:0,gare:0,all:0,ipo:0,gol:0,tiri:0,gialli:0,rossi:0};
+  });
+  presBase.forEach(r=>{
+    const k=playerKeyFromPresence(r); if(!k||!S[k]) return;
+    S[k].totSess++; if(isP(r)) S[k].pres++;
+    S[k].min += (+r.Minuti||0);
+    if(r.Tipo==='Gara') S[k].gare++; else S[k].all++;
+  });
+  anaBase.forEach(r=>{
+    if(!isNoi(r)) return;
+    const k=playerKeyFromAnalytics(r); if(!k||!S[k]) return;
+    S[k].ipo += (+r.PunteggioIPO||0);
+    if(isTiro(r.TipoEvento)) S[k].tiri++;
+    if(r.EsitoTiro==='Gol') S[k].gol++;
+    if(r.TipoEvento==='Cartellino giallo') S[k].gialli++;
+    if(r.TipoEvento==='Cartellino rosso') S[k].rossi++;
+  });
+
+  const rows=_roOrder.map(k=>{
+    const x=S[k];
+    const pct=x.totSess?Math.round(x.pres/x.totSess*100):0;
+    return {
+      COGNOME_NOME:k.toUpperCase(),
+      Giocatore:x.label,
+      RuoloPreferito:x.ruoloPref,
+      AltriRuoli:x.altriRuoli,
+      Presenze:x.pres,
+      Sessioni:x.totSess,
+      Percentuale:pct,
+      Minuti:x.min,
+      Gare:x.gare,
+      Allenamenti:x.all,
+      IPO:x.ipo,
+      Gol:x.gol,
+      Tiri:x.tiri,
+      Gialli:x.gialli,
+      Rossi:x.rossi
+    };
+  });
+
+  const csv = toCSV(rows);
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='coachlab-rosa.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+function toCSV(arr){
+  if(!arr.length) return '';
+  const cols=Object.keys(arr[0]);
+  const esc=v=> `"${String(v??'').replace(/"/g,'""')}"`;
+  return [cols.join(';'), ...arr.map(r=>cols.map(c=>esc(r[c])).join(';'))].join('\n');
+}
+
+// ═══════════════════════════════════════
+// TEMPLATE EXCEL (aggiunge foglio ROSA)
+// ═══════════════════════════════════════
 function dlTpl(){
   const wb=XLSX.utils.book_new();
+
   const R=[
     {Data:'2024-09-15',Competizione:'Campionato',Giornata:1,Avversario:'FC Siena',Venue:'Home',Campo:'Stadio Franchi',GolFatti:2,GolSubiti:1,Note:''},
     {Data:'2024-09-22',Competizione:'Campionato',Giornata:2,Avversario:'AC Pisa',Venue:'Away',Campo:'Arena Garibaldi',GolFatti:0,GolSubiti:0,Note:''},
@@ -1223,21 +1866,31 @@ function dlTpl(){
     {Data:'2024-10-06',Competizione:'Campionato',Giornata:3,Avversario:'Livorno FC',Venue:'Away',Campo:'Armando Picchi',GolFatti:1,GolSubiti:2,Note:''},
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(R),'RISULTATI');
+
   const P=[
-    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:''},
-    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:65,Ruolo:'Riserva',Nota:'Entrato al 25'},
-    {Nome:'Andrea',Cognome:'Verdi',Data:'2024-09-15',Tipo:'Gara',Presente:'No',Minuti:0,Ruolo:'',Nota:'Infortunio'},
-    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:''},
-    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'No',Minuti:0,Ruolo:'',Nota:'Malato'},
+    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:'',COGNOME_NOME:'ROSSI_MARCO'},
+    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-15',Tipo:'Gara',Presente:'Si',Minuti:65,Ruolo:'Riserva',Nota:'Entrato al 25',COGNOME_NOME:'BIANCHI_LUCA'},
+    {Nome:'Andrea',Cognome:'Verdi',Data:'2024-09-15',Tipo:'Gara',Presente:'No',Minuti:0,Ruolo:'',Nota:'Infortunio',COGNOME_NOME:'VERDI_ANDREA'},
+    {Nome:'Marco',Cognome:'Rossi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'Si',Minuti:90,Ruolo:'Titolare',Nota:'',COGNOME_NOME:'ROSSI_MARCO'},
+    {Nome:'Luca',Cognome:'Bianchi',Data:'2024-09-17',Tipo:'Allenamento',Presente:'No',Minuti:0,Ruolo:'',Nota:'Malato',COGNOME_NOME:'BIANCHI_LUCA'},
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(P),'PRESENZE');
+
   const A=[
-    {Data:'2024-09-15',Gara:'Noi vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,Squadra:'Noi',TipoEvento:'Occasione da goal',GiocatoreEvento:'Rossi M.',MinutoEvento:23,ZonaEvento:11,NotaEvento:'Contropiede',EsitoTiro:'Gol',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:6,GiocatoreRifinitura:'Bianchi L.',ZonaRifinitura:10,ZonaRecuperoPalla:5,PunteggioIPO:10},
-    {Data:'2024-09-15',Gara:'Noi vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,Squadra:'Avversario',TipoEvento:'Tiro in area di rigore',GiocatoreEvento:'',MinutoEvento:40,ZonaEvento:10,NotaEvento:'',EsitoTiro:'Parato',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:3},
-    {Data:'2024-09-22',Gara:'AC Pisa vs Noi',Risultato:'0-0',Competizione:'Campionato',Giornata:2,Squadra:'Noi',TipoEvento:'Punizione da zona centrale',GiocatoreEvento:'Bianchi L.',MinutoEvento:15,ZonaEvento:7,NotaEvento:'',EsitoTiro:'Parato',TipologiaTiro:'Destro',EsitoPallaInattiva:'Parato',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:3},
-    {Data:'2024-09-22',Gara:'AC Pisa vs Noi',Risultato:'0-0',Competizione:'Campionato',Giornata:2,Squadra:'Avversario',TipoEvento:'Corner',GiocatoreEvento:'',MinutoEvento:62,ZonaEvento:12,NotaEvento:'',EsitoTiro:'',TipologiaTiro:'',EsitoPallaInattiva:'Non concluso',ZonaInizioAzione:'',GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:1},
+    {Data:'2024-09-15',Gara:'Noi vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,Squadra:'Noi',TipoEvento:'Occasione da goal',GiocatoreEvento:'Rossi M.',COGNOME_NOME:'ROSSI_MARCO',MinutoEvento:23,ZonaEvento:11,NotaEvento:'Contropiede',EsitoTiro:'Gol',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:6,GiocatoreRifinitura:'Bianchi L.',ZonaRifinitura:10,ZonaRecuperoPalla:5,PunteggioIPO:10},
+    {Data:'2024-09-15',Gara:'Noi vs FC Siena',Risultato:'2-1',Competizione:'Campionato',Giornata:1,Squadra:'Avversario',TipoEvento:'Tiro in area di rigore',GiocatoreEvento:'',COGNOME_NOME:'',MinutoEvento:40,ZonaEvento:10,NotaEvento:'',EsitoTiro:'Parato',TipologiaTiro:'Destro',EsitoPallaInattiva:'',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:3},
+    {Data:'2024-09-22',Gara:'AC Pisa vs Noi',Risultato:'0-0',Competizione:'Campionato',Giornata:2,Squadra:'Noi',TipoEvento:'Punizione da zona centrale',GiocatoreEvento:'Bianchi L.',COGNOME_NOME:'BIANCHI_LUCA',MinutoEvento:15,ZonaEvento:7,NotaEvento:'',EsitoTiro:'Parato',TipologiaTiro:'Destro',EsitoPallaInattiva:'Parato',ZonaInizioAzione:7,GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:3},
+    {Data:'2024-09-22',Gara:'AC Pisa vs Noi',Risultato:'0-0',Competizione:'Campionato',Giornata:2,Squadra:'Avversario',TipoEvento:'Corner',GiocatoreEvento:'',COGNOME_NOME:'',MinutoEvento:62,ZonaEvento:12,NotaEvento:'',EsitoTiro:'',TipologiaTiro:'',EsitoPallaInattiva:'Non concluso',ZonaInizioAzione:'',GiocatoreRifinitura:'',ZonaRifinitura:'',ZonaRecuperoPalla:'',PunteggioIPO:1},
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(A),'ANALYTICS');
+
+  const RO=[
+    {NOME:'Marco',COGNOME:'Rossi','RUOLO PREFERITO':'Centrocampista','ALTRI RUOLI':'Mezzala; Trequartista'},
+    {NOME:'Luca',COGNOME:'Bianchi','RUOLO PREFERITO':'Attaccante','ALTRI RUOLI':'Punta; Esterno'},
+    {NOME:'Andrea',COGNOME:'Verdi','RUOLO PREFERITO':'Difensore','ALTRI RUOLI':'Terzino; Centrale'},
+  ];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(RO),'ROSA');
+
   XLSX.writeFile(wb,'coachlab-template.xlsx');
 }
 </script>
