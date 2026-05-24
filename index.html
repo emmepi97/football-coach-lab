@@ -2,352 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>CoachLab</title>
-
-  <!-- ✅ FONT (fix: link vero, non testo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap">
-
-  <!-- ✅ LIBRERIE (fix: script veri, non testo) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js/auto"></script>
-
-  <style>
-    :root{
-      --bg:#06080f;--s1:#0f1525;--s2:#151e30;--s3:#0b1020;
-      --bo:rgba(255,255,255,0.07);--bo2:rgba(255,255,255,0.13);
-      --g:#00e676;--r:#ff3d57;--a:#ffb300;--b:#2979ff;--c:#00e5ff;--p:#7c4dff;--rosa:#ff4da6;
-      --tx:#e8edf5;--mu:#4a5568;--mu2:#6b7a8d;
-      --fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
-
-      /* layout */
-      --shellH: 120px; /* verrà sovrascritto da JS */
-      --gap: 10px;
-      --radius: 16px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);font-family:var(--fb);color:var(--tx);overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background:
-      radial-gradient(ellipse 70% 50% at 10% 0%,rgba(41,121,255,0.07) 0%,transparent 60%),
-      radial-gradient(ellipse 50% 40% at 90% 100%,rgba(0,230,118,0.05) 0%,transparent 60%);
-    pointer-events:none;z-index:0}
-
-    /* SHELL */
-    #shell{
-      position:fixed;top:0;left:0;right:0;z-index:200;
-      background:rgba(6,8,15,0.92);
-      backdrop-filter: blur(14px);
-      border-bottom:1px solid var(--bo);
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    }
-    #navrow{
-      max-width:1600px;margin:0 auto;
-      padding:10px 18px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-    }
-    .logo{
-      display:flex;align-items:baseline;gap:8px;
-      font-family:var(--fh);
-      font-size:26px;font-weight:900;letter-spacing:.05em;white-space:nowrap
-    }
-    .logo span{color:var(--g)}
-    .subbrand{
-      font-size:10px;color:var(--mu2);letter-spacing:.12em;text-transform:uppercase;
-      margin-top:2px;
-    }
-
-    /* NAV TABS */
-    .nav-tabs{
-      display:flex;gap:6px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      border:1px solid var(--bo);
-      border-radius:14px;
-      padding:6px;
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      max-width:min(980px, 70vw);
-    }
-    .nav-tabs::-webkit-scrollbar{height:4px}
-    .nav-tabs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:999px}
-
-    .nt{
-      display:flex;align-items:center;gap:8px;
-      font-family:var(--fh);
-      font-size:12px;font-weight:800;letter-spacing:.08em;
-      padding:8px 14px;border-radius:11px;
-      cursor:pointer;transition:.15s;
-      color:var(--mu2);
-      border:1px solid transparent;
-      background:transparent;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .nt .ico{font-size:14px}
-    .nt.active{
-      background:linear-gradient(180deg, rgba(41,121,255,.95), rgba(21,101,192,.9));
-      color:#fff;border-color:rgba(41,121,255,.55)
-    }
-    .nt:hover:not(.active){color:var(--tx);background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.07)}
-    .nt.rosa.active{
-      background:linear-gradient(180deg, rgba(255,77,166,.95), rgba(255,77,166,.65));
-      border-color:rgba(255,77,166,.45);
-    }
-
-    .head-actions{
-      display:flex;align-items:center;gap:8px;flex-shrink:0;
-    }
-    .head-pill{
-      display:flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:12px;
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--bo);
-      color:var(--mu2);
-      font-size:11px;
-    }
-    .head-pill strong{color:var(--tx);font-weight:700}
-    .head-btn{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--bo);
-      color:var(--tx);
-      padding:8px 10px;border-radius:12px;
-      cursor:pointer;transition:.15s;
-      font-family:var(--fh);font-weight:800;letter-spacing:.06em;font-size:11px;
-      display:flex;align-items:center;gap:8px;
-      user-select:none;
-    }
-    .head-btn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
-    .head-btn.red:hover{border-color:rgba(255,61,87,.55);color:#ff97a5;background:rgba(255,61,87,.08)}
-
-    /* FILTER BAR */
-    #fwrap{
-      max-width:1600px;margin:0 auto;
-      padding:0 18px 10px;
-      display:flex;flex-direction:column;gap:8px;
-    }
-    #fcontrols{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:8px 12px;
-      border:1px solid var(--bo);
-      border-radius:14px;
-      background:rgba(255,255,255,.02);
-    }
-    .fleft{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      color:var(--mu2);font-size:11px;
-    }
-    .fleft .tag{
-      font-family:var(--fh);
-      font-weight:900;letter-spacing:.1em;
-      color:#cbd5e1;
-      display:flex;align-items:center;gap:8px;
-    }
-    .fleft .tag .dot{width:7px;height:7px;border-radius:999px;background:var(--b);box-shadow:0 0 0 4px rgba(41,121,255,.12)}
-    .fright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .fbtn{
-      background:var(--s2);border:1px solid var(--bo);border-radius:12px;padding:8px 12px;
-      color:var(--tx);font-family:var(--fh);font-size:12px;font-weight:900;letter-spacing:.06em;
-      cursor:pointer;transition:.15s;
-      display:flex;align-items:center;gap:8px;
-      user-select:none;
-    }
-    .fbtn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
-    .fbtn.red{border-color:rgba(255,61,87,.35);color:#ff97a5;background:rgba(255,61,87,.04)}
-    .fbtn.red:hover{border-color:rgba(255,61,87,.6);background:rgba(255,61,87,.1);color:#ffd2d7}
-
-    #frow{
-      border:1px solid var(--bo);
-      border-radius:16px;
-      background:rgba(255,255,255,.02);
-      padding:10px;
-      display:grid;
-      grid-template-columns:repeat(12, 1fr);
-      gap:8px;
-      overflow:hidden;
-      transition:.18s;
-    }
-    #frow.collapsed{max-height:0;padding:0;border-width:0;opacity:0;pointer-events:none}
-
-    .fg{
-      display:flex;flex-direction:column;gap:6px;
-      padding:8px 10px;border-radius:14px;
-      background:rgba(255,255,255,.02);
-      border:1px solid rgba(255,255,255,.05);
-      min-height:68px;
-    }
-    .fl2{
-      font-size:9px;font-weight:900;letter-spacing:.12em;
-      color:var(--mu2);
-      text-transform:uppercase;
-      display:flex;align-items:center;gap:6px;
-    }
-    .fl2 .i{opacity:.9}
-    .fg select,.fg input[type=date],.fg input[type=text]{
-      background:var(--s2);
-      border:1px solid var(--bo);
-      border-radius:12px;
-      padding:8px 10px;
-      color:var(--tx);
-      font-family:var(--fb);
-      font-size:11px;
-      outline:none;
-      transition:.15s;
-      height:34px;
-      width:100%;
-    }
-    .fg select:focus,.fg input:focus{border-color:rgba(41,121,255,.65)}
-    .fg select option{background:var(--s2)}
-
-    /* grid positions */
-    .col-3{grid-column:span 3}
-    .col-2{grid-column:span 2}
-    .col-4{grid-column:span 4}
-    .col-6{grid-column:span 6}
-    .col-12{grid-column:span 12}
-
-    /* ✅ CHIPS (NUOVO: puliti, compatti, contatore, niente caos) */
-    #chipsWrap{
-      max-width:1600px;margin:0 auto;padding:0 18px 10px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-    }
-    #chips{
-      display:flex;flex-wrap:wrap;gap:6px;min-height:10px;
-    }
-    .chip{
-      display:inline-flex;align-items:center;gap:7px;
-      background:rgba(41,121,255,.10);
-      border:1px solid rgba(41,121,255,.25);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:10px;color:#b9d6ff;
-      user-select:none;
-      max-width:100%;
-    }
-    .chip .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
-    .chip.rosa{background:rgba(255,77,166,.10);border-color:rgba(255,77,166,.25);color:#ffb6da}
-    .chip-x{cursor:pointer;font-size:12px;line-height:1;opacity:.75}
-    .chip-x:hover{opacity:1}
-    .chipMeta{
-      display:flex;align-items:center;gap:8px;color:var(--mu2);font-size:11px;
-      background:rgba(255,255,255,.02);border:1px solid var(--bo);border-radius:12px;padding:6px 10px;
-    }
-    .chipMeta strong{color:var(--tx)}
-    .chipMeta button{
-      background:none;border:none;color:#ff97a5;cursor:pointer;font-weight:900;
-      font-family:var(--fh);letter-spacing:.06em;
-    }
-    .chipMeta button:hover{color:#ffd2d7}
-
-    /* MAIN */
-    #main{max-width:1600px;margin:0 auto;padding:12px 18px 40px;position:relative;z-index:1}
-    #landing{padding-top:calc(var(--shellH) + 18px)}
-    #afterLoad{display:none;padding-top:calc(var(--shellH) + 12px)}
-
-    /* UPLOAD */
-    .upbar{background:var(--s1);border:1px solid var(--bo);border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-    .uplabel{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px dashed rgba(41,121,255,.4);border-radius:12px;padding:9px 14px;font-size:12px;color:var(--mu2);cursor:pointer;transition:.15s}
-    .uplabel:hover{border-color:rgba(41,121,255,.8);color:var(--tx);background:rgba(41,121,255,.06)}
-    .uplabel input{display:none}
-    .upname{font-size:11px;color:var(--g);font-weight:800}
-    .btn{background:var(--b);color:#fff;border:none;padding:9px 16px;border-radius:12px;font-family:var(--fh);font-size:13px;font-weight:900;letter-spacing:.06em;cursor:pointer;transition:.15s}
-    .btn:hover{background:#1565c0}
-    .btn.gr{background:var(--g);color:#06110a}.btn.gr:hover{background:#00c853}
-    .btn.gh{background:var(--s2);border:1px solid var(--bo);color:var(--tx)}.btn.gh:hover{background:var(--s1)}
-    .btn.sm{padding:6px 10px;font-size:11px}
-
-    /* GUIDE */
-    .guide{background:var(--s1);border:1px solid rgba(41,121,255,.2);border-radius:16px;padding:16px 18px}
-    .gtitle{font-family:var(--fh);font-size:18px;font-weight:900;color:var(--b);margin-bottom:10px}
-    .gcol-head{font-size:10px;font-weight:900;letter-spacing:.10em;margin-bottom:6px}
-    .gitem{background:var(--s2);border:1px solid var(--bo);border-radius:10px;padding:8px 10px;margin-bottom:6px}
-    .gf{font-size:10px;font-weight:900;color:var(--c);letter-spacing:.06em;margin-bottom:2px}
-    .gv{font-size:10px;color:var(--mu2);line-height:1.4}
-
-    /* PAGE */
-    .page{display:none}.page.active{display:block}
-
-    /* KPI */
-    .krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;margin-bottom:10px}
-    .kpi{background:var(--s1);border:1px solid var(--bo);border-radius:14px;padding:10px 12px;transition:.15s}
-    .kpi:hover{border-color:var(--bo2);transform:translateY(-1px)}
-    .kl{font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:var(--mu2);font-weight:800;margin-bottom:4px}
-    .kv{font-family:var(--fh);font-size:24px;font-weight:900;line-height:1}
-    .kpi.g .kv{color:var(--g)}.kpi.b .kv{color:var(--b)}.kpi.a .kv{color:var(--a)}.kpi.r .kv{color:var(--r)}.kpi.c .kv{color:var(--c)}.kpi.p .kv{color:var(--p)}.kpi.rosa .kv{color:var(--rosa)}
-
-    /* CARD */
-    .card{background:var(--s1);border:1px solid var(--bo);border-radius:16px;padding:12px 14px;transition:.15s;overflow:hidden}
-    .card:hover{border-color:var(--bo2)}
-    .card.dd{cursor:crosshair}.card.dd:hover{border-color:rgba(41,121,255,.5)}
-    .card.dd .ct::after{content:' ↗';font-size:9px;color:var(--b);opacity:.85}
-    .ct{font-family:var(--fh);font-size:15px;font-weight:900;letter-spacing:.04em;margin-bottom:1px}
-    .cs{font-size:10px;color:var(--mu2);margin-bottom:8px;line-height:1.35}
-
-    /* ✅ CHART WRAPS (più compatti + responsive) */
-    .ch{position:relative;width:100%}
-    .ch-sm{height:clamp(130px, 22vh, 170px)}
-    .ch-md{height:clamp(160px, 26vh, 210px)}
-    .ch-lg{height:clamp(190px, 30vh, 250px)}
-    .ch-xl{height:clamp(220px, 38vh, 320px)}
-
-    /* DESCRIZIONI SOTTO GRAFICI */
-    .cd{
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(255,255,255,.02);
-      border:1px solid rgba(255,255,255,.06);
-      color:rgba(232,237,245,.78);
-      font-size:11px;
-      line-height:1.55;
-    }
-    .cd strong{color:#9cc4ff}
-    .cd .hint{color:rgba(107,122,141,.95)}
-    .cd.rosa strong{color:#ff8ac7}
-
-    /* GRIDS (✅ auto-fit = davvero responsive + meno dispersione) */
-    .g2{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
-    .g3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
-    .g4{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
-    .g12{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:var(--gap);margin-bottom:var(--gap)}
-    .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--gap);margin-bottom:var(--gap)}
-    .mb{margin-bottom:var(--gap)}
-
-    @media(max-width:1200px){.g4{grid-template-columns:repeat(2, minmax(0,1fr))}.g3{grid-template-columns:repeat(2, minmax(0,1fr))}}
-    @media(max-width:900px){.g2,.g3,.g4,.g12,.g21{grid-template-columns:1fr}}
-
-    /* TABLE */
-    .tw{overflow:auto;max-height:380px;border-radius:12px;border:1px solid rgba(255,255,255,.04)}
-    .tbl{width:100%;border-collapse:collapse}
-    .tbl th{
-      background:var(--s2);color:var(--mu2);padding:8px 10px;font-size:10px;text-align:left;font-weight:900;
-      text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;position:sticky;top:0;z-index:2
-    }
-    .tbl td{padding:8px 10px;border-top:1px solid var(--bo);font-size:11px;white-space:nowrap}
-    .tbl tr:hover td{background:rgba(255,255,255,.03)}
-    .tbl tr.sel td{background:rgba(255,77,166,.10)!important}
-    .tbl tr.sel td:first-child{border-left:2px solid rgba(255,77,166,.9)}
-
-    /* BADGE */
-    .bd{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.02em}
-    .bg{background:rgba(0,230,118,.13);color:var(--g)}
-    .br{background:rgba(255,61,87,.13);color:var(--r)}
-    .ba{background:rgba(255,179,0,.13);color:var(--a)}
-    .bb{background:rgba(41,121,255,.13);color:var(--b)}
-    .bc{background:rgba(0,229,255,.13);color:var(--c)}
-    .bp{background:rgba(124,77,255,.13);color:var(--p)}
-    .brosa{background:rgba(255,77,166,.13);color:#ffb6da;border:1px solid rgba(255,77,166,.22)}
-
-    /* INSIGHT */
-    .insight{background:rgba(41,121,255,.07);border:1px solid rgba(41,121,255,.2);border-radius:12px;padding:10px 12px;font-size:11px;color:#90caf9;line-height:1.6;margin-top:8px}
-    .insight strong{color:var(--b)}
-    .insight.rosa{background:rgba(255,77,166,.07);border-color:rgba(255,77,166,.18);color:#ffb6da}
-    .insight.rosa strong{color:var(--rosa)}
-
-    /* IPO BIG */
-    .ipo-big{font-family:var(--fh);font-size:56px;font-weight:900;line-height:1}
-    @media(max-width:520px){ .ipo-big{font-size:46px} }
+  <meta name="viewport":520px){ .ipo-big{font-size:46px} }  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 
     /* PITCH */
     .pitch{position:relative;width:100%;aspect-ratio:1.65/1;background:#0d1f0d;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
@@ -389,6 +44,7 @@
       text-transform:uppercase;margin:12px 0 8px;padding-left:8px;border-left:2px solid var(--b)
     }
     .sec-title.rosa{border-left-color:var(--rosa)}
+    .sec-title.scout{border-left-color:var(--c)}
 
     /* ✅ Analytics compatti: details */
     details.group{
@@ -434,7 +90,7 @@
   </style>
 </head>
 
-<body>
+<body class="preload">
 
 <div id="shell">
   <div id="navrow">
@@ -448,10 +104,11 @@
       <button class="nt" onclick="showPage('presenze',this)"><span class="ico">👤</span> PRESENZE</button>
       <button class="nt" onclick="showPage('analytics',this)"><span class="ico">📊</span> ANALYTICS</button>
       <button class="nt rosa" onclick="showPage('rosa',this)"><span class="ico">🌸</span> ROSA</button>
+      <button class="nt scout" onclick="showPage('scouting',this)"><span class="ico">🧠</span> SCOUTING</button>
     </div>
 
     <div class="head-actions">
-      <div class="head-pill" title="Suggerimento: carica il file Excel con 4 fogli (RISULTATI, PRESENZE, ANALYTICS, ROSA)">
+      <div class="head-pill" title="Suggerimento: carica il file Excel con 5 fogli (RISULTATI, PRESENZE, ANALYTICS, ROSA, SCOUTING)">
         <span>📂</span> <strong>Excel</strong> <span style="opacity:.7">→</span> <span>grafici</span>
       </div>
       <button class="head-btn" onclick="toggleFilters()"><span>🎛</span> FILTRI</button>
@@ -545,7 +202,6 @@
     </div>
   </div>
 
-  <!-- ✅ chips bar nuova -->
   <div id="chipsWrap">
     <div id="chips"></div>
     <div class="chipMeta" id="chipsMeta" style="display:none">
@@ -559,14 +215,14 @@
   <!-- LANDING -->
   <div id="landing">
     <div class="upbar">
-      <label class="uplabel">📂 Carica Excel (4 fogli) <input type="file" id="fw" accept=".xlsx,.xls"/></label>
+      <label class="uplabel">📂 Carica Excel (5 fogli) <input type="file" id="fw" accept=".xlsx,.xls"/></label>
       <span class="upname" id="wname">nessun file</span>
       <button class="btn gr" onclick="dlTpl()">⬇ Template Excel</button>
       <span style="font-size:11px;color:var(--mu2)">Se carichi il template appena scaricato, la dashboard deve popolarsi subito.</span>
     </div>
 
     <div class="guide">
-      <div class="gtitle">📖 Guida Excel — 4 fogli</div>
+      <div class="gtitle">📖 Guida Excel — 5 fogli</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
         <div>
           <div class="gcol-head" style="color:var(--g)">RISULTATI</div>
@@ -603,6 +259,16 @@
           <div class="gitem"><div class="gf">ALTRI RUOLI</div><div class="gv">Es: Terzino; Esterno; Punta</div></div>
           <div class="gitem"><div class="gf">Chiave</div><div class="gv">COGNOME_NOME (generata automaticamente)</div></div>
         </div>
+
+        <div>
+          <div class="gcol-head" style="color:var(--c)">SCOUTING</div>
+          <div class="gitem"><div class="gf">DATA OSSERVAZIONE · NOME · COGNOME</div><div class="gv">YYYY-MM-DD · testo</div></div>
+          <div class="gitem"><div class="gf">PARTITA · RUOLO · CATEGORIA · COMPETIZIONE</div><div class="gv">testo</div></div>
+          <div class="gitem"><div class="gf">Extra</div><div class="gv">numero · data di nascita · peso_kg · altezza_cm · nickname · piede forte · dettagli_ruolo</div></div>
+          <div class="gitem"><div class="gf">Testi scout</div><div class="gv">possesso · non possesso · transizioni · mentali · punti forza/debolezza · impressione generale</div></div>
+          <div class="gitem"><div class="gf">Voti 1–5</div><div class="gv">palle inattive · tecnica/tattica · difesa · attacco · mentali · fisico · portiere</div></div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -613,7 +279,6 @@
     <!-- ═══ RISULTATI ═══ -->
     <div id="page-risultati" class="page active">
       <div class="krow" id="rKpi"></div>
-
       <div class="sec-title">📈 Andamento Stagionale</div>
 
       <div class="g2 mb">
@@ -863,7 +528,7 @@
       </div>
     </div>
 
-    <!-- ═══ ANALYTICS (✅ compatta) ═══ -->
+    <!-- ═══ ANALYTICS (compatta) ═══ -->
     <div id="page-analytics" class="page">
       <div class="krow" id="aKpi"></div>
 
@@ -1162,6 +827,98 @@
       </div>
     </div>
 
+    <!-- ═══ SCOUTING ═══ -->
+    <div id="page-scouting" class="page">
+      <div class="krow" id="sKpi"></div>
+
+      <div class="sec-title scout">🧠 Scouting — Overview</div>
+
+      <div class="g3 mb">
+        <div class="card dd">
+          <div class="ct">Osservazioni per Competizione</div>
+          <div class="cs">Click barra → filtra competizione (usa filtro Competizione)</div>
+          <div class="ch ch-md"><canvas id="cScoutComp"></canvas></div>
+          <div class="cd scout"><strong>Lettura:</strong> dove stai osservando di più. Picchi = focus scout su tornei/categorie.</div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Media Voti — Macro Categorie</div>
+          <div class="cs">Valori medi (1–5) su tutte le osservazioni filtrate</div>
+          <div class="ch ch-md"><canvas id="cScoutMacro"></canvas></div>
+          <div class="cd scout"><strong>Lettura:</strong> profilo medio del campione osservato (tecnica, difesa, mentali, ecc.).</div>
+        </div>
+
+        <div class="card">
+          <div class="ct">Distribuzione “Overall”</div>
+          <div class="cs">Media voti per osservazione (1–5)</div>
+          <div class="ch ch-md"><canvas id="cScoutOverall"></canvas></div>
+          <div class="cd scout"><strong>Lettura:</strong> quante osservazioni sono “alte” vs “medie/basse”.</div>
+        </div>
+      </div>
+
+      <div class="sec-title scout">📋 Registro Osservazioni</div>
+
+      <div class="g21 mb">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <div>
+              <div class="ct">Osservazioni</div>
+              <div class="cs">Click riga → dettaglio a destra</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span class="bd bscout">SCOUTING</span>
+              <button class="btn sm gh" onclick="exportScoutingCSV()">⬇ CSV</button>
+            </div>
+          </div>
+
+          <div class="tw" style="max-height:460px">
+            <table class="tbl">
+              <thead>
+              <tr>
+                <th>#</th>
+                <th>Data Oss.</th>
+                <th>Giocatore</th>
+                <th>Partita</th>
+                <th>Ruolo</th>
+                <th>Categoria</th>
+                <th>Competizione</th>
+                <th>Anno Oss.</th>
+                <th>Overall</th>
+              </tr>
+              </thead>
+              <tbody id="tScout"></tbody>
+            </table>
+          </div>
+
+          <div class="cd scout">
+            <strong>Tip:</strong> Usa i filtri data/competizione per isolare periodi o tornei. L’Overall è la media dei voti disponibili (1–5).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ct" id="scSelName">—</div>
+          <div class="cs" id="scSelMeta">Seleziona un’osservazione dalla tabella</div>
+
+          <div class="krow" id="scSelKpi" style="margin-top:8px"></div>
+
+          <div class="sec-title scout" style="margin-top:12px">📝 Note &amp; Impressioni</div>
+          <div class="cd scout" id="scSelText">
+            <strong>Possesso:</strong> —<br/>
+            <strong>Non possesso:</strong> —<br/>
+            <strong>Transizioni:</strong> —<br/>
+            <strong>Mentali:</strong> —<br/>
+            <strong>Punti di forza:</strong> —<br/>
+            <strong>Punti di debolezza:</strong> —<br/>
+            <strong>Impressione generale:</strong> —
+          </div>
+
+          <div class="sec-title scout" style="margin-top:12px">⭐ Profilo Voti (macro)</div>
+          <div class="ch ch-md"><canvas id="cScoutSelMacro"></canvas></div>
+          <div class="cd scout"><strong>Lettura:</strong> macro categorie della singola osservazione (media sottocategorie).</div>
+        </div>
+      </div>
+    </div>
+
     <div class="guide" style="margin-top:24px;opacity:.65">
       <div class="gtitle" style="font-size:14px">📖 Riferimento rapido colonne</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:10px;color:var(--mu2)">
@@ -1169,6 +926,7 @@
         <div><strong style="color:var(--a)">PRESENZE:</strong> Nome · Cognome · Data · Tipo · Presente · Minuti · Ruolo · Nota · (cons.) COGNOME_NOME</div>
         <div><strong style="color:var(--c)">ANALYTICS:</strong> TipoEvento · Zone · Minuto · Esito/Tipologia · GiocatoreEvento · Squadra · Gara · Competizione · (cons.) COGNOME_NOME</div>
         <div><strong style="color:var(--rosa)">ROSA:</strong> NOME · COGNOME · RUOLO PREFERITO · ALTRI RUOLI</div>
+        <div><strong style="color:var(--c)">SCOUTING:</strong> DATA OSSERVAZIONE · NOME · COGNOME · PARTITA · RUOLO · CATEGORIA · COMPETIZIONE · extra + testi + voti (1–5)</div>
       </div>
     </div>
   </div>
@@ -1198,11 +956,39 @@
 
 <script>
 /* ─────────────────────────────────────────────
+   ✅ FALLBACK LOADER (Chart/XLSX) - FIX Chart.js non caricata
+───────────────────────────────────────────── */
+function loadScript(url){
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src=url; s.async=true;
+    s.onload=()=>resolve(url);
+    s.onerror=()=>reject(new Error('Failed '+url));
+    document.head.appendChild(s);
+  });
+}
+async function ensureLibs(){
+  if(typeof XLSX === 'undefined'){
+    const xUrls=[
+      'https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js',
+      'https://unpkg.com/xlsx/dist/xlsx.full.min.js'
+    ];
+    for(const u of xUrls){ try{ await loadScript(u); if(typeof XLSX!=='undefined') break; }catch(e){} }
+  }
+  if(typeof Chart === 'undefined'){
+    const cUrls=[
+      'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js',
+      'https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js'
+    ];
+    for(const u of cUrls){ try{ await loadScript(u); if(typeof Chart!=='undefined') break; }catch(e){} }
+  }
+}
+
+/* ─────────────────────────────────────────────
    DATA
 ───────────────────────────────────────────── */
-let DR=[],DP=[],DA=[],DRO=[];
-let FR=[],FP=[],FA=[];
-let FRO=[];
+let DR=[],DP=[],DA=[],DRO=[],DS=[];  // ✅ DS scouting
+let FR=[],FP=[],FA=[],FRO=[],FS=[];
 const C={};
 
 const IPOW={
@@ -1229,8 +1015,10 @@ let _roOrder=[];
 let _labelByKey={};
 let _keyByLabel={};
 
+let _scSelIdx=-1;
+
 /* ─────────────────────────────────────────────
-   ✅ FILTRI: state unico + chips pulite
+   ✅ FILTRI: state unico + chips
 ───────────────────────────────────────────── */
 const FILTER_META = {
   fComp:     {label:'Competizione', type:'select'},
@@ -1256,37 +1044,24 @@ function optionText(selectId,val){
   return o?o.text:val;
 }
 
-function onFilterInput(id, value){
-  setFilter(id, value, 'input');
-}
+function onFilterInput(id, value){ setFilter(id, value, 'input'); }
 
-function setFilter(id, value, source='sys'){
+function setFilter(id, value){
   if(!(id in FSTATE)) return;
-  const prev = FSTATE[id] || '';
   FSTATE[id] = value || '';
-
-  // sync UI input only if needed
   const el = document.getElementById(id);
   if(el && el.value !== FSTATE[id]) el.value = FSTATE[id];
-
-  // apply + chips
   scheduleApplyAll();
   renderChips();
-
-  // micro UX: se uguale a prima e arrivava da un click su chart -> toggle off
-  // (gestito altrove con setFilterToggle)
 }
-
 function setFilterToggle(id, value){
   const v = (FSTATE[id] === value) ? '' : value;
-  setFilter(id, v, 'toggle');
+  setFilter(id, v);
 }
-
 function getF(){ return {...FSTATE}; }
 
 function resetAllFilters(){
   Object.keys(FSTATE).forEach(k=>FSTATE[k]='');
-  // reset UI
   Object.keys(FILTER_META).forEach(k=>{
     const el=document.getElementById(k);
     if(el) el.value='';
@@ -1294,6 +1069,12 @@ function resetAllFilters(){
   const ps=document.getElementById('pSrch'); if(ps) ps.value='';
   renderChips();
   scheduleApplyAll(true);
+}
+
+function escapeHtml(str){
+  return String(str||'').replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
 }
 
 function renderChips(){
@@ -1324,10 +1105,7 @@ function renderChips(){
   metaEl.style.display='';
   countEl.textContent = active.length;
 }
-
-function removeChip(key){
-  setFilter(key,'','chip');
-}
+function removeChip(key){ setFilter(key,''); }
 
 /* ─────────────────────────────────────────────
    UI: FILTRI COLLAPSABLE + responsive header height
@@ -1337,7 +1115,6 @@ function toggleFilters(){
   fr.classList.toggle('collapsed');
   syncShellHeight();
 }
-
 function syncShellHeight(){
   const shell = document.getElementById('shell');
   if(!shell) return;
@@ -1346,64 +1123,6 @@ function syncShellHeight(){
 }
 window.addEventListener('resize', syncShellHeight);
 window.addEventListener('load', syncShellHeight);
-
-/* ─────────────────────────────────────────────
-   LOAD EXCEL (✅ robust + fix template load)
-───────────────────────────────────────────── */
-document.getElementById('fw').addEventListener('change',function(e){
-  const f=e.target.files[0]; if(!f) return;
-  document.getElementById('wname').textContent=f.name;
-
-  if(typeof XLSX === 'undefined'){
-    alert('Errore: libreria XLSX non caricata. Controlla la connessione o i tag <script>.');
-    return;
-  }
-  if(typeof Chart === 'undefined'){
-    alert('Errore: libreria Chart.js non caricata. Controlla la connessione o i tag <script>.');
-    return;
-  }
-
-  const rd=new FileReader();
-  rd.onerror = ()=> alert('Errore lettura file. Riprova.');
-  rd.onload = ev=>{
-    try{
-      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
-
-      // sheet names robusti (case-insensitive)
-      const sn = wb.SheetNames.reduce((a,n)=>{a[n.toLowerCase()]=n;return a;},{});
-      const sh = (name)=> wb.Sheets[ sn[name.toLowerCase()] || name ] || null;
-
-      const sR = sh('RISULTATI');
-      const sP = sh('PRESENZE');
-      const sA = sh('ANALYTICS');
-      const sO = sh('ROSA');
-
-      DR = sR ? XLSX.utils.sheet_to_json(sR) : [];
-      DP = sP ? XLSX.utils.sheet_to_json(sP) : [];
-      DA = sA ? XLSX.utils.sheet_to_json(sA).map(r=>({...r,PunteggioIPO:IPOW[r.TipoEvento]||0})) : [];
-      DRO= sO ? XLSX.utils.sheet_to_json(sO) : [];
-
-      if(!DR.length && !DP.length && !DA.length && !DRO.length){
-        alert('Ho caricato il file ma non trovo dati nei 4 fogli. Controlla i nomi: RISULTATI, PRESENZE, ANALYTICS, ROSA.');
-        return;
-      }
-
-      buildRosterIndex();
-      populateFilters();
-
-      document.getElementById('landing').style.display='none';
-      document.getElementById('afterLoad').style.display='block';
-
-      renderChips();
-      scheduleApplyAll(true);
-      syncShellHeight();
-    }catch(err){
-      console.error(err);
-      alert('Errore durante la lettura dell’Excel. Verifica che il file non sia corrotto e che abbia i fogli richiesti.');
-    }
-  };
-  rd.readAsArrayBuffer(f);
-});
 
 /* ─────────────────────────────────────────────
    HELPERS
@@ -1430,12 +1149,6 @@ function keyNC(cognome,nome){
 }
 function capWords(s){ return String(s||'').toLowerCase().replace(/\b\w/g,m=>m.toUpperCase()); }
 function labelNC(cognome,nome){ return `${String(cognome||'').trim()} ${String(nome||'').trim()}`.trim(); }
-
-function escapeHtml(str){
-  return str.replace(/[&<>"']/g, m => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[m]));
-}
 
 function dc(id){ if(C[id]){ C[id].destroy(); delete C[id]; } }
 
@@ -1465,7 +1178,92 @@ function coc(onClickFn){
 }
 
 /* ─────────────────────────────────────────────
-   ROSA INDEX + MATCH
+   ✅ SCOUTING: voti & calcoli (AnnoNascita / AnnoOsservazione)
+───────────────────────────────────────────── */
+const SCOUT_RATING = {
+  palle_inattive: ["corner","punizione","rigore","rimessa_laterale","attitudine_schemi"],
+  tecnica_tattica: ["passaggio","stop","conduzione","tiro","lancio","colpo_testa","tecnica_individuale","tattica_collettiva"],
+  difesa: ["anticipo","intercetto","contrasto","marcatura_uomo","marcatura_zona","intervento_scivolata","indirizzamento_avversario","postura_difensiva","duello_aereo","recupero_palloni"],
+  attacco: ["dribbling","finalizzazione","tiro_distanza","creativita","cross","filtrante","rifinitura"],
+  mentali: ["concentrazione","personalita","coraggio","determinazione","leadership","lavoro_squadra","impegno","comunicazione","rischio","ego","rispetto_regole"],
+  fisico: ["velocita","accelerazione","agilita","forza","resistenza","salto","rapidita","altezza","muscolatura"],
+  portiere: ["abilita_tecniche_portiere","parata_tuffo","uscite_basse","uscite_alte","rinvio_piedi","rinvio_mani","posizionamento_pali","scelta_tempi","organizzazione_difesa","senso_tattico","copertura_spazio_avanti"]
+};
+const SCOUT_ALL_RATING_FIELDS = Object.values(SCOUT_RATING).flat();
+
+function pick(r, ...keys){
+  for(const k of keys){
+    if(k in r && r[k]!==undefined && r[k]!==null && String(r[k]).trim()!=='') return r[k];
+  }
+  return '';
+}
+function dateISO(d){
+  const s=String(d||'').trim();
+  if(!s) return '';
+  // Excel serial
+  if(/^\d+(\.\d+)?$/.test(s)){
+    const n=Number(s);
+    const dt = new Date(Math.round((n-25569)*86400*1000));
+    if(!isNaN(dt.getTime())){
+      const mm=String(dt.getMonth()+1).padStart(2,'0');
+      const dd=String(dt.getDate()).padStart(2,'0');
+      return `${dt.getFullYear()}-${mm}-${dd}`;
+    }
+  }
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return s;
+}
+function yOf(d){
+  const s=String(d||'').trim();
+  if(!s) return '';
+  return s.slice(0,4);
+}
+function toNum1to5(v){
+  const n=Number(String(v||'').replace(',','.'));
+  if(!isFinite(n)) return null;
+  if(n<1 || n>5) return null;
+  return n;
+}
+function macroAvg(row, macro){
+  const fields = SCOUT_RATING[macro]||[];
+  const vals = fields.map(f=>toNum1to5(row[f])).filter(v=>v!==null);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function overallAvg(row){
+  const vals = SCOUT_ALL_RATING_FIELDS.map(f=>toNum1to5(row[f])).filter(v=>v!==null);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function normalizeScoutingRow(r){
+  const dataO = pick(r,'DATA OSSERVAZIONE','DATA_OSSERVAZIONE','Data Osservazione','data_osservazione','data osservazione');
+  const dob   = pick(r,'data di nascita','DATA DI NASCITA','Data di nascita','data_nascita');
+  const nome  = pick(r,'NOME','Nome','nome');
+  const cogn  = pick(r,'COGNOME','Cognome','cognome');
+
+  const row = {...r};
+
+  row['DATA OSSERVAZIONE'] = dateISO(dataO);
+  row['data di nascita']   = dateISO(dob);
+
+  row.NOME = nome;
+  row.COGNOME = cogn;
+  row.PARTITA = pick(r,'PARTITA','Partita','partita');
+  row.RUOLO = pick(r,'RUOLO','Ruolo','ruolo');
+  row.CATEGORIA = pick(r,'CATEGORIA','Categoria','categoria');
+  row.Competizione = pick(r,'COMPETIZIONE','Competizione','competizione');
+
+  row.AnnoNascita = yOf(row['data di nascita']);
+  row.AnnoOsservazione = yOf(row['DATA OSSERVAZIONE']);
+
+  const ov = overallAvg(row);
+  row.Overall = (ov===null) ? '' : Number(ov.toFixed(2));
+
+  return row;
+}
+
+/* ─────────────────────────────────────────────
+   ROSA INDEX + MATCH (originale)
 ───────────────────────────────────────────── */
 function buildRosterIndex(){
   _roIndex={}; _roOrder=[]; _labelByKey={}; _keyByLabel={};
@@ -1559,7 +1357,8 @@ const FV={
   risultati:{fComp:1,fVenue:1,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:0,fGara:0,fEvento:0,fPeriodo:0},
   presenze: {fComp:0,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:1,fTipo:1,fGara:0,fEvento:0,fPeriodo:0},
   analytics:{fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:1,fTipo:0,fGara:1,fEvento:1,fPeriodo:1},
-  rosa:     {fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:1,fGara:0,fEvento:0,fPeriodo:0}
+  rosa:     {fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:1,fGara:0,fEvento:0,fPeriodo:0},
+  scouting: {fComp:1,fVenue:0,fS:1,fE:1,fStagione:1,fGioc:0,fTipo:0,fGara:0,fEvento:0,fPeriodo:0}
 };
 function updateFVis(pg){
   const v=FV[pg]||{};
@@ -1574,11 +1373,11 @@ updateFVis('risultati');
    FILTERS POP
 ───────────────────────────────────────────── */
 function populateFilters(){
-  const comps=[...new Set([...DR.map(d=>d.Competizione),...DA.map(d=>d.Competizione)].filter(Boolean))].sort();
+  const comps=[...new Set([...DR.map(d=>d.Competizione),...DA.map(d=>d.Competizione),...DS.map(d=>d.Competizione)].filter(Boolean))].sort();
   const giocKeys=_roOrder.length?_roOrder:[...new Set(DP.map(playerKeyFromPresence).filter(Boolean))].sort();
   const giocVals=giocKeys.map(k=>({v:k,t:_labelByKey[k]||capWords(k.replace(/_/g,' '))}));
   const gare=[...new Set(DA.map(d=>d.Gara).filter(Boolean))].sort();
-  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||''),...DA.map(d=>d.Data||'')]
+  const anni=[...new Set([...DR.map(d=>d.Data||''),...DP.map(d=>d.Data||''),...DA.map(d=>d.Data||''),...DS.map(d=>d['DATA OSSERVAZIONE']||'')]
       .map(d=>String(d).slice(0,4)).filter(a=>a && a!=='unde'))].sort();
 
   pop('fComp',comps);
@@ -1587,7 +1386,6 @@ function populateFilters(){
   pop('fEvento',Object.keys(IPOW));
   pop('fStagione',anni.map(a=>({v:a,t:`Stagione ${a}`})));
 }
-
 function pop(id,vals){
   const s=document.getElementById(id);
   if(!s) return;
@@ -1601,7 +1399,7 @@ function pop(id,vals){
 }
 
 /* ─────────────────────────────────────────────
-   APPLY FILTERS (✅ ora coerenti + date su analytics)
+   APPLY FILTERS
 ───────────────────────────────────────────── */
 let _applyTimer=null;
 function scheduleApplyAll(immediate=false){
@@ -1648,7 +1446,6 @@ function applyAll(){
       if(String(p)!==f.fPeriodo) return false;
     }
 
-    // ✅ FIX: date/stagione anche su analytics
     if(f.fStagione && r.Data && !(String(r.Data).startsWith(f.fStagione))) return false;
     if(f.fS && r.Data && (String(r.Data)<f.fS)) return false;
     if(f.fE && r.Data && (String(r.Data)>f.fE)) return false;
@@ -1657,16 +1454,96 @@ function applyAll(){
     return true;
   });
 
+  // ✅ SCOUTING: filtri per competizione/date/stagione su DATA OSSERVAZIONE
+  FS=DS.filter(r=>{
+    const dt=String(r['DATA OSSERVAZIONE']||'');
+    if(f.fComp && r.Competizione!==f.fComp) return false;
+    if(f.fStagione && !(dt.startsWith(f.fStagione))) return false;
+    if(f.fS && dt && (dt < f.fS)) return false;
+    if(f.fE && dt && (dt > f.fE)) return false;
+    return true;
+  });
+
   FRO=_roOrder.slice();
 
   if(curPage==='risultati') renderR(FR);
   else if(curPage==='presenze') renderP(FP);
   else if(curPage==='analytics') renderA(FA);
-  else renderRo();
+  else if(curPage==='rosa') renderRo();
+  else renderS(FS);
 }
 
 /* ─────────────────────────────────────────────
-   RISULTATI (quasi invariato, solo toggle filtri click)
+   LOAD EXCEL (5 fogli) ✅ include SCOUTING
+───────────────────────────────────────────── */
+document.getElementById('fw').addEventListener('change', async function(e){
+  const f=e.target.files[0]; if(!f) return;
+  document.getElementById('wname').textContent=f.name;
+
+  await ensureLibs();
+
+  if(typeof XLSX === 'undefined'){
+    alert('Errore: libreria XLSX non caricata. Controlla la connessione o i tag <script>.');
+    return;
+  }
+  if(typeof Chart === 'undefined'){
+    alert('Errore: libreria Chart.js non caricata. Controlla la connessione o i tag <script>.');
+    return;
+  }
+
+  const rd=new FileReader();
+  rd.onerror = ()=> alert('Errore lettura file. Riprova.');
+  rd.onload = ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+
+      const sn = wb.SheetNames.reduce((a,n)=>{a[n.toLowerCase()]=n;return a;},{});
+      const sh = (name)=> wb.Sheets[ sn[name.toLowerCase()] || name ] || null;
+
+      const sR = sh('RISULTATI');
+      const sP = sh('PRESENZE');
+      const sA = sh('ANALYTICS');
+      const sO = sh('ROSA');
+      const sS = sh('SCOUTING');
+
+      DR = sR ? XLSX.utils.sheet_to_json(sR) : [];
+      DP = sP ? XLSX.utils.sheet_to_json(sP) : [];
+      DA = sA ? XLSX.utils.sheet_to_json(sA).map(r=>({...r,PunteggioIPO:IPOW[r.TipoEvento]||0})) : [];
+      DRO= sO ? XLSX.utils.sheet_to_json(sO) : [];
+      DS = sS ? XLSX.utils.sheet_to_json(sS).map(r=>normalizeScoutingRow(r)) : [];
+
+      if(!DR.length && !DP.length && !DA.length && !DRO.length && !DS.length){
+        alert('Ho caricato il file ma non trovo dati nei fogli. Controlla i nomi: RISULTATI, PRESENZE, ANALYTICS, ROSA, SCOUTING.');
+        return;
+      }
+
+      buildRosterIndex();
+      populateFilters();
+
+      document.getElementById('landing').style.display='none';
+      document.getElementById('afterLoad').style.display='block';
+
+      // ✅ mostra filtri/chips/azioni solo dopo load
+      document.body.classList.remove('preload');
+
+      renderChips();
+      scheduleApplyAll(true);
+      syncShellHeight();
+    }catch(err){
+      console.error(err);
+      alert('Errore durante la lettura dell’Excel. Verifica che il file non sia corrotto e che abbia i fogli richiesti.');
+    }
+  };
+  rd.readAsArrayBuffer(f);
+});
+
+/* ─────────────────────────────────────────────
+   ✅ QUI SOTTO: TUTTE LE FUNZIONI ORIGINALI
+   (renderR, renderP, modal, renderA, buildPitch, renderRo, export, template…)
+───────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────
+   RISULTATI (originale)
 ───────────────────────────────────────────── */
 function renderR(data){
   const d=data.map(r=>{
@@ -1765,7 +1642,6 @@ function renderR(data){
     data:{labels:Object.keys(meseMap).sort(),datasets:[{label:'Punti',data:Object.keys(meseMap).sort().map(k=>meseMap[k]),borderColor:'#00e5ff',backgroundColor:'rgba(0,229,255,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},
     options:co()});
 
-  // Gol tempo: usa analytics filtrata (FA) se disponibile, altrimenti fallback
   const useA=(FA && FA.length);
   const t1=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)<=45 && isNoi(r)).length;
   const t2=FA.filter(r=>r.EsitoTiro==='Gol' && Number(r.MinutoEvento||0)>45 && isNoi(r)).length;
@@ -1802,7 +1678,7 @@ function printR(){
 }
 
 /* ─────────────────────────────────────────────
-   PRESENZE (come tuo, invariato dove possibile)
+   PRESENZE (originale)
 ───────────────────────────────────────────── */
 function renderP(data){
   const tot=data.length;
@@ -1967,7 +1843,7 @@ function srchP(){
 }
 
 /* ─────────────────────────────────────────────
-   MODAL
+   MODAL (originale)
 ───────────────────────────────────────────── */
 function openModal(key){
   const g=_gmCache[key]; if(!g) return;
@@ -2007,7 +1883,7 @@ function closeM(){document.getElementById('pModal').classList.remove('open');}
 document.getElementById('pModal').addEventListener('click',function(e){if(e.target===this)closeM();});
 
 /* ─────────────────────────────────────────────
-   ANALYTICS (✅ IPO non somma + filtri toggle + descrizioni già in HTML)
+   ANALYTICS + buildPitch (originale)
 ───────────────────────────────────────────── */
 function renderA(data){
   const noi=data.filter(isNoi),avv=data.filter(r=>!isNoi(r));
@@ -2023,7 +1899,6 @@ function renderA(data){
   const gialli=data.filter(r=>r.TipoEvento==='Cartellino giallo').length;
   const rossi=data.filter(r=>r.TipoEvento==='Cartellino rosso').length;
 
-  // ✅ IPO principale = NOI (non somma)
   document.getElementById('ipoN').textContent=ipoNoi;
   document.getElementById('ipoNoi').textContent=ipoNoi;
   document.getElementById('ipoAvv').textContent=ipoAvv;
@@ -2238,7 +2113,7 @@ function buildPitch(id,data,field){
 }
 
 /* ─────────────────────────────────────────────
-   ROSA (come tuo, invariato dove possibile)
+   ROSA (originale)
 ───────────────────────────────────────────── */
 function rosterBasePresence(){
   const f=getF();
@@ -2459,7 +2334,217 @@ function toCSV(arr){
 }
 
 /* ─────────────────────────────────────────────
-   TEMPLATE EXCEL (4 fogli) ✅
+   ✅ SCOUTING RENDER (nuovo)
+───────────────────────────────────────────── */
+function renderS(data){
+  const tot=data.length;
+  const players = new Set(data.map(r=>norm(`${r.COGNOME||''} ${r.NOME||''}`)).filter(Boolean));
+  const comps   = new Set(data.map(r=>(r.Competizione||'').trim()).filter(Boolean));
+  const cats    = new Set(data.map(r=>(r.CATEGORIA||'').trim()).filter(Boolean));
+  const ruoli   = new Set(data.map(r=>(r.RUOLO||'').trim()).filter(Boolean));
+
+  const ovals = data.map(r=> (r.Overall!=='' && r.Overall!=null) ? Number(r.Overall) : overallAvg(r))
+                    .filter(v=>v!=null && isFinite(v));
+  const avgOverall = ovals.length ? (ovals.reduce((a,b)=>a+b,0)/ovals.length) : 0;
+
+  document.getElementById('sKpi').innerHTML=`
+    <div class="kpi c"><div class="kl">Osservazioni</div><div class="kv">${tot}</div></div>
+    <div class="kpi b"><div class="kl">Giocatori</div><div class="kv">${players.size}</div></div>
+    <div class="kpi a"><div class="kl">Ruoli</div><div class="kv">${ruoli.size}</div></div>
+    <div class="kpi p"><div class="kl">Categorie</div><div class="kv">${cats.size}</div></div>
+    <div class="kpi g"><div class="kl">Overall medio</div><div class="kv">${avgOverall?avgOverall.toFixed(2):'0.00'}</div></div>
+  `;
+
+  // Osservazioni per competizione
+  const compMap={};
+  data.forEach(r=>{
+    const c=(r.Competizione||'N/D').trim() || 'N/D';
+    compMap[c]=(compMap[c]||0)+1;
+  });
+  const compLabels = Object.keys(compMap).sort((a,b)=>compMap[b]-compMap[a]).slice(0,12);
+  dc('cScoutComp');
+  C.cScoutComp = new Chart(document.getElementById('cScoutComp'),{
+    type:'bar',
+    data:{labels:compLabels,datasets:[{label:'Osservazioni',data:compLabels.map(k=>compMap[k]),backgroundColor:'rgba(0,229,255,.65)',borderRadius:8,borderSkipped:false}]},
+    options:coc((_,lbl)=>{ if(lbl && lbl!=='N/D') setFilterToggle('fComp', lbl); })
+  });
+
+  // Radar macro medie
+  const macros = Object.keys(SCOUT_RATING);
+  const macroLabels = ['Palle inattive','Tecnica/Tattica','Difesa','Attacco','Mentali','Fisico','Portiere'];
+  const macroAvgVals = macros.map(m=>{
+    const vals = data.map(r=>macroAvg(r,m)).filter(v=>v!=null);
+    return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+  });
+
+  dc('cScoutMacro');
+  C.cScoutMacro = new Chart(document.getElementById('cScoutMacro'),{
+    type:'radar',
+    data:{
+      labels:macroLabels,
+      datasets:[{
+        label:'Media voti (1–5)',
+        data:macroAvgVals.map(v=>Number(v.toFixed(2))),
+        borderColor:'rgba(0,229,255,.9)',
+        backgroundColor:'rgba(0,229,255,.12)',
+        pointBackgroundColor:'rgba(0,229,255,.9)',
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{ r:{ suggestedMin:0, suggestedMax:5, ticks:{display:false}, grid:{color:'rgba(255,255,255,.05)'}, angleLines:{color:'rgba(255,255,255,.06)'}, pointLabels:{color:'#6b7a8d', font:{size:10}} } },
+      plugins:{ legend:{labels:{color:'#6b7a8d'}} }
+    }
+  });
+
+  // Distribuzione overall
+  const bins = { '1.0–1.9':0,'2.0–2.9':0,'3.0–3.9':0,'4.0–5.0':0 };
+  data.forEach(r=>{
+    const ov = (r.Overall!=='' && r.Overall!=null) ? Number(r.Overall) : overallAvg(r);
+    if(ov==null || !isFinite(ov)) return;
+    if(ov<2) bins['1.0–1.9']++;
+    else if(ov<3) bins['2.0–2.9']++;
+    else if(ov<4) bins['3.0–3.9']++;
+    else bins['4.0–5.0']++;
+  });
+  const bLabs = Object.keys(bins);
+  dc('cScoutOverall');
+  C.cScoutOverall = new Chart(document.getElementById('cScoutOverall'),{
+    type:'bar',
+    data:{labels:bLabs,datasets:[{label:'N° osservazioni',data:bLabs.map(k=>bins[k]),
+      backgroundColor:['rgba(255,61,87,.55)','rgba(255,179,0,.55)','rgba(41,121,255,.55)','rgba(0,230,118,.55)'],
+      borderRadius:8,borderSkipped:false}]},
+    options:{...co(),plugins:{legend:{display:false}}}
+  });
+
+  // Tabella
+  document.getElementById('tScout').innerHTML = data.map((r,i)=>{
+    const nm = `${capWords(r.COGNOME||'')} ${capWords(r.NOME||'')}`.trim() || '—';
+    const dt = r['DATA OSSERVAZIONE']||'';
+    const ov = (r.Overall!=='' && r.Overall!=null) ? Number(r.Overall) : overallAvg(r);
+    const ovTxt = (ov==null || !isFinite(ov)) ? '—' : ov.toFixed(2);
+    const badge = (ov>=4)?'bg':(ov>=3)?'bb':(ov>=2)?'ba':'br';
+    const sel = (i===_scSelIdx)?'scsel':'';
+    return `<tr class="${sel}" style="cursor:pointer" onclick="selectScout(${i})">
+      <td>${i+1}</td>
+      <td>${dt}</td>
+      <td><strong>${nm}</strong></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(String(r.PARTITA||''))}</td>
+      <td>${escapeHtml(String(r.RUOLO||''))}</td>
+      <td>${escapeHtml(String(r.CATEGORIA||''))}</td>
+      <td>${escapeHtml(String(r.Competizione||''))}</td>
+      <td>${escapeHtml(String(r.AnnoOsservazione||''))}</td>
+      <td><span class="bd ${badge}">${ovTxt}</span></td>
+    </tr>`;
+  }).join('');
+
+  if(_scSelIdx<0 && data.length) _scSelIdx=0;
+  renderScoutSide(data[_scSelIdx]||null);
+}
+function selectScout(i){
+  _scSelIdx=i;
+  renderS(FS);
+}
+function renderScoutSide(r){
+  if(!r){
+    document.getElementById('scSelName').textContent='—';
+    document.getElementById('scSelMeta').textContent='Seleziona un’osservazione dalla tabella';
+    document.getElementById('scSelKpi').innerHTML='';
+    document.getElementById('scSelText').innerHTML=
+      `<strong>Possesso:</strong> —<br/>
+       <strong>Non possesso:</strong> —<br/>
+       <strong>Transizioni:</strong> —<br/>
+       <strong>Mentali:</strong> —<br/>
+       <strong>Punti di forza:</strong> —<br/>
+       <strong>Punti di debolezza:</strong> —<br/>
+       <strong>Impressione generale:</strong> —`;
+    dc('cScoutSelMacro');
+    return;
+  }
+
+  const nm = `${capWords(r.COGNOME||'')} ${capWords(r.NOME||'')}`.trim() || '—';
+  document.getElementById('scSelName').textContent = nm;
+  document.getElementById('scSelMeta').textContent =
+    `${r['DATA OSSERVAZIONE']||''} · ${r.PARTITA||''} · ${r.RUOLO||''} · ${r.CATEGORIA||''}`;
+
+  const ov = (r.Overall!=='' && r.Overall!=null) ? Number(r.Overall) : overallAvg(r);
+
+  const num = pick(r,'numero','Numero','NUMERO');
+  const dob = r['data di nascita']||'';
+  const h   = pick(r,'altezza_cm','ALTEZZA_CM','altezza');
+  const w   = pick(r,'peso_kg','PESO_KG','peso');
+  const nick= pick(r,'nickname','Nickname');
+  const pied= pick(r,'piede forte','piede_forte','PIEDE_FORTE');
+  const detR= pick(r,'dettagli_ruolo','DETTAGLI_RUOLO');
+
+  document.getElementById('scSelKpi').innerHTML=`
+    <div class="kpi c"><div class="kl">Overall</div><div class="kv">${(ov==null||!isFinite(ov))?'—':ov.toFixed(2)}</div></div>
+    <div class="kpi b"><div class="kl">Anno Oss.</div><div class="kv">${r.AnnoOsservazione||'—'}</div></div>
+    <div class="kpi a"><div class="kl">Anno Nasc.</div><div class="kv">${r.AnnoNascita||'—'}</div></div>
+    <div class="kpi g"><div class="kl">N°</div><div class="kv">${num||'—'}</div></div>
+    <div class="kpi p"><div class="kl">H cm</div><div class="kv">${h||'—'}</div></div>
+    <div class="kpi r"><div class="kl">Kg</div><div class="kv">${w||'—'}</div></div>
+  `;
+
+  const poss = pick(r,'fase di possesso','fase_possesso');
+  const npos = pick(r,'fase di non possesso','fase_non_possesso');
+  const tran = pick(r,'transizioni');
+  const ment = pick(r,'caratteristiche comportamentali e mentali','mentali_note');
+  const pf   = pick(r,'punti di forza','punti_forza');
+  const pd   = pick(r,'punti di debolezza','punti_debolezza');
+  const ig   = pick(r,'impressione generale','impressione_generale');
+
+  document.getElementById('scSelText').innerHTML =
+    `<strong>Info:</strong> Nascita ${escapeHtml(dob||'—')} · Nickname ${escapeHtml(nick||'—')} · Piede ${escapeHtml(pied||'—')}<br/>
+     <strong>Dettagli ruolo:</strong> ${escapeHtml(detR||'—')}<br/><br/>
+     <strong>Possesso:</strong> ${escapeHtml(poss||'—')}<br/>
+     <strong>Non possesso:</strong> ${escapeHtml(npos||'—')}<br/>
+     <strong>Transizioni:</strong> ${escapeHtml(tran||'—')}<br/>
+     <strong>Mentali:</strong> ${escapeHtml(ment||'—')}<br/>
+     <strong>Punti di forza:</strong> ${escapeHtml(pf||'—')}<br/>
+     <strong>Punti di debolezza:</strong> ${escapeHtml(pd||'—')}<br/>
+     <strong>Impressione generale:</strong> ${escapeHtml(ig||'—')}`;
+
+  const macroLabels=['Palle inattive','Tecnica/Tattica','Difesa','Attacco','Mentali','Fisico','Portiere'];
+  const macroVals=Object.keys(SCOUT_RATING).map(m=>macroAvg(r,m)||0);
+
+  dc('cScoutSelMacro');
+  C.cScoutSelMacro = new Chart(document.getElementById('cScoutSelMacro'),{
+    type:'bar',
+    data:{labels:macroLabels,datasets:[{label:'Media macro (1–5)',data:macroVals.map(v=>Number(v.toFixed(2))),backgroundColor:'rgba(0,229,255,.55)',borderRadius:8,borderSkipped:false}]},
+    options:{...co(),plugins:{legend:{display:false}},scales:{y:{min:0,max:5}}}
+  });
+}
+
+function exportScoutingCSV(){
+  const rows = (FS||[]).map(r=>{
+    const out = {
+      DATA_OSSERVAZIONE: r['DATA OSSERVAZIONE']||'',
+      NOME: r.NOME||'',
+      COGNOME: r.COGNOME||'',
+      PARTITA: r.PARTITA||'',
+      RUOLO: r.RUOLO||'',
+      CATEGORIA: r.CATEGORIA||'',
+      COMPETIZIONE: r.Competizione||'',
+      ANNO_OSSERVAZIONE: r.AnnoOsservazione||'',
+      DATA_NASCITA: r['data di nascita']||'',
+      ANNO_NASCITA: r.AnnoNascita||'',
+      OVERALL: (r.Overall!=='' && r.Overall!=null)?r.Overall:(overallAvg(r)?.toFixed(2)||'')
+    };
+    return out;
+  });
+  const csv = toCSV(rows);
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='coachlab-scouting.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+
+/* ─────────────────────────────────────────────
+   TEMPLATE EXCEL (5 fogli) ✅ include SCOUTING completo
 ───────────────────────────────────────────── */
 function dlTpl(){
   if(typeof XLSX === 'undefined'){
@@ -2500,11 +2585,428 @@ function dlTpl(){
   ];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(RO),'ROSA');
 
+  // ✅ SCOUTING: tutte le colonne richieste
+  const scoutAllCols = [
+    "DATA OSSERVAZIONE","NOME","COGNOME","PARTITA","RUOLO","CATEGORIA","COMPETIZIONE",
+    "numero","data di nascita","peso_kg","altezza_cm","nickname","piede forte","dettagli_ruolo",
+    "fase di possesso","fase di non possesso","transizioni","caratteristiche comportamentali e mentali",
+    "punti di forza","punti di debolezza","impressione generale",
+    ...SCOUT_ALL_RATING_FIELDS
+  ];
+
+  const scoutRow = {
+    "DATA OSSERVAZIONE":"2024-10-12",
+    "NOME":"Giacomo",
+    "COGNOME":"Neri",
+    "PARTITA":"U17 Azzurri vs U17 Rossi",
+    "RUOLO":"Centrocampista",
+    "CATEGORIA":"U17",
+    "COMPETIZIONE":"Torneo Regionale",
+    "numero":8,
+    "data di nascita":"2008-03-20",
+    "peso_kg":68,
+    "altezza_cm":178,
+    "nickname":"Giac",
+    "piede forte":"Destro",
+    "dettagli_ruolo":"Mezzala box-to-box; tempi inserimento buoni",
+    "fase di possesso":"Si smarca bene tra le linee, orienta il controllo, gioca a 2 tocchi.",
+    "fase di non possesso":"Buona postura e letture; a volte ritardo in uscita sul portatore.",
+    "transizioni":"Recupero immediato dopo palla persa; attacca lo spazio in avanti.",
+    "caratteristiche comportamentali e mentali":"Concentrato, comunicativo, leadership discreta.",
+    "punti di forza":"Passaggio, conduzione, resistenza, letture difensive.",
+    "punti di debolezza":"Tiro da fuori migliorabile, aggressività nei duelli aerei.",
+    "impressione generale":"Profilo interessante; potenziale crescita se migliora finalizzazione e forza.",
+
+    "corner":3, "punizione":3, "rigore":2, "rimessa_laterale":3, "attitudine_schemi":3,
+    "passaggio":4, "stop":4, "conduzione":4, "tiro":3, "lancio":3, "colpo_testa":2, "tecnica_individuale":4, "tattica_collettiva":4,
+    "anticipo":3, "intercetto":4, "contrasto":3, "marcatura_uomo":3, "marcatura_zona":4,
+    "intervento_scivolata":3, "indirizzamento_avversario":4, "postura_difensiva":4,
+    "duello_aereo":2, "recupero_palloni":4,
+    "dribbling":3, "finalizzazione":2, "tiro_distanza":3, "creativita":3, "cross":2, "filtrante":4, "rifinitura":4,
+    "concentrazione":4, "personalita":3, "coraggio":3, "determinazione":4, "leadership":3,
+    "lavoro_squadra":4, "impegno":4, "comunicazione":4, "rischio":3, "ego":2, "rispetto_regole":5,
+    "velocita":3, "accelerazione":3, "agilita":3, "forza":3, "resistenza":4, "salto":2,
+    "rapidita":3, "altezza":3, "muscolatura":3,
+    "abilita_tecniche_portiere":"", "parata_tuffo":"", "uscite_basse":"", "uscite_alte":"",
+    "rinvio_piedi":"", "rinvio_mani":"", "posizionamento_pali":"", "scelta_tempi":"",
+    "organizzazione_difesa":"", "senso_tattico":"", "copertura_spazio_avanti":""
+  };
+
+  const scoutRowFull = {};
+  scoutAllCols.forEach(c=>scoutRowFull[c] = (c in scoutRow) ? scoutRow[c] : '');
+  const shS = XLSX.utils.json_to_sheet([scoutRowFull],{header:scoutAllCols});
+  XLSX.utils.book_append_sheet(wb, shS, 'SCOUTING');
+
   XLSX.writeFile(wb,'coachlab-template.xlsx');
 }
 
 /* Avvio chips vuoti */
 renderChips();
 </script>
+
 </body>
 </html>
+  <title>CoachLab</title>
+
+  <!-- ✅ FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap">
+
+  <!-- ✅ LIBRERIE
+       XLSX ok
+       Chart FIX: usa UMD per garantire globale Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#06080f;--s1:#0f1525;--s2:#151e30;--s3:#0b1020;
+      --bo:rgba(255,255,255,0.07);--bo2:rgba(255,255,255,0.13);
+      --g:#00e676;--r:#ff3d57;--a:#ffb300;--b:#2979ff;--c:#00e5ff;--p:#7c4dff;--rosa:#ff4da6;
+      --tx:#e8edf5;--mu:#4a5568;--mu2:#6b7a8d;
+      --fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+
+      /* layout */
+      --shellH: 120px; /* verrà sovrascritto da JS */
+      --gap: 10px;
+      --radius: 16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);font-family:var(--fb);color:var(--tx);overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background:
+      radial-gradient(ellipse 70% 50% at 10% 0%,rgba(41,121,255,0.07) 0%,transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 100%,rgba(0,230,118,0.05) 0%,transparent 60%);
+    pointer-events:none;z-index:0}
+
+    /* ✅ Nascondi filtri/chips/azioni finché non carichi Excel */
+    body.preload #fwrap,
+    body.preload #chipsWrap,
+    body.preload .head-actions .head-pill,
+    body.preload .head-actions .head-btn{display:none!important}
+
+    /* SHELL */
+    #shell{
+      position:fixed;top:0;left:0;right:0;z-index:200;
+      background:rgba(6,8,15,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid var(--bo);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    #navrow{
+      max-width:1600px;margin:0 auto;
+      padding:10px 18px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .logo{
+      display:flex;align-items:baseline;gap:8px;
+      font-family:var(--fh);
+      font-size:26px;font-weight:900;letter-spacing:.05em;white-space:nowrap
+    }
+    .logo span{color:var(--g)}
+    .subbrand{
+      font-size:10px;color:var(--mu2);letter-spacing:.12em;text-transform:uppercase;
+      margin-top:2px;
+    }
+
+    /* NAV TABS */
+    .nav-tabs{
+      display:flex;gap:6px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--bo);
+      border-radius:14px;
+      padding:6px;
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      max-width:min(1050px, 75vw);
+    }
+    .nav-tabs::-webkit-scrollbar{height:4px}
+    .nav-tabs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:999px}
+
+    .nt{
+      display:flex;align-items:center;gap:8px;
+      font-family:var(--fh);
+      font-size:12px;font-weight:800;letter-spacing:.08em;
+      padding:8px 14px;border-radius:11px;
+      cursor:pointer;transition:.15s;
+      color:var(--mu2);
+      border:1px solid transparent;
+      background:transparent;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .nt .ico{font-size:14px}
+    .nt.active{
+      background:linear-gradient(180deg, rgba(41,121,255,.95), rgba(21,101,192,.9));
+      color:#fff;border-color:rgba(41,121,255,.55)
+    }
+    .nt:hover:not(.active){color:var(--tx);background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.07)}
+    .nt.rosa.active{
+      background:linear-gradient(180deg, rgba(255,77,166,.95), rgba(255,77,166,.65));
+      border-color:rgba(255,77,166,.45);
+    }
+    /* ✅ tab scouting */
+    .nt.scout.active{
+      background:linear-gradient(180deg, rgba(0,229,255,.90), rgba(0,229,255,.55));
+      border-color:rgba(0,229,255,.35);
+    }
+
+    .head-actions{
+      display:flex;align-items:center;gap:8px;flex-shrink:0;
+    }
+    .head-pill{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:12px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--bo);
+      color:var(--mu2);
+      font-size:11px;
+    }
+    .head-pill strong{color:var(--tx);font-weight:700}
+    .head-btn{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--bo);
+      color:var(--tx);
+      padding:8px 10px;border-radius:12px;
+      cursor:pointer;transition:.15s;
+      font-family:var(--fh);font-weight:800;letter-spacing:.06em;font-size:11px;
+      display:flex;align-items:center;gap:8px;
+      user-select:none;
+    }
+    .head-btn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
+    .head-btn.red:hover{border-color:rgba(255,61,87,.55);color:#ff97a5;background:rgba(255,61,87,.08)}
+
+    /* FILTER BAR */
+    #fwrap{
+      max-width:1600px;margin:0 auto;
+      padding:0 18px 10px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    #fcontrols{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:8px 12px;
+      border:1px solid var(--bo);
+      border-radius:14px;
+      background:rgba(255,255,255,.02);
+    }
+    .fleft{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      color:var(--mu2);font-size:11px;
+    }
+    .fleft .tag{
+      font-family:var(--fh);
+      font-weight:900;letter-spacing:.1em;
+      color:#cbd5e1;
+      display:flex;align-items:center;gap:8px;
+    }
+    .fleft .tag .dot{width:7px;height:7px;border-radius:999px;background:var(--b);box-shadow:0 0 0 4px rgba(41,121,255,.12)}
+    .fright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .fbtn{
+      background:var(--s2);border:1px solid var(--bo);border-radius:12px;padding:8px 12px;
+      color:var(--tx);font-family:var(--fh);font-size:12px;font-weight:900;letter-spacing:.06em;
+      cursor:pointer;transition:.15s;
+      display:flex;align-items:center;gap:8px;
+      user-select:none;
+    }
+    .fbtn:hover{border-color:rgba(41,121,255,.55);color:#9cc4ff;background:rgba(41,121,255,.08)}
+    .fbtn.red{border-color:rgba(255,61,87,.35);color:#ff97a5;background:rgba(255,61,87,.04)}
+    .fbtn.red:hover{border-color:rgba(255,61,87,.6);background:rgba(255,61,87,.1);color:#ffd2d7}
+
+    #frow{
+      border:1px solid var(--bo);
+      border-radius:16px;
+      background:rgba(255,255,255,.02);
+      padding:10px;
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      gap:8px;
+      overflow:hidden;
+      transition:.18s;
+    }
+    #frow.collapsed{max-height:0;padding:0;border-width:0;opacity:0;pointer-events:none}
+
+    .fg{
+      display:flex;flex-direction:column;gap:6px;
+      padding:8px 10px;border-radius:14px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.05);
+      min-height:68px;
+    }
+    .fl2{
+      font-size:9px;font-weight:900;letter-spacing:.12em;
+      color:var(--mu2);
+      text-transform:uppercase;
+      display:flex;align-items:center;gap:6px;
+    }
+    .fl2 .i{opacity:.9}
+    .fg select,.fg input[type=date],.fg input[type=text]{
+      background:var(--s2);
+      border:1px solid var(--bo);
+      border-radius:12px;
+      padding:8px 10px;
+      color:var(--tx);
+      font-family:var(--fb);
+      font-size:11px;
+      outline:none;
+      transition:.15s;
+      height:34px;
+      width:100%;
+    }
+    .fg select:focus,.fg input:focus{border-color:rgba(41,121,255,.65)}
+    .fg select option{background:var(--s2)}
+
+    /* grid positions */
+    .col-3{grid-column:span 3}
+    .col-2{grid-column:span 2}
+    .col-4{grid-column:span 4}
+    .col-6{grid-column:span 6}
+    .col-12{grid-column:span 12}
+
+    /* ✅ CHIPS */
+    #chipsWrap{
+      max-width:1600px;margin:0 auto;padding:0 18px 10px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    }
+    #chips{
+      display:flex;flex-wrap:wrap;gap:6px;min-height:10px;
+    }
+    .chip{
+      display:inline-flex;align-items:center;gap:7px;
+      background:rgba(41,121,255,.10);
+      border:1px solid rgba(41,121,255,.25);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:10px;color:#b9d6ff;
+      user-select:none;
+      max-width:100%;
+    }
+    .chip .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+    .chip.rosa{background:rgba(255,77,166,.10);border-color:rgba(255,77,166,.25);color:#ffb6da}
+    .chip.scout{background:rgba(0,229,255,.10);border-color:rgba(0,229,255,.25);color:#b9f6ff}
+    .chip-x{cursor:pointer;font-size:12px;line-height:1;opacity:.75}
+    .chip-x:hover{opacity:1}
+    .chipMeta{
+      display:flex;align-items:center;gap:8px;color:var(--mu2);font-size:11px;
+      background:rgba(255,255,255,.02);border:1px solid var(--bo);border-radius:12px;padding:6px 10px;
+    }
+    .chipMeta strong{color:var(--tx)}
+    .chipMeta button{
+      background:none;border:none;color:#ff97a5;cursor:pointer;font-weight:900;
+      font-family:var(--fh);letter-spacing:.06em;
+    }
+    .chipMeta button:hover{color:#ffd2d7}
+
+    /* MAIN */
+    #main{max-width:1600px;margin:0 auto;padding:12px 18px 40px;position:relative;z-index:1}
+    #landing{padding-top:calc(var(--shellH) + 18px)}
+    #afterLoad{display:none;padding-top:calc(var(--shellH) + 12px)}
+
+    /* UPLOAD */
+    .upbar{background:var(--s1);border:1px solid var(--bo);border-radius:16px;padding:14px 18px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .uplabel{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px dashed rgba(41,121,255,.4);border-radius:12px;padding:9px 14px;font-size:12px;color:var(--mu2);cursor:pointer;transition:.15s}
+    .uplabel:hover{border-color:rgba(41,121,255,.8);color:var(--tx);background:rgba(41,121,255,.06)}
+    .uplabel input{display:none}
+    .upname{font-size:11px;color:var(--g);font-weight:800}
+    .btn{background:var(--b);color:#fff;border:none;padding:9px 16px;border-radius:12px;font-family:var(--fh);font-size:13px;font-weight:900;letter-spacing:.06em;cursor:pointer;transition:.15s}
+    .btn:hover{background:#1565c0}
+    .btn.gr{background:var(--g);color:#06110a}.btn.gr:hover{background:#00c853}
+    .btn.gh{background:var(--s2);border:1px solid var(--bo);color:var(--tx)}.btn.gh:hover{background:var(--s1)}
+    .btn.sm{padding:6px 10px;font-size:11px}
+
+    /* GUIDE */
+    .guide{background:var(--s1);border:1px solid rgba(41,121,255,.2);border-radius:16px;padding:16px 18px}
+    .gtitle{font-family:var(--fh);font-size:18px;font-weight:900;color:var(--b);margin-bottom:10px}
+    .gcol-head{font-size:10px;font-weight:900;letter-spacing:.10em;margin-bottom:6px}
+    .gitem{background:var(--s2);border:1px solid var(--bo);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+    .gf{font-size:10px;font-weight:900;color:var(--c);letter-spacing:.06em;margin-bottom:2px}
+    .gv{font-size:10px;color:var(--mu2);line-height:1.4}
+
+    /* PAGE */
+    .page{display:none}.page.active{display:block}
+
+    /* KPI */
+    .krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px;margin-bottom:10px}
+    .kpi{background:var(--s1);border:1px solid var(--bo);border-radius:14px;padding:10px 12px;transition:.15s}
+    .kpi:hover{border-color:var(--bo2);transform:translateY(-1px)}
+    .kl{font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:var(--mu2);font-weight:800;margin-bottom:4px}
+    .kv{font-family:var(--fh);font-size:24px;font-weight:900;line-height:1}
+    .kpi.g .kv{color:var(--g)}.kpi.b .kv{color:var(--b)}.kpi.a .kv{color:var(--a)}.kpi.r .kv{color:var(--r)}.kpi.c .kv{color:var(--c)}.kpi.p .kv{color:var(--p)}.kpi.rosa .kv{color:var(--rosa)}
+
+    /* CARD */
+    .card{background:var(--s1);border:1px solid var(--bo);border-radius:16px;padding:12px 14px;transition:.15s;overflow:hidden}
+    .card:hover{border-color:var(--bo2)}
+    .card.dd{cursor:crosshair}.card.dd:hover{border-color:rgba(41,121,255,.5)}
+    .card.dd .ct::after{content:' ↗';font-size:9px;color:var(--b);opacity:.85}
+    .ct{font-family:var(--fh);font-size:15px;font-weight:900;letter-spacing:.04em;margin-bottom:1px}
+    .cs{font-size:10px;color:var(--mu2);margin-bottom:8px;line-height:1.35}
+
+    /* ✅ CHART WRAPS */
+    .ch{position:relative;width:100%}
+    .ch-sm{height:clamp(130px, 22vh, 170px)}
+    .ch-md{height:clamp(160px, 26vh, 210px)}
+    .ch-lg{height:clamp(190px, 30vh, 250px)}
+    .ch-xl{height:clamp(220px, 38vh, 320px)}
+
+    /* DESCRIZIONI SOTTO GRAFICI */
+    .cd{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.06);
+      color:rgba(232,237,245,.78);
+      font-size:11px;
+      line-height:1.55;
+    }
+    .cd strong{color:#9cc4ff}
+    .cd .hint{color:rgba(107,122,141,.95)}
+    .cd.rosa strong{color:#ff8ac7}
+    .cd.scout strong{color:#9ff7ff}
+
+    /* GRIDS */
+    .g2{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g4{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+    .g12{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:var(--gap);margin-bottom:var(--gap)}
+    .g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--gap);margin-bottom:var(--gap)}
+    .mb{margin-bottom:var(--gap)}
+    @media(max-width:1200px){.g4{grid-template-columns:repeat(2, minmax(0,1fr))}.g3{grid-template-columns:repeat(2, minmax(0,1fr))}}
+    @media(max-width:900px){.g2,.g3,.g4,.g12,.g21{grid-template-columns:1fr}}
+
+    /* TABLE */
+    .tw{overflow:auto;max-height:380px;border-radius:12px;border:1px solid rgba(255,255,255,.04)}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th{
+      background:var(--s2);color:var(--mu2);padding:8px 10px;font-size:10px;text-align:left;font-weight:900;
+      text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;position:sticky;top:0;z-index:2
+    }
+    .tbl td{padding:8px 10px;border-top:1px solid var(--bo);font-size:11px;white-space:nowrap}
+    .tbl tr:hover td{background:rgba(255,255,255,.03)}
+    .tbl tr.sel td{background:rgba(255,77,166,.10)!important}
+    .tbl tr.sel td:first-child{border-left:2px solid rgba(255,77,166,.9)}
+    /* scouting selection */
+    .tbl tr.scsel td{background:rgba(0,229,255,.10)!important}
+    .tbl tr.scsel td:first-child{border-left:2px solid rgba(0,229,255,.9)}
+
+    /* BADGE */
+    .bd{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.02em}
+    .bg{background:rgba(0,230,118,.13);color:var(--g)}
+    .br{background:rgba(255,61,87,.13);color:var(--r)}
+    .ba{background:rgba(255,179,0,.13);color:var(--a)}
+    .bb{background:rgba(41,121,255,.13);color:var(--b)}
+    .bc{background:rgba(0,229,255,.13);color:var(--c)}
+    .bp{background:rgba(124,77,255,.13);color:var(--p)}
+    .brosa{background:rgba(255,77,166,.13);color:#ffb6da;border:1px solid rgba(255,77,166,.22)}
+    .bscout{background:rgba(0,229,255,.13);color:#b9f6ff;border:1px solid rgba(0,229,255,.22)}
+
+    /* INSIGHT */
+    .insight{background:rgba(41,121,255,.07);border:1px solid rgba(41,121,255,.2);border-radius:12px;padding:10px 12px;font-size:11px;color:#90caf9;line-height:1.6;margin-top:8px}
+    .insight strong{color:var(--b)}
+    .insight.rosa{background:rgba(255,77,166,.07);border-color:rgba(255,77,166,.18);color:#ffb6da}
+    .insight.rosa strong{color:var(--rosa)}
+    .insight.scout{background:rgba(0,229,255,.06);border-color:rgba(0,229,255,.18);color:#b9f6ff}
+    .insight.scout strong{color:var(--c)}
+
+    /* IPO BIG */
+    .ipo-big{font-family:var(--fh);font-size:56px;font-weight:900;line-height:1}
